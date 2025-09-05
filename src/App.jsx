@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import AIChatSupport from "./components/AIChatSupport"
 import Login from "./pages/login";
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "./pages/dashboard";
 import ApplicationTracking from "./pages/ApplicationTracking";
 import StudentSearch from "./pages/StudentSearch"
 import AddCouse from "./pages/AddCourse"
