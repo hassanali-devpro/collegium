@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logout } from "../../features/auth/authSlice"; // ✅ import logout action
 import {
   Home,
   Search,
@@ -14,9 +16,24 @@ import logo from "/Logo-R.png";
 
 export default function Layout({ role = "user", children }) {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
   const location = useLocation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
+  const toggleProfileMenu = () => setProfileMenuOpen(!isProfileMenuOpen);
+
+  const handleLogout = () => {
+    // ✅ Clear Redux state
+    dispatch(logout());
+
+    // ✅ Clear localStorage if token is stored
+    localStorage.removeItem("token");
+
+    // ✅ Redirect to login
+    navigate("/login");
+  };
 
   const menuItems = [
     { name: "Dashboard", path: "/dashboard", icon: <Home size={18} /> },
@@ -25,12 +42,13 @@ export default function Layout({ role = "user", children }) {
     { name: "Student Search", path: "/student-search", icon: <Search size={18} /> },
     role === "admin" && { name: "Manage Users", path: "/manage-users", icon: <Users size={18} /> },
     role === "admin" && { name: "Payments", path: "/payments", icon: <CreditCard size={18} /> },
+    role === "admin" && { name: "Offices", path: "/offices", icon: <CreditCard size={18} /> },
   ].filter(Boolean);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       {/* ---------- Topbar ---------- */}
-      <div className="w-full h-16 bg-white shadow-md flex items-center justify-between px-4 sm:px-6">
+      <div className="w-full h-16 bg-white shadow-md flex items-center justify-between px-4 sm:px-6 relative">
         {/* Left - Logo + Menu */}
         <div className="flex items-center gap-3">
           {/* Mobile Menu Button */}
@@ -51,12 +69,43 @@ export default function Layout({ role = "user", children }) {
             <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
 
-          {/* Profile Picture */}
-          <img
-            src="/hassan.jpg"
-            alt="Profile"
-            className="h-10 w-10 rounded-full border border-gray-300 cursor-pointer"
-          />
+          {/* Profile Picture + Dropdown */}
+          <div className="relative">
+            <img
+              src="/hassan.jpg"
+              alt="Profile"
+              className="h-10 w-10 rounded-full border border-gray-300 cursor-pointer"
+              onClick={toggleProfileMenu}
+            />
+
+            {isProfileMenuOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                <Link
+                  to="/profile-settings"
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  onClick={() => setProfileMenuOpen(false)}
+                >
+                  Profile Settings
+                </Link>
+                <Link
+                  to="/support"
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  onClick={() => setProfileMenuOpen(false)}
+                >
+                  Support
+                </Link>
+                <button
+                  className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  onClick={() => {
+                    setProfileMenuOpen(false);
+                    handleLogout(); // ✅ call logout
+                  }}
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
