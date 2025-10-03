@@ -1,4 +1,3 @@
-// src/pages/Offices.jsx
 import React, { useState } from "react";
 import {
   useGetOfficesQuery,
@@ -13,7 +12,7 @@ export default function Offices() {
   const [updateOffice] = useUpdateOfficeMutation();
   const [deleteOffice] = useDeleteOfficeMutation();
 
-  const [form, setForm] = useState({ id: null, name: "", location: "" });
+  const [form, setForm] = useState({ id: null, name: "", address: "", location: "" });
   const [isEditing, setIsEditing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -21,7 +20,8 @@ export default function Offices() {
     data?.data?.map((o) => ({
       id: o._id,
       name: o.name,
-      location: o.address,
+      address: o.address,
+      location: o.location,
       createdAt: o.createdAt,
     })) || [];
 
@@ -30,11 +30,12 @@ export default function Offices() {
   };
 
   const handleAdd = async () => {
-    if (!form.name || !form.location) return;
+    if (!form.name || !form.address || !form.location) return;
     try {
       await addOffice({
         name: form.name,
-        address: form.location,
+        address: form.address,
+        location: form.location,
       }).unwrap();
       resetForm();
     } catch (err) {
@@ -53,7 +54,8 @@ export default function Offices() {
       await updateOffice({
         id: form.id,
         name: form.name,
-        address: form.location,
+        address: form.address,
+        location: form.location,
       }).unwrap();
       resetForm();
     } catch (err) {
@@ -70,7 +72,7 @@ export default function Offices() {
   };
 
   const resetForm = () => {
-    setForm({ id: null, name: "", location: "" });
+    setForm({ id: null, name: "", address: "", location: "" });
     setIsEditing(false);
     setIsModalOpen(false);
   };
@@ -94,7 +96,7 @@ export default function Offices() {
           <button
             onClick={() => {
               setIsEditing(false);
-              setForm({ id: null, name: "", location: "" });
+              setForm({ id: null, name: "", address: "", location: "" });
               setIsModalOpen(true);
             }}
             className="bg-[#F42222] text-white px-4 py-2 rounded-lg hover:bg-red-600"
@@ -113,10 +115,21 @@ export default function Offices() {
               >
                 <div>
                   <p className="font-semibold">{office.name}</p>
-                  <p className="text-sm text-gray-600">{office.location}</p>
+                  <p className="text-sm text-gray-600">{office.address}</p>
                   <p className="text-xs text-gray-500">Created: {date}</p>
                 </div>
                 <div className="flex gap-2">
+                  {office.location && (
+                    <a
+                      href={office.location.startsWith("http") ? office.location : `https://${office.location}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600"
+                    >
+                      View Location
+                    </a>
+                  )}
+
                   <button
                     onClick={() => handleEdit(office)}
                     className="bg-yellow-400 text-white px-3 py-1 rounded-lg hover:bg-yellow-500"
@@ -154,8 +167,17 @@ export default function Offices() {
 
             <input
               type="text"
+              name="address"
+              placeholder="Office Address"
+              value={form.address}
+              onChange={handleChange}
+              className="border rounded-lg px-3 py-2 w-full mb-3"
+            />
+
+            <input
+              type="text"
               name="location"
-              placeholder="Location"
+              placeholder="Google Maps Link"
               value={form.location}
               onChange={handleChange}
               className="border rounded-lg px-3 py-2 w-full mb-4"

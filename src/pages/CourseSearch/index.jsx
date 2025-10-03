@@ -1,210 +1,185 @@
-// src/components/StudyProgramSearch.jsx
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import {
+  useSearchCoursesQuery,
+  useDeleteCourseMutation,
+} from "../../features/courses/courseApi";
 
-const dummyPrograms = [
-  {
-    course: "Computer Science",
-    university: "Oxford University",
-    department: "Engineering",
-    country: "UK",
-    febIntake: "Yes",
-    septIntake: "Yes",
-    isPrivate: "No",
-    type: "Bachelors",
-    fee: "15000",
-    timePeriod: "3 Years",
-  },
-  {
-    course: "MBA",
-    university: "Harvard University",
-    department: "Business",
-    country: "USA",
-    febIntake: "No",
-    septIntake: "Yes",
-    isPrivate: "Yes",
-    type: "Masters",
-    fee: "30000",
-    timePeriod: "2 Years",
-  },
-  {
-    course: "Data Science",
-    university: "Toronto University",
-    department: "Computer Science",
-    country: "Canada",
-    febIntake: "Yes",
-    septIntake: "No",
-    isPrivate: "No",
-    type: "PhD",
-    fee: "20000",
-    timePeriod: "2 Years",
-  },
-];
+const ProgramCard = () => {
+  const { user } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
 
-const StudyProgramSearch = () => {
+  // 🔎 Form state
   const [filters, setFilters] = useState({
     search: "",
     country: "",
-    intake: "",
-    isPrivate: "",
     type: "",
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFilters({ ...filters, [name]: value });
-  };
-
-  const filteredPrograms = dummyPrograms.filter((program) => {
-    const matchesSearch =
-      program.course.toLowerCase().includes(filters.search.toLowerCase()) ||
-      program.university.toLowerCase().includes(filters.search.toLowerCase());
-
-    const matchesCountry =
-      !filters.country ||
-      program.country.toLowerCase().includes(filters.country.toLowerCase());
-
-    const matchesIntake =
-      !filters.intake ||
-      (filters.intake === "Feb" && program.febIntake === "Yes") ||
-      (filters.intake === "Sept" && program.septIntake === "Yes");
-
-    const matchesPrivate =
-      !filters.isPrivate || program.isPrivate === filters.isPrivate;
-
-    const matchesType = !filters.type || program.type === filters.type;
-
-    return (
-      matchesSearch &&
-      matchesCountry &&
-      matchesIntake &&
-      matchesPrivate &&
-      matchesType
-    );
+  // API call with filters
+  const { data, error, isLoading } = useSearchCoursesQuery({
+    search: filters.search,
+    country: filters.country,
+    type: filters.type,
+    page: 1,
+    limit: 10,
   });
 
+  const [deleteCourse] = useDeleteCourseMutation();
+
+  const handleDelete = async (id) => {
+    if (confirm("Are you sure you want to delete this course?")) {
+      await deleteCourse(id);
+    }
+  };
+
+  const handleEdit = (program) => {
+    navigate("/add-course", { state: { program } });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 p-6 md:p-10">
-      <div className="max-w-7xl mx-auto">
-        {/* Filters Section */}
-        <div className="bg-white shadow-md rounded-2xl p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Search & Filters
-          </h2>
+    <div className="space-y-6">
+      {/* 🔎 Search Form */}
+      <div className="p-4 bg-gray-100 rounded-lg flex flex-wrap gap-4 items-center">
+        <input
+          type="text"
+          placeholder="Search by name..."
+          className="border p-2 rounded w-1/3"
+          value={filters.search}
+          onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+        />
+        <input
+          type="text"
+          placeholder="Country"
+          className="border p-2 rounded w-1/4"
+          value={filters.country}
+          onChange={(e) => setFilters({ ...filters, country: e.target.value })}
+        />
+        <select
+          className="border p-2 rounded w-1/4"
+          value={filters.type}
+          onChange={(e) => setFilters({ ...filters, type: e.target.value })}
+        >
+          <option value="">All Types</option>
+          <option value="Bachelors">Bachelors</option>
+          <option value="Masters">Masters</option>
+          <option value="PhD">PhD</option>
+        </select>
+      </div>
 
-          {/* Search Bar First */}
-          <div className="mb-4">
-            <input
-              type="text"
-              name="search"
-              placeholder="Search by Course or University"
-              value={filters.search}
-              onChange={handleChange}
-              className="p-3 border rounded-lg w-full"
-            />
-          </div>
+      {/* 🔄 Results */}
+      {isLoading && <p>Loading...</p>}
+      {error && <p className="text-red-500">Failed to load courses</p>}
 
-          {/* Filters Below */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <input
-              type="text"
-              name="country"
-              placeholder="Search by Country"
-              value={filters.country}
-              onChange={handleChange}
-              className="p-3 border rounded-lg w-full"
-            />
-            <select
-              name="intake"
-              value={filters.intake}
-              onChange={handleChange}
-              className="p-3 border rounded-lg w-full"
-            >
-              <option value="">All Intakes</option>
-              <option value="Feb">February</option>
-              <option value="Sept">September</option>
-            </select>
-            <select
-              name="isPrivate"
-              value={filters.isPrivate}
-              onChange={handleChange}
-              className="p-3 border rounded-lg w-full"
-            >
-              <option value="">Public & Private</option>
-              <option value="Yes">Private</option>
-              <option value="No">Public</option>
-            </select>
-            <select
-              name="type"
-              value={filters.type}
-              onChange={handleChange}
-              className="p-3 border rounded-lg w-full"
-            >
-              <option value="">All Types</option>
-              <option value="Bachelors">Bachelors</option>
-              <option value="Masters">Masters</option>
-              <option value="PhD">PhD</option>
-            </select>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {data?.data?.length === 0 && (
+          <p className="text-gray-500 col-span-2">No courses found.</p>
+        )}
 
-        {/* Results */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredPrograms.length > 0 ? (
-            filteredPrograms.map((program, idx) => (
-              <div
-                key={idx}
-                className="bg-white shadow-md rounded-2xl p-6 hover:shadow-xl transition"
-              >
-                <h3 className="text-lg font-semibold text-blue-700">
-                  {program.course}
-                </h3>
-                <p className="text-gray-700 font-medium">
-                  {program.university}
+        {data?.data?.map((program) => (
+          <div
+            key={program._id}
+            className="max-w-md w-full bg-white shadow-lg rounded-2xl p-6 border border-gray-200 relative"
+          >
+            {/* Title & University */}
+            <div className="mb-4 flex justify-between items-start">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">{program.name}</h2>
+                <p className="text-sm text-gray-600">
+                  {program.university} • {program.country}
                 </p>
-                <p className="text-sm text-gray-500 mb-2">
-                  {program.country}
-                </p>
-
-                <div className="mt-3 space-y-1 text-sm">
-                  <p>
-                    <span className="font-semibold">Type:</span> {program.type}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Department:</span>{" "}
-                    {program.department}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Fee:</span> ${program.fee}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Duration:</span>{" "}
-                    {program.timePeriod}
-                  </p>
-                </div>
-
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {program.febIntake === "Yes" && (
-                    <span className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full">
-                      February Intake
-                    </span>
-                  )}
-                  {program.septIntake === "Yes" && (
-                    <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-                      September Intake
-                    </span>
-                  )}
-                </div>
+                {program.city && (
+                  <p className="text-xs text-gray-500">{program.city}</p>
+                )}
               </div>
-            ))
-          ) : (
-            <p className="text-gray-600 col-span-full text-center">
-              No programs found.
-            </p>
-          )}
-        </div>
+
+              {user?.role === "SuperAdmin" && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEdit(program)}
+                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(program._id)}
+                    className="px-3 py-1 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Program Details */}
+            <div className="grid grid-cols-2 gap-4 text-sm text-gray-800">
+              {program.department && (
+                <div>
+                  <p className="font-semibold">Department:</p>
+                  <p>{program.department}</p>
+                </div>
+              )}
+              {program.intake && (
+                <div>
+                  <p className="font-semibold">Intake:</p>
+                  <p>{program.intake}</p>
+                </div>
+              )}
+              {program.type && (
+                <div>
+                  <p className="font-semibold">Type:</p>
+                  <p>{program.type}</p>
+                </div>
+              )}
+              {program.fee && (
+                <div>
+                  <p className="font-semibold">Fee:</p>
+                  <p>{program.fee}</p>
+                </div>
+              )}
+              {program.timePeriod && (
+                <div>
+                  <p className="font-semibold">Time Period:</p>
+                  <p>{program.timePeriod}</p>
+                </div>
+              )}
+              {program.percentageRequirement && (
+                <div>
+                  <p className="font-semibold">Percentage Requirement:</p>
+                  <p>{program.percentageRequirement}</p>
+                </div>
+              )}
+              {program.cgpaRequirement && (
+                <div>
+                  <p className="font-semibold">CGPA Requirement:</p>
+                  <p>{program.cgpaRequirement}</p>
+                </div>
+              )}
+              {program.isPrivate && (
+                <div>
+                  <p className="font-semibold">Private:</p>
+                  <p>{program.isPrivate}</p>
+                </div>
+              )}
+              {program.languageTest && (
+                <div>
+                  <p className="font-semibold">Language Test:</p>
+                  <p>{program.languageTest}</p>
+                </div>
+              )}
+              {program.minBands && (
+                <div>
+                  <p className="font-semibold">Minimum Bands / Score:</p>
+                  <p>{program.minBands}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
 };
 
-export default StudyProgramSearch;
+export default ProgramCard;

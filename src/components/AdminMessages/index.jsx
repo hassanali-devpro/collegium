@@ -1,4 +1,3 @@
-// src/components/AdminChatBoard.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { Megaphone } from "lucide-react";
 
@@ -10,7 +9,6 @@ const AdminChatBoard = () => {
 
   const chatContainerRef = useRef(null);
 
-  // Simulate admin sending new messages
   useEffect(() => {
     const interval = setInterval(() => {
       const newMessages = [
@@ -30,12 +28,11 @@ const AdminChatBoard = () => {
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         },
       ]);
-    }, 15000); // every 15 seconds for demo
+    }, 15000); 
 
     return () => clearInterval(interval);
   }, []);
 
-  // Auto scroll inside chat box (not the whole page)
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
@@ -44,13 +41,13 @@ const AdminChatBoard = () => {
 
   return (
     <div className="w-full mx-auto bg-white shadow-lg rounded-2xl border border-gray-200 flex flex-col h-96 mb-10">
-      {/* Header */}
+     
       <div className="flex items-center gap-2 px-4 py-3 bg-[#F42222] text-white rounded-t-xl">
         <Megaphone size={20} />
         <h2 className="font-semibold">Collegium Updates</h2>
       </div>
 
-      {/* Messages */}
+ 
       <div
         ref={chatContainerRef}
         className="flex-1 overflow-y-auto p-4 space-y-3"

@@ -19,7 +19,6 @@ const ApplicationTracking = () => {
   const [searchId, setSearchId] = useState("");
   const [searchedApp, setSearchedApp] = useState(null);
 
-  // Dummy applications with name, university, program
   const [applications, setApplications] = useState([
     {
       studentId: "STU001",
@@ -28,7 +27,7 @@ const ApplicationTracking = () => {
       program: "MSc Computer Science",
       stages: stageTitles.map((title, i) => ({
         title,
-        passed: i < 3, // first 3 passed
+        passed: i < 3,
         comments:
           i === 0
             ? ["Payment received on Aug 15"]
@@ -46,7 +45,7 @@ const ApplicationTracking = () => {
       program: "MBA",
       stages: stageTitles.map((title, i) => ({
         title,
-        passed: i < 5, // first 5 passed
+        passed: i < 5,
         comments:
           i === 0
             ? ["Initial fee cleared"]
@@ -92,7 +91,6 @@ const ApplicationTracking = () => {
 
   return (
     <div className="p-6 w-full max-w-3xl mx-auto">
-      {/* Search Section */}
       <div className="flex gap-2 mb-6">
         <input
           type="text"
@@ -109,10 +107,8 @@ const ApplicationTracking = () => {
         </button>
       </div>
 
-      {/* Show Application */}
       {searchedApp ? (
         <div className="bg-white shadow-lg rounded-2xl p-6 border border-gray-200">
-          {/* Student Info */}
           <div className="mb-6">
             <h2 className="text-lg font-bold text-gray-800">
               {searchedApp.studentName} ({searchedApp.studentId})
@@ -127,11 +123,9 @@ const ApplicationTracking = () => {
             </p>
           </div>
 
-          {/* Vertical Timeline */}
           <div className="relative border-l-2 border-gray-300 pl-6 space-y-8">
             {searchedApp.stages.map((stage, stageIndex) => (
               <div key={stageIndex} className="relative">
-                {/* Circle */}
                 <span
                   className={`absolute -left-[22px] flex items-center justify-center w-8 h-8 rounded-full border-2 ${
                     stage.passed
@@ -142,13 +136,11 @@ const ApplicationTracking = () => {
                   {stage.passed ? <Check size={16} /> : stageIndex + 1}
                 </span>
 
-                {/* Stage Content */}
                 <div className="bg-gray-50 p-4 rounded-xl shadow-sm">
                   <h3 className="font-semibold text-gray-800">
                     {stage.title}
                   </h3>
 
-                  {/* Comments */}
                   <div className="mt-2 space-y-1">
                     {stage.comments.map((c, i) => (
                       <p
@@ -160,7 +152,6 @@ const ApplicationTracking = () => {
                     ))}
                   </div>
 
-                  {/* Add Comment */}
                   <div className="flex mt-2">
                     <input
                       type="text"
@@ -185,7 +176,6 @@ const ApplicationTracking = () => {
                     </button>
                   </div>
 
-                  {/* Pass Stage */}
                   {!stage.passed && (
                     <button
                       onClick={() => handlePassStage(stageIndex)}

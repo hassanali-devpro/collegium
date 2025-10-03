@@ -11,6 +11,7 @@ import AddCouse from "./pages/AddCourse";
 import AddStudent from "./pages/AddStudent";
 import CourseSearch from "./pages/CourseSearch";
 import Offices from "./pages/Offices";
+import Agents from "./pages/Agents";
 import ProtectedRoute from "./components/ProtectedRoute"; 
 
 function App() {
@@ -63,6 +64,16 @@ function App() {
               <ProtectedRoute>
                 <Layout role={userRole}>
                   <Offices />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manage-users"
+            element={
+              <ProtectedRoute>
+                <Layout role={userRole}>
+                  <Agents />
                 </Layout>
               </ProtectedRoute>
             }

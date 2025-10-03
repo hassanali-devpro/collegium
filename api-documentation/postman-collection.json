@@ -1,0 +1,2539 @@
+{
+    "info": {
+        "_postman_id": "travel-agency-api-optimized",
+        "name": "Travel Agency API - Optimized Document System",
+        "description": "Complete API collection for Travel Agency Management System with optimized document upload, automatic cleanup, file compression, advanced storage management, and real-time chat system.\n\n## 🚀 NEW FEATURES:\n- **Real-time Chat System**: One-to-one chat between Super Admin and Agents\n- **Socket.IO Integration**: Real-time messaging with typing indicators and read receipts\n- **Automatic Document Replacement**: Old documents are automatically deleted when replaced\n- **File Optimization**: Images are automatically compressed and optimized\n- **Orphaned File Cleanup**: Automatic cleanup of unused files\n- **Storage Statistics**: Real-time storage usage monitoring\n- **Enhanced Error Handling**: Comprehensive rollback and error recovery\n- **Document Versioning**: Smart document management with cleanup\n\n## 💬 Chat System Features:\n- **One-to-One Messaging**: Super Admin ↔ Agent conversations\n- **Real-time Communication**: Socket.IO WebSocket connections\n- **Message Types**: Text, Image, File, System messages\n- **Read Receipts**: Message read status tracking\n- **Typing Indicators**: Real-time typing status\n- **Message Search**: Search across conversations\n- **User Presence**: Online/offline status tracking\n- **JWT Authentication**: Secure token-based authentication\n\n## 📁 Document Upload System:\n- **Bulk Upload**: Upload multiple document types in a single request\n- **S3 Integration**: All documents stored in AWS S3 with organized folder structure\n- **Automatic Optimization**: Images compressed to 85% quality, max 1920x1080\n- **Old Document Cleanup**: Replaced documents automatically deleted from S3\n- **File Validation**: Enhanced validation with duplicate detection\n- **Size Limits**: 10MB per file, 15 files per request\n\n## 🔧 Storage Management:\n- **Cleanup Endpoints**: SuperAdmin can clean orphaned files\n- **Storage Stats**: Monitor storage usage and file counts\n- **Automatic Cleanup**: Scheduled cleanup of unused files\n- **Space Optimization**: Significant storage savings through compression\n\n## 🛡️ Security & Validation:\n- **File Hash Generation**: SHA-256 hashing for duplicate detection\n- **MIME Type Validation**: Strict file type checking\n- **Filename Sanitization**: Secure filename handling\n- **Role-based Access**: SuperAdmin, Admin, and Agent roles\n\n## 📊 Optimization Results:\n- **Image Compression**: Up to 70% size reduction\n- **Format Conversion**: PNG→JPEG, GIF→JPEG for better compression\n- **Quality Control**: Automatic quality adjustment to meet size limits\n- **Storage Efficiency**: Reduced S3 costs through optimization",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Authentication",
+            "item": [
+                {
+                    "name": "SuperAdmin Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"superadmin@travelagency.com\",\n  \"password\": \"SuperAdmin123!\"\n}",
+                            "description": "**Validation Rules:**\n- `email`: Required, valid email format\n- `password`: Required, minimum 6 characters\n\n**Response includes:**\n- User data with populated office information (name, address, location)\n- Access token\n- Refresh token"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Agent Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"agent@example.com\",\n  \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/profile",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "profile"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Profile",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Updated Name\",\n  \"phone\": \"+1234567890\"\n}",
+                            "description": "**Validation Rules:**\n- `name`: Optional, 2-100 characters\n- `phone`: Optional, valid phone format (regex: /^[\\+]?[1-9][\\d]{0,15}$/)\n\n**Response includes:**\n- Updated user data with populated office information (name, address, location)"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/profile",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "profile"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Change Password",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"currentPassword\": \"SuperAdmin123!\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/change-password",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "change-password"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Refresh Token",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/refresh",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "refresh"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/logout",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "logout"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Offices",
+            "item": [
+                {
+                    "name": "Get All Offices",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/offices?page=1&limit=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "offices"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Office",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Main Office\",\n  \"address\": \"123 Main Street, City, Country\",\n  \"location\": \"https://maps.google.com/maps?q=123+Main+Street+City+Country\"\n}",
+                            "description": "**Validation Rules:**\n- `name`: Required, 2-100 characters\n- `address`: Required, 5-500 characters  \n- `location`: Optional, max 1000 characters. Accepts:\n  - Google Maps links (https://...)\n  - Coordinates (latitude,longitude)\n  - Location descriptions"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/offices",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "offices"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Office by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/offices/{{officeId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "offices",
+                                "{{officeId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Office",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Updated Office Name\",\n  \"address\": \"456 New Street, City, Country\",\n  \"location\": \"40.7128,-74.0060\"\n}",
+                            "description": "**Validation Rules:**\n- `name`: Optional, 2-100 characters\n- `address`: Optional, 5-500 characters\n- `location`: Optional, max 1000 characters. Accepts:\n  - Google Maps links (https://...)\n  - Coordinates (latitude,longitude) \n  - Location descriptions\n  - Empty string to remove location"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/offices/{{officeId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "offices",
+                                "{{officeId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Office with Coordinates",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Branch Office\",\n  \"address\": \"456 Oak Avenue, Downtown, City\",\n  \"location\": \"40.7589,-73.9851\"\n}",
+                            "description": "**Example with coordinates:**\n- `location`: Latitude,longitude format\n- Useful for map integrations and GPS systems\n\n**Validation Rules:**\n- `name`: Required, 2-100 characters\n- `address`: Required, 5-500 characters\n- `location`: Optional, max 1000 characters"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/offices",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "offices"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Office with Description",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Regional Office\",\n  \"address\": \"789 Business Park, Suite 200, City\",\n  \"location\": \"Located in the Business District, near Central Station, 2nd floor of the main building\"\n}",
+                            "description": "**Example with description:**\n- `location`: Descriptive text for easy identification\n- Useful when exact coordinates are not available\n\n**Validation Rules:**\n- `name`: Required, 2-100 characters\n- `address`: Required, 5-500 characters\n- `location`: Optional, max 1000 characters"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/offices",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "offices"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Office",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/offices/{{officeId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "offices",
+                                "{{officeId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Agents",
+            "item": [
+                {
+                    "name": "Get All Agents",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/agents?page=1&limit=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "agents"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Agent",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"Agent\",\n  \"officeId\": \"{{officeId}}\",\n  \"phone\": \"+1234567890\"\n}",
+                            "description": "**Validation Rules:**\n- `name`: Required, 2-100 characters\n- `email`: Required, valid email format, unique\n- `password`: Required, minimum 6 characters\n- `role`: Required, one of: 'SuperAdmin', 'Admin', 'Agent'\n- `officeId`: Required for Admin/Agent roles, valid MongoDB ObjectId\n- `phone`: Optional, valid phone format (regex: /^[\\+]?[1-9][\\d]{0,15}$/)\n\n**Response includes:**\n- Created agent data with populated office information (name, address, location)"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/agents",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "agents"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Admin Agent",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Admin User\",\n  \"email\": \"admin@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"Admin\",\n  \"officeId\": \"{{officeId}}\",\n  \"phone\": \"+1234567890\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/agents",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "agents"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create SuperAdmin Agent",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Super Admin User\",\n  \"email\": \"superadmin2@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"SuperAdmin\",\n  \"phone\": \"+1234567890\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/agents",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "agents"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Agent by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/agents/{{agentId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "agents",
+                                "{{agentId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Agent",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"John Doe Updated\",\n  \"email\": \"john.updated@example.com\",\n  \"role\": \"Agent\",\n  \"officeId\": \"{{officeId}}\",\n  \"phone\": \"+1234567890\",\n  \"isActive\": true\n}",
+                            "description": "**Update Agent Details**\n\n**Available Fields for Update:**\n- `name`: Agent's full name (2-100 characters)\n- `email`: Agent's email address (must be unique)\n- `role`: Agent's role - 'SuperAdmin', 'Admin', or 'Agent'\n- `officeId`: MongoDB ObjectId of the office (required for Admin/Agent roles)\n- `phone`: Phone number (optional, valid format required)\n- `isActive`: Boolean flag to activate/deactivate agent\n\n**Validation Rules:**\n- All fields are optional for updates\n- Email must be unique if provided\n- Phone must match regex: /^[\\+]?[1-9][\\d]{0,15}$/\n- Role must be one of: 'SuperAdmin', 'Admin', 'Agent'\n- Office must exist if officeId is provided\n\n**Access Control:**\n- SuperAdmin can update any agent\n- Admin can only update agents in their own office\n- Cannot delete your own account\n\n**Response includes:**\n- Updated agent data with populated office information\n- Excludes password field for security"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/agents/{{agentId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "agents",
+                                "{{agentId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Agent - Partial Update",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "status": "active",
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "description": "Bearer token for authentication"
+                            },
+                            {
+                                "status": "active",
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "description": "Content type header"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Jane Smith\",\n  \"phone\": \"+9876543210\"\n}",
+                            "description": "**Partial Agent Update Example**\n\nThis example shows how to update only specific fields without affecting others.\nYou can update any combination of fields - only provided fields will be updated.\n\nThe response will include the complete updated agent object with all fields."
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/agents/{{agentId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "agents",
+                                "{{agentId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Agent - Role Change",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "status": "active",
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "description": "Bearer token for authentication"
+                            },
+                            {
+                                "status": "active",
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "description": "Content type header"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"role\": \"Admin\",\n  \"officeId\": \"{{officeId}}\"\n}",
+                            "description": "**Agent Role Update Example**\n\n**Important:** When upgrading an agent to Admin role, officeId becomes mandatory.\nWhen downgrading from Admin to Agent, officeId should be provided.\nWhen changing to SuperAdmin, officeId is not required.\n\n**Role Hierarchy:**\n- SuperAdmin: Highest level, no office restriction\n- Admin: Office-level administration\n- Agent: Basic agent role"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/agents/{{agentId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "agents",
+                                "{{agentId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Agent Password",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "status": "active",
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "description": "Bearer token for authentication"
+                            },
+                            {
+                                "status": "active",
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "description": "Content type header"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"currentPassword\": \"password123\",\n  \"newPassword\": \"newSecurePassword456\",\n  \"confirmPassword\": \"newSecurePassword456\"\n}",
+                            "description": "**Agent Password Update**\n\n**Important Security Features:**\n- Requires current password verification\n- Password confirmation validation\n- Minimum 6 characters requirement\n- Cannot reuse current password\n- Password hashing handled automatically\n\n**Required Fields:**\n- `currentPassword`: Agent's current password for verification\n- `newPassword`: New password (min 6 characters)\n- `confirmPassword`: Must match new password\n\n**Access Control:**\n- SuperAdmin: Can update any agent's password\n- Admin: Can update agents in their office\n- Agent: Can only update their own password\n\n**Password Security:**\n- Old password is verified before change\n- New password must be different from current\n- Password confirmation prevents typos\n- All passwords are securely hashed\n\n**Security Response:**\n- Only returns success message (no password data)\n- Sessions remain valid after password change"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/agents/{{agentId}}/password",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "agents",
+                                "{{agentId}}",
+                                "password"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Own Password (Agent)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "status": "active",
+                                "key": "Authorization",
+                                "value": "Bearer {{agentToken}}",
+                                "description": "Bearer token for agent authentication"
+                            },
+                            {
+                                "status": "active",
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "description": "Content type header"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"currentPassword\": \"oldpassword123\",\n  \"newPassword\": \"agentNewPassword789\",\n  \"confirmPassword\": \"agentNewPassword789\"\n}",
+                            "description": "**Update Own Password Example**\n\nThis request shows how an agent can update their own password.\nUse `{{agentToken}}` which should contain the agent's JWT token.\nReplace `{{agentId}}` with the agent's own ID.\n\n**Steps:**\n1. Agent logs in to get authentication token\n2. Agent calls this endpoint with their own ID\n3. Provides current password for verification\n4. Sets new password with confirmation\n5. Receives success confirmation\n\n**Security for Agents:**\n- Agents can ONLY update their own passwords\n- Cannot update other agents' passwords\n- Must provide current password\n- All validation rules still apply"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/agents/{{agentId}}/password",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "agents",
+                                "{{agentId}}",
+                                "password"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Activate Agent",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "status": "active",
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "description": "Bearer token for authentication"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/agents/{{agentId}}/activate",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "agents",
+                                "{{agentId}}",
+                                "activate"
+                            ]
+                        },
+                        "description": "**Activate Agent**\n\nUsed to reactivate a previously deactivated agent.\n\n**Access Control:**\n- SuperAdmin: Can activate any agent\n- Admin: Can only activate agents in their office\n\n**Response includes:**\n- Updated agent status (isActive: true)\n- Agent basic info (id, name, email)\n\n**Common Use Cases:**\n- Restoring temporarily disabled agents\n- Re-enabling agents after suspension\n- Reactivating accounts after resolution of issues"
+                    }
+                },
+                {
+                    "name": "Deactivate Agent",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "status": "active",
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "description": "Bearer token for authentication"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/agents/{{agentId}}/deactivate",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "agents",
+                                "{{agentId}}",
+                                "deactivate"
+                            ]
+                        },
+                        "description": "**Deactivate Agent**\n\nUsed to temporarily disable an agent account (soft delete).\n\n**Key Features:**\n- Sets isActive to false without deleting data\n- Agent remains in system but cannot login\n- Can be reactivated later\n- Prevents self-deactivation\n\n**Access Control:**\n- SuperAdmin: Can deactivate any agent\n- Admin: Can only deactivate agents in their office\n\n**Response includes:**\n- Updated agent status (isActive: false)\n- Agent basic info (id, name, email)\n\n**Common Use Cases:**\n- Temporary suspension\n- Disciplinary actions\n- Temporary leave/departure\n- Account security measures"
+                    }
+                },
+                {
+                    "name": "Hard Delete Agent (SuperAdmin Only)",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "status": "active",
+                                "key": "Authorization",
+                                "value": "Bearer {{superAdminToken}}",
+                                "description": "Bearer token for SuperAdmin authentication"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/agents/{{agentId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "agents",
+                                "{{agentId}}"
+                            ]
+                        },
+                        "description": "**Permanent Agent Deletion**\n\n⚠️ **DANGER ZONE - SuperAdmin Only** ⚠️\n\nThis completely removes the agent from the database forever.\n\n**Critical Checks Performed:**\n🔍 **Dependency Analysis:** Checks for:\n- Associated students (needs reassignment)\n- Pending notifications (needs disposal)\n- Chat messages (needs archiving)\n- Chat participation (needs removal)\n- Chat ownership (needs transfer)\n\n**Response if Dependencies Exist:**\n```json\n{\n  \"success\": false,\n  \"message\": \"Cannot delete agent due to existing dependencies\",\n  \"dependencies\": {\n    \"students\": { \"count\": 3, \"studentNames\": [...] },\n    \"notifications\": { \"count\": 5, \"notificationIds\": [...] }\n  },\n  \"suggestions\": [\n    \"Reassign 3 student(s) to other agents\",\n    \"Delete or reassign 5 notification(s)\"\n  ]\n}\n```\n\n**Before Using:**\n1. Check dependencies first\n2. Reassign/clean up dependencies\n3. Then proceed with deletion\n4. Cannot be undone!\n\n**Security:**\n- Only SuperAdmin can delete\n- Cannot delete own account\n- Prevents cascade data loss"
+                    }
+                },
+                {
+                    "name": "Check Agent Dependencies (Before Delete)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "status": "active",
+                                "key": "Authorization",
+                                "value": "Bearer {{superAdminToken}}",
+                                "description": "Bearer token for SuperAdmin authentication"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/agents/{{agentId}}/dependencies",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "agents",
+                                "{{agentId}}",
+                                "dependencies"
+                            ]
+                        },
+                        "description": "**Dependency Check Helper**\n\nCheck what entities are linked to an agent before attempting hard delete.\n\n**Returns dependency information:**\n- Students assigned to agent\n- Notifications sent to agent\n- Messages sent by agent\n- Chats agent participates in\n- Chats created by agent\n\n**Usage:**\n1. Use this endpoint first\n2. Review dependencies\n3. Clean up dependencies manually\n4. Then proceed with hard delete\n\n**Note:** This endpoint calls the dependency checking internally, but provides detailed breakdown for planning deletion steps."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Students",
+            "item": [
+                {
+                    "name": "Get All Students",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/students?page=1&limit=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "students"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Student (Agent)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Sarah Johnson\",\n  \"email\": \"sarah.johnson@example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"+1234567890\",\n  \"dateOfBirth\": \"1995-05-15\",\n  \"nationality\": \"American\",\n  \"passportNumber\": \"A12345678\"\n}",
+                            "description": "**Validation Rules:**\n- `name`: Required, 2-100 characters\n- `email`: Required, valid email format, unique\n- `password`: Required, minimum 6 characters\n- `phone`: Optional, valid phone format (regex: /^[\\+]?[1-9][\\d]{0,15}$/)\n- `dateOfBirth`: Optional, valid date format (YYYY-MM-DD)\n- `nationality`: Optional, 2-100 characters\n- `passportNumber`: Optional, 5-50 characters\n- `officeId`: Auto-assigned based on agent's office (for Agent role)\n- `agentId`: Auto-assigned to current user (for Agent role)\n\n**Response includes:**\n- Created student data with populated office and agent information"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/students",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "students"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Student (SuperAdmin)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"John Student\",\n  \"email\": \"john.student@example.com\",\n  \"password\": \"password123\",\n  \"officeId\": \"{{officeId}}\",\n  \"agentId\": \"{{agentId}}\",\n  \"phone\": \"+1234567890\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/students",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "students"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Student by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/students/{{studentId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "students",
+                                "{{studentId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Student",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Jane Updated\",\n  \"email\": \"jane.updated@example.com\",\n  \"status\": \"active\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/students/{{studentId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "students",
+                                "{{studentId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Student",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/students/{{studentId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "students",
+                                "{{studentId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Upload Student Documents (Legacy)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "documents",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/students/{{studentId}}/documents",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "students",
+                                "{{studentId}}",
+                                "documents"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Bulk Upload Student Documents",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "profilePicture",
+                                    "type": "file",
+                                    "src": [],
+                                    "description": "Student's profile picture (optional)"
+                                },
+                                {
+                                    "key": "matricCertificate",
+                                    "type": "file",
+                                    "src": [],
+                                    "description": "Matriculation certificate (optional)"
+                                },
+                                {
+                                    "key": "matricMarksSheet",
+                                    "type": "file",
+                                    "src": [],
+                                    "description": "Matriculation marks sheet (optional)"
+                                },
+                                {
+                                    "key": "intermediateCertificate",
+                                    "type": "file",
+                                    "src": [],
+                                    "description": "Intermediate certificate (optional)"
+                                },
+                                {
+                                    "key": "intermediateMarkSheet",
+                                    "type": "file",
+                                    "src": [],
+                                    "description": "Intermediate marks sheet (optional)"
+                                },
+                                {
+                                    "key": "degree",
+                                    "type": "file",
+                                    "src": [],
+                                    "description": "Degree certificate (optional)"
+                                },
+                                {
+                                    "key": "transcript",
+                                    "type": "file",
+                                    "src": [],
+                                    "description": "Academic transcript (optional)"
+                                },
+                                {
+                                    "key": "languageCertificate",
+                                    "type": "file",
+                                    "src": [],
+                                    "description": "Language proficiency certificate (optional)"
+                                },
+                                {
+                                    "key": "passport",
+                                    "type": "file",
+                                    "src": [],
+                                    "description": "Passport document (optional)"
+                                },
+                                {
+                                    "key": "experienceLetter",
+                                    "type": "file",
+                                    "src": [],
+                                    "description": "Work experience letter (optional)"
+                                },
+                                {
+                                    "key": "birthCertificate",
+                                    "type": "file",
+                                    "src": [],
+                                    "description": "Birth certificate (optional)"
+                                },
+                                {
+                                    "key": "familyRegistration",
+                                    "type": "file",
+                                    "src": [],
+                                    "description": "Family registration document (optional)"
+                                },
+                                {
+                                    "key": "otherDocs",
+                                    "type": "file",
+                                    "src": [],
+                                    "description": "Additional documents (optional, up to 10 files)"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/students/{{studentId}}/documents/bulk",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "students",
+                                "{{studentId}}",
+                                "documents",
+                                "bulk"
+                            ]
+                        },
+                        "description": "**Bulk Document Upload with S3 Integration**\n\nUpload multiple specific document types for a student in a single request. All documents are stored in AWS S3 with organized folder structure.\n\n**Supported Document Types:**\n- `profilePicture`: Student's profile picture\n- `matricCertificate`: Matriculation certificate\n- `matricMarksSheet`: Matriculation marks sheet\n- `intermediateCertificate`: Intermediate certificate\n- `intermediateMarkSheet`: Intermediate marks sheet\n- `degree`: Degree certificate\n- `transcript`: Academic transcript\n- `languageCertificate`: Language proficiency certificate\n- `passport`: Passport document\n- `experienceLetter`: Work experience letter\n- `birthCertificate`: Birth certificate\n- `familyRegistration`: Family registration document\n- `otherDocs`: Additional documents (up to 10 files)\n\n**File Constraints:**\n- Maximum 10MB per file\n- Maximum 15 files per request\n- Allowed types: PDF, Images (JPEG, PNG, GIF, WebP), Office documents\n\n**Response includes:**\n- Upload results for each document type\n- S3 URLs and metadata\n- Success/failure status for each document"
+                    }
+                },
+                {
+                    "name": "Get Student Documents",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/students/{{studentId}}/documents",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "students",
+                                "{{studentId}}",
+                                "documents"
+                            ]
+                        },
+                        "description": "**Get All Student Documents**\n\nRetrieve all documents for a specific student including S3 URLs and metadata.\n\n**Response includes:**\n- Student information\n- All uploaded documents with S3 URLs\n- Document metadata (size, type, upload date)\n- Organized by document type"
+                    }
+                },
+                {
+                    "name": "Delete Student Document",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/students/{{studentId}}/documents/profilePicture",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "students",
+                                "{{studentId}}",
+                                "documents",
+                                "profilePicture"
+                            ]
+                        },
+                        "description": "**Delete Specific Document**\n\nDelete a specific document type for a student. For `otherDocs`, add `?index=0` query parameter to specify which document to delete.\n\n**Examples:**\n- Delete profile picture: `/documents/profilePicture`\n- Delete first otherDoc: `/documents/otherDocs?index=0`\n- Delete second otherDoc: `/documents/otherDocs?index=1`\n\n**Response includes:**\n- Confirmation of deletion\n- Document information that was deleted"
+                    }
+                },
+                {
+                    "name": "Delete Other Document (with index)",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/students/{{studentId}}/documents/otherDocs?index=0",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "students",
+                                "{{studentId}}",
+                                "documents",
+                                "otherDocs"
+                            ],
+                            "query": [
+                                {
+                                    "key": "index",
+                                    "value": "0",
+                                    "description": "Index of the otherDoc to delete (0-based)"
+                                }
+                            ]
+                        },
+                        "description": "**Delete Specific Other Document**\n\nDelete a specific document from the otherDocs array by specifying its index.\n\n**Query Parameters:**\n- `index`: Required, 0-based index of the document to delete\n\n**Response includes:**\n- Confirmation of deletion\n- Document information that was deleted"
+                    }
+                },
+                {
+                    "name": "Get Student Options",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/students/{{studentId}}/options",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "students",
+                                "{{studentId}}",
+                                "options"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Student Options",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"clients\": true,\n  \"initialPayment\": true,\n  \"documents\": false,\n  \"applications\": false,\n  \"offerLetterSecured\": false,\n  \"secondPaymentDone\": false,\n  \"visaApplication\": false,\n  \"visaSecured\": false,\n  \"finalPayment\": false\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/students/{{studentId}}/options",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "students",
+                                "{{studentId}}",
+                                "options"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Student Options Count",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/students/options/count",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "students",
+                                "options",
+                                "count"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Link Student to Course",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"courseId\": \"{{courseId}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/students/{{studentId}}/course",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "students",
+                                "{{studentId}}",
+                                "course"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Unlink Student from Course",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/students/{{studentId}}/course",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "students",
+                                "{{studentId}}",
+                                "course"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Courses",
+            "item": [
+                {
+                    "name": "Get All Courses",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/courses?page=1&limit=10&search=&country=&city=&type=",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "courses"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                },
+                                {
+                                    "key": "search",
+                                    "value": "",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "country",
+                                    "value": "",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "city",
+                                    "value": "",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "type",
+                                    "value": "",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Search Courses",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/courses?search=computer science&country=UK&type=Bachelors",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "courses"
+                            ],
+                            "query": [
+                                {
+                                    "key": "search",
+                                    "value": "computer science"
+                                },
+                                {
+                                    "key": "country",
+                                    "value": "UK"
+                                },
+                                {
+                                    "key": "type",
+                                    "value": "Bachelors"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Course (SuperAdmin)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Computer Science\",\n  \"university\": \"Oxford University\",\n  \"department\": \"Engineering\",\n  \"country\": \"UK\",\n  \"city\": \"Oxford\",\n  \"intake\": \"Feb\",\n  \"isPrivate\": \"No\",\n  \"type\": \"Bachelors\",\n  \"fee\": \"25000\",\n  \"timePeriod\": \"4 Years\",\n  \"percentageRequirement\": \"60%\",\n  \"cgpaRequirement\": \"3.0\",\n  \"languageTest\": \"IELTS\",\n  \"minBands\": \"6.5\"\n}",
+                            "description": "**Validation Rules:**\n- `name`: Required, 2-200 characters\n- `university`: Required, 2-200 characters\n- `department`: Required, 2-100 characters\n- `country`: Required, 2-100 characters\n- `city`: Required, 2-100 characters\n- `intake`: Required, 1-50 characters\n- `isPrivate`: Required, either 'Yes' or 'No'\n- `type`: Required, 2-50 characters\n- `fee`: Required, 1-50 characters\n- `timePeriod`: Required, 1-50 characters\n- `percentageRequirement`: Required, 1-10 characters\n- `cgpaRequirement`: Required, 1-10 characters\n- `languageTest`: Required, 1-100 characters (e.g., IELTS, TOEFL, PTE)\n- `minBands`: Required, 1-50 characters (e.g., 6.5, 7.0, Pass)"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/courses",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "courses"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Master's Course",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Business Administration\",\n  \"university\": \"Harvard Business School\",\n  \"department\": \"Business\",\n  \"country\": \"United States\",\n  \"city\": \"Boston\",\n  \"intake\": \"Sep\",\n  \"isPrivate\": \"Yes\",\n  \"type\": \"Masters\",\n  \"fee\": \"75000\",\n  \"timePeriod\": \"2 Years\",\n  \"percentageRequirement\": \"70%\",\n  \"cgpaRequirement\": \"3.5\",\n  \"languageTest\": \"TOEFL\",\n  \"minBands\": \"100\"\n}",
+                            "description": "**Validation Rules:**\n- `name`: Required, 2-200 characters\n- `university`: Required, 2-200 characters\n- `department`: Required, 2-100 characters\n- `country`: Required, 2-100 characters\n- `city`: Required, 2-100 characters\n- `intake`: Required, 1-50 characters\n- `isPrivate`: Required, either 'Yes' or 'No'\n- `type`: Required, 2-50 characters\n- `fee`: Required, 1-50 characters\n- `timePeriod`: Required, 1-50 characters\n- `percentageRequirement`: Required, 1-10 characters\n- `cgpaRequirement`: Required, 1-10 characters\n- `languageTest`: Required, 1-100 characters (e.g., IELTS, TOEFL, PTE)\n- `minBands`: Required, 1-50 characters (e.g., 6.5, 7.0, Pass)\n\n**Examples:**\n- IELTS: 6.5 bands\n- TOEFL: 100 (iBT)\n- PTE: 65\n- Cambridge: C1 Advanced"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/courses",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "courses"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Course by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/courses/{{courseId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "courses",
+                                "{{courseId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Course",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Updated Computer Science\",\n  \"university\": \"Oxford University\",\n  \"department\": \"Computer Science\",\n  \"fee\": \"26000\",\n  \"percentageRequirement\": \"65%\",\n  \"languageTest\": \"IELTS\",\n  \"minBands\": \"6.5\"\n}",
+                            "description": "**Validation Rules:**\n- `name`: Optional, 2-200 characters\n- `university`: Optional, 2-200 characters\n- `department`: Optional, 2-100 characters\n- `country`: Optional, 2-100 characters\n- `city`: Optional, 2-100 characters\n- `intake`: Optional, 1-50 characters\n- `isPrivate`: Optional, either 'Yes' or 'No'\n- `type`: Optional, 2-50 characters\n- `fee`: Optional, 1-50 characters\n- `timePeriod`: Optional, 1-50 characters\n- `percentageRequirement`: Optional, 1-10 characters\n- `cgpaRequirement`: Optional, 1-10 characters\n- `languageTest`: Optional, 1-100 characters\n- `minBands`: Optional, 1-50 characters\n- `isActive`: Optional, boolean\n\n**Partial Update:** Only include fields that need to be updated."
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/courses/{{courseId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "courses",
+                                "{{courseId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Course",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/courses/{{courseId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "courses",
+                                "{{courseId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Students in Course",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/courses/{{courseId}}/students?page=1&limit=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "courses",
+                                "{{courseId}}",
+                                "students"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Link Student to Course (Alternative)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/courses/{{courseId}}/students/{{studentId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "courses",
+                                "{{courseId}}",
+                                "students",
+                                "{{studentId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Unlink Student from Course (Alternative)",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/courses/{{courseId}}/students/{{studentId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "courses",
+                                "{{courseId}}",
+                                "students",
+                                "{{studentId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Payments",
+            "item": [
+                {
+                    "name": "Get All Payments",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments?page=1&limit=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "payments"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Payment",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"studentId\": \"{{studentId}}\",\n  \"amount\": 1000,\n  \"date\": \"2024-01-15\",\n  \"paymentMethod\": \"cash\",\n  \"notes\": \"Initial payment\"\n}",
+                            "description": "**Validation Rules:**\n- `studentId`: Required, valid MongoDB ObjectId\n- `amount`: Required, positive number\n- `date`: Required, valid date format (YYYY-MM-DD)\n- `paymentMethod`: Required, one of: 'cash', 'card', 'bank_transfer', 'check', 'other'\n- `notes`: Optional, max 500 characters\n- `receiptNumber`: Optional, 5-50 characters (auto-generated if not provided)\n\n**Response includes:**\n- Created payment data with populated student information"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "payments"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Payment (Bank Transfer)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"studentId\": \"{{studentId}}\",\n  \"amount\": 2500,\n  \"date\": \"2024-01-20\",\n  \"paymentMethod\": \"bank_transfer\",\n  \"notes\": \"Bank transfer payment\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "payments"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Payment by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments/{{paymentId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "payments",
+                                "{{paymentId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Payment",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"amount\": 1200,\n  \"date\": \"2024-01-20\",\n  \"paymentMethod\": \"card\",\n  \"notes\": \"Updated payment\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments/{{paymentId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "payments",
+                                "{{paymentId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Payment Statistics",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments/stats",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "payments",
+                                "stats"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Payment",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments/{{paymentId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "payments",
+                                "{{paymentId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Chat System",
+            "item": [
+                {
+                    "name": "Create Direct Chat",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"participantIds\": [\"{{adminUserId}}\"],\n  \"chatType\": \"direct\"\n}",
+                            "description": "**Create a direct chat between SuperAdmin and Admin**\n\n**Validation Rules:**\n- `participantIds`: Required array with at least one participant ID\n- `chatType`: Required, either 'direct' or 'group'\n- For direct chat: exactly 2 participants (including current user)\n- For group chat: 2+ participants (including current user)\n\n**Access Control:**\n- Only SuperAdmin and Admin roles can access chat\n- Agents are excluded from chat system\n\n**Response includes:**\n- Chat data with populated participants\n- Chat ID for messaging"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/chats",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "chats"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Group Chat",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"participantIds\": [\"{{adminUserId1}}\", \"{{adminUserId2}}\"],\n  \"chatType\": \"group\"\n}",
+                            "description": "**Create a group chat with multiple participants**\n\n**Validation Rules:**\n- `participantIds`: Required array with participant IDs\n- `chatType`: Required, set to 'group'\n- Minimum 2 participants (including current user)\n\n**Access Control:**\n- Only SuperAdmin and Admin roles can access chat\n- All participants must be SuperAdmin or Admin users"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/chats",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "chats"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get User Chats",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/chats?page=1&limit=20&search=&chatType=",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "chats"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "search",
+                                    "value": "",
+                                    "disabled": true,
+                                    "description": "Search by participant names"
+                                },
+                                {
+                                    "key": "chatType",
+                                    "value": "",
+                                    "disabled": true,
+                                    "description": "Filter by 'direct' or 'group'"
+                                }
+                            ]
+                        },
+                        "description": "**Get all chats for the authenticated user**\n\n**Query Parameters:**\n- `page`: Page number (default: 1)\n- `limit`: Items per page (default: 20, max: 100)\n- `search`: Search by participant names\n- `chatType`: Filter by 'direct' or 'group'\n\n**Response includes:**\n- Array of chats with participants and last message\n- Pagination information\n- Sorted by last message timestamp"
+                    }
+                },
+                {
+                    "name": "Get Chat Messages",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/chats/{{chatId}}?page=1&limit=50",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "chats",
+                                "{{chatId}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "50"
+                                }
+                            ]
+                        },
+                        "description": "**Get messages for a specific chat**\n\n**Query Parameters:**\n- `page`: Page number (default: 1)\n- `limit`: Items per page (default: 50)\n\n**Access Control:**\n- User must be a participant in the chat\n- Messages are marked as read automatically\n\n**Response includes:**\n- Array of messages with sender information\n- Message content, timestamps, and read status\n- Pagination information"
+                    }
+                },
+                {
+                    "name": "Send Message",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"content\": \"Hello! This is a test message.\",\n  \"messageType\": \"text\"\n}",
+                            "description": "**Send a text message to a chat**\n\n**Validation Rules:**\n- `content`: Required, 1-2000 characters\n- `messageType`: Optional, default 'text' (options: 'text', 'file', 'image', 'system')\n- `replyTo`: Optional, message ID for replies\n\n**Access Control:**\n- User must be a participant in the chat\n\n**Response includes:**\n- Created message data with sender information\n- Message ID and timestamp"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/chats/{{chatId}}/messages",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "chats",
+                                "{{chatId}}",
+                                "messages"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Send Reply Message",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"content\": \"This is a reply to your message.\",\n  \"messageType\": \"text\",\n  \"replyTo\": \"{{messageId}}\"\n}",
+                            "description": "**Send a reply message**\n\n**Validation Rules:**\n- `content`: Required, 1-2000 characters\n- `replyTo`: Required, valid message ID in the same chat\n- `messageType`: Optional, default 'text'\n\n**Access Control:**\n- User must be a participant in the chat\n- Reply message must exist in the same chat"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/chats/{{chatId}}/messages",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "chats",
+                                "{{chatId}}",
+                                "messages"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Edit Message",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"content\": \"This message has been edited!\"\n}",
+                            "description": "**Edit a message (only by the sender)**\n\n**Validation Rules:**\n- `content`: Required, 1-2000 characters\n\n**Access Control:**\n- Only the message sender can edit their own messages\n- User must be a participant in the chat\n\n**Response includes:**\n- Updated message data\n- Edit timestamp and status"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/chats/messages/{{messageId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "chats",
+                                "messages",
+                                "{{messageId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Message",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/chats/messages/{{messageId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "chats",
+                                "messages",
+                                "{{messageId}}"
+                            ]
+                        },
+                        "description": "**Delete a message**\n\n**Access Control:**\n- Message sender can delete their own messages\n- Admins can delete any message in their chats\n- User must be a participant in the chat\n\n**Response includes:**\n- Confirmation of deletion"
+                    }
+                },
+                {
+                    "name": "Get Unread Count",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/chats/unread-count",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "chats",
+                                "unread-count"
+                            ]
+                        },
+                        "description": "**Get total unread message count**\n\n**Query Parameters:**\n- `chatId`: Optional, get count for specific chat only\n\n**Response includes:**\n- Total unread message count\n- Count for specific chat if chatId provided"
+                    }
+                },
+                {
+                    "name": "Get Unread Count for Chat",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/chats/unread-count?chatId={{chatId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "chats",
+                                "unread-count"
+                            ],
+                            "query": [
+                                {
+                                    "key": "chatId",
+                                    "value": "{{chatId}}",
+                                    "description": "Get unread count for specific chat"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Chat Participants",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/chats/{{chatId}}/participants",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "chats",
+                                "{{chatId}}",
+                                "participants"
+                            ]
+                        },
+                        "description": "**Get list of participants in a chat**\n\n**Access Control:**\n- User must be a participant in the chat\n\n**Response includes:**\n- Array of participant user data\n- User names, emails, and roles"
+                    }
+                },
+                {
+                    "name": "Test Chat Access (Agent Role)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{agentToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/chats",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "chats"
+                            ]
+                        },
+                        "description": "**Test that Agents cannot access chat system**\n\n**Expected Result:**\n- 403 Forbidden response\n- Message: 'Access denied. Chat is only available for SuperAdmin and Admin users.'\n\n**Purpose:**\n- Verify access control is working correctly\n- Ensure only SuperAdmin and Admin can use chat"
+                    }
+                },
+                {
+                    "name": "Test Invalid Chat Access",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/chats/invalid_chat_id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "chats",
+                                "invalid_chat_id"
+                            ]
+                        },
+                        "description": "**Test access to non-existent chat**\n\n**Expected Result:**\n- 404 Not Found response\n- Message: 'Chat not found'\n\n**Purpose:**\n- Verify error handling for invalid chat IDs\n- Test validation of MongoDB ObjectId format"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Notifications",
+            "item": [
+                {
+                    "name": "Get All Notifications",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/notifications?page=1&limit=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "notifications"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Notification",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"officeId\": \"{{officeId}}\",\n  \"agentId\": \"{{agentId}}\",\n  \"message\": \"New student registration completed\",\n  \"title\": \"Student Registration\",\n  \"type\": \"student\",\n  \"priority\": \"medium\"\n}",
+                            "description": "**Validation Rules:**\n- `officeId`: Required, valid MongoDB ObjectId\n- `agentId`: Required, valid MongoDB ObjectId\n- `message`: Required, 5-1000 characters\n- `title`: Required, 2-200 characters\n- `type`: Required, one of: 'info', 'success', 'warning', 'error', 'payment', 'student', 'system'\n- `priority`: Optional, one of: 'low', 'medium', 'high', 'urgent' (default: medium)\n- `expiresAt`: Optional, valid date format (YYYY-MM-DD)\n\n**Response includes:**\n- Created notification data"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/notifications",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "notifications"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Notification by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/notifications/{{notificationId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "notifications",
+                                "{{notificationId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Mark Notification as Read",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"read\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/notifications/{{notificationId}}/status",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "notifications",
+                                "{{notificationId}}",
+                                "status"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Unread Count",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/notifications/unread/count",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "notifications",
+                                "unread",
+                                "count"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Notification",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/notifications/{{notificationId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "notifications",
+                                "{{notificationId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:5000"
+        },
+        {
+            "key": "token",
+            "value": "your-jwt-token-here"
+        },
+        {
+            "key": "refreshToken",
+            "value": "your-refresh-token-here"
+        },
+        {
+            "key": "officeId",
+            "value": "your-office-id-here"
+        },
+        {
+            "key": "agentId",
+            "value": "your-agent-id-here"
+        },
+        {
+            "key": "studentId",
+            "value": "your-student-id-here"
+        },
+        {
+            "key": "paymentId",
+            "value": "your-payment-id-here"
+        },
+        {
+            "key": "notificationId",
+            "value": "your-notification-id-here"
+        },
+        {
+            "key": "courseId",
+            "value": "your-course-id-here"
+        },
+        {
+            "key": "chatId",
+            "value": "your-chat-id-here"
+        },
+        {
+            "key": "messageId",
+            "value": "your-message-id-here"
+        },
+        {
+            "key": "adminUserId",
+            "value": "your-admin-user-id-here"
+        },
+        {
+            "key": "adminUserId1",
+            "value": "your-admin-user-id-1-here"
+        },
+        {
+            "key": "adminUserId2",
+            "value": "your-admin-user-id-2-here"
+        },
+        {
+            "key": "agentToken",
+            "value": "your-agent-jwt-token-here"
+        }
+    ]
+}

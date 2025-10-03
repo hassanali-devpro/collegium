@@ -1,4 +1,3 @@
-// features/offices/officesApi.js
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { API_BASE_URL } from "../../app/apiConfig";
 
@@ -17,7 +16,6 @@ export const officesApi = createApi({
   }),
   tagTypes: ["Office"],
   endpoints: (builder) => ({
-    // GET offices with pagination
     getOffices: builder.query({
       query: ({ page = 1, limit = 10 }) => `/offices?page=${page}&limit=${limit}`,
       providesTags: (result) =>
@@ -29,7 +27,7 @@ export const officesApi = createApi({
           : [{ type: "Office", id: "LIST" }],
     }),
 
-    // CREATE office
+
     addOffice: builder.mutation({
       query: (newOffice) => ({
         url: "/offices",
@@ -39,7 +37,7 @@ export const officesApi = createApi({
       invalidatesTags: [{ type: "Office", id: "LIST" }],
     }),
 
-    // UPDATE office
+
     updateOffice: builder.mutation({
       query: ({ id, ...patch }) => ({
         url: `/offices/${id}`,
@@ -49,7 +47,7 @@ export const officesApi = createApi({
       invalidatesTags: (result, error, { id }) => [{ type: "Office", id }],
     }),
 
-    // DELETE office
+
     deleteOffice: builder.mutation({
       query: (id) => ({
         url: `/offices/${id}`,

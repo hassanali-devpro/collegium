@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { logout } from "../../features/auth/authSlice"; // ✅ import logout action
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../../features/auth/authSlice"; 
 import {
   Home,
   Search,
@@ -14,44 +14,52 @@ import {
 } from "lucide-react";
 import logo from "/Logo-R.png";
 
-export default function Layout({ role = "user", children }) {
+export default function Layout({ children }) {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
-  const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
 
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
-  const toggleProfileMenu = () => setProfileMenuOpen(!isProfileMenuOpen);
 
   const handleLogout = () => {
-    // ✅ Clear Redux state
     dispatch(logout());
-
-    // ✅ Clear localStorage if token is stored
     localStorage.removeItem("token");
-
-    // ✅ Redirect to login
     navigate("/login");
   };
+
+  // First letter of user's name (fallback = U)
+  const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : "U";
 
   const menuItems = [
     { name: "Dashboard", path: "/dashboard", icon: <Home size={18} /> },
     { name: "Course Search", path: "/course-search", icon: <Search size={18} /> },
     { name: "Application Tracking", path: "/application-tracking", icon: <FileText size={18} /> },
     { name: "Student Search", path: "/student-search", icon: <Search size={18} /> },
-    role === "admin" && { name: "Manage Users", path: "/manage-users", icon: <Users size={18} /> },
-    role === "admin" && { name: "Payments", path: "/payments", icon: <CreditCard size={18} /> },
-    role === "admin" && { name: "Offices", path: "/offices", icon: <CreditCard size={18} /> },
+
+    user?.role === "SuperAdmin" && {
+      name: "Manage Users",
+      path: "/manage-users",
+      icon: <Users size={18} />,
+    },
+    user?.role === "SuperAdmin" && {
+      name: "Payments",
+      path: "/payments",
+      icon: <CreditCard size={18} />,
+    },
+    user?.role === "SuperAdmin" && {
+      name: "Offices",
+      path: "/offices",
+      icon: <CreditCard size={18} />,
+    },
   ].filter(Boolean);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
-      {/* ---------- Topbar ---------- */}
+      {/* Top Navbar */}
       <div className="w-full h-16 bg-white shadow-md flex items-center justify-between px-4 sm:px-6 relative">
-        {/* Left - Logo + Menu */}
         <div className="flex items-center gap-3">
-          {/* Mobile Menu Button */}
           <button
             className="sm:hidden p-2 rounded-md hover:bg-gray-100"
             onClick={toggleSidebar}
@@ -61,102 +69,71 @@ export default function Layout({ role = "user", children }) {
           <img src={logo} alt="Logo" className="h-10 w-auto hidden sm:block" />
         </div>
 
-        {/* Right - Actions */}
         <div className="flex items-center gap-4 sm:gap-6">
-          {/* Notifications */}
           <button className="relative p-2 hover:bg-gray-100 rounded-full transition">
             <Bell size={20} />
             <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
 
-          {/* Profile Picture + Dropdown */}
-          <div className="relative">
-            <img
-              src="/hassan.jpg"
-              alt="Profile"
-              className="h-10 w-10 rounded-full border border-gray-300 cursor-pointer"
-              onClick={toggleProfileMenu}
-            />
-
-            {isProfileMenuOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                <Link
-                  to="/profile-settings"
-                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                  onClick={() => setProfileMenuOpen(false)}
-                >
-                  Profile Settings
-                </Link>
-                <Link
-                  to="/support"
-                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                  onClick={() => setProfileMenuOpen(false)}
-                >
-                  Support
-                </Link>
-                <button
-                  className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                  onClick={() => {
-                    setProfileMenuOpen(false);
-                    handleLogout(); // ✅ call logout
-                  }}
-                >
-                  Logout
-                </button>
-              </div>
-            )}
+          {/* User Initial Circle */}
+          <div className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-200 border border-gray-300 text-gray-700 font-semibold">
+            {userInitial}
           </div>
+
+          {/* Logout button */}
+          <button
+            className="px-3 py-2 rounded-md bg-red-500 text-white hover:bg-red-600 transition"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
         </div>
       </div>
 
-      {/* ---------- Main Content with Sidebar ---------- */}
+      {/* Sidebar + Content */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar + Overlay for Mobile */}
-        <>
-          {isSidebarOpen && (
-            <div
-              className="fixed inset-0 bg-black bg-opacity-40 z-40 sm:hidden"
-              onClick={toggleSidebar}
-            />
-          )}
-
+        {isSidebarOpen && (
           <div
-            className={`fixed sm:static top-0 left-0 h-screen w-64 bg-gray-100 text-gray-800 flex flex-col shadow-md transform transition-transform z-50
-            ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} sm:translate-x-0`}
-          >
-            {/* Mobile Top Section (Logo + Close Button) */}
-            <div className="sm:hidden flex items-center justify-between p-4 border-b border-gray-300 shadow-3xl">
-              <img src={logo} alt="Logo" className="h-10 w-auto" />
-              <button onClick={toggleSidebar}>
-                <X size={22} />
-              </button>
-            </div>
+            className="fixed inset-0 bg-black bg-opacity-40 z-40 sm:hidden"
+            onClick={toggleSidebar}
+          />
+        )}
 
-            {/* Sidebar Links */}
-            <nav className="flex-1 p-4 mt-2 sm:mt-6">
-              <ul className="space-y-2">
-                {menuItems.map((item, index) => (
-                  <li key={index}>
-                    <Link
-                      to={item.path}
-                      className={`flex items-center gap-3 p-2 rounded-lg transition ${
-                        location.pathname === item.path
-                          ? "bg-gray-300 text-gray-900"
-                          : "text-gray-700 hover:bg-gray-200 hover:text-gray-900"
-                      }`}
-                      onClick={toggleSidebar}
-                    >
-                      {item.icon}
-                      <span>{item.name}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+        {/* Sidebar */}
+        <div
+          className={`fixed sm:static top-0 left-0 h-screen w-64 bg-gray-100 text-gray-800 flex flex-col shadow-md transform transition-transform z-50
+          ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} sm:translate-x-0`}
+        >
+          <div className="sm:hidden flex items-center justify-between p-4 border-b border-gray-300 shadow-3xl">
+            <img src={logo} alt="Logo" className="h-10 w-auto" />
+            <button onClick={toggleSidebar}>
+              <X size={22} />
+            </button>
           </div>
-        </>
 
-        {/* Main Page Content */}
+          <nav className="flex-1 p-4 mt-2 sm:mt-6">
+            <ul className="space-y-2">
+              {menuItems.map((item, index) => (
+                <li key={index}>
+                  <Link
+                    to={item.path}
+                    className={`flex items-center gap-3 p-2 rounded-lg transition ${
+                      location.pathname === item.path
+                        ? "bg-gray-300 text-gray-900"
+                        : "text-gray-700 hover:bg-gray-200 hover:text-gray-900"
+                    }`}
+                    onClick={toggleSidebar}
+                  >
+                    {item.icon}
+                    <span>{item.name}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
+
+        {/* Main content */}
         <div className="flex-1 p-6 overflow-y-auto">{children}</div>
       </div>
     </div>

@@ -1,40 +1,64 @@
-// src/components/StudyProgramForm.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import {
+  useCreateCourseMutation,
+  useUpdateCourseMutation,
+} from "../../features/courses/courseApi";
 
 const StudyProgramForm = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const editProgram = location.state?.program || null;
+
+  const [createCourse, { isLoading: isCreating }] = useCreateCourseMutation();
+  const [updateCourse, { isLoading: isUpdating }] = useUpdateCourseMutation();
+
   const [formData, setFormData] = useState({
-    course: "",
+    name: "",
     university: "",
     department: "",
     country: "",
     city: "",
-    febIntake: "",
-    septIntake: "",
+    intake: "",
     isPrivate: "",
     type: "",
     fee: "",
     timePeriod: "",
     percentageRequirement: "",
     cgpaRequirement: "",
-    marksRequirement: "",
+    languageTest: "",
+    minBands: "",
   });
 
-  // handle input changes
+  useEffect(() => {
+    if (editProgram) {
+      setFormData({ ...editProgram });
+    }
+  }, [editProgram]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // handle form submit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Study Program Data:", formData);
-    alert("Program Registered!");
+    try {
+      if (editProgram) {
+        await updateCourse({ id: editProgram._id, ...formData }).unwrap();
+        alert("Program Updated Successfully!");
+      } else {
+        await createCourse(formData).unwrap();
+        alert("Program Registered Successfully!");
+      }
+      navigate("/course-search");
+    } catch (err) {
+      console.error("Error:", err);
+      alert("Something went wrong!");
+    }
   };
 
-  // common input style
-  const inputClass =
-    "w-full p-2 border-b focus:outline-none focus:ring-0";
+  const inputClass = "w-full p-2 border-b focus:outline-none focus:ring-0";
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -48,7 +72,7 @@ const StudyProgramForm = () => {
         </div>
 
         <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-          Register Study Program
+          {editProgram ? "Edit Study Program" : "Register Study Program"}
         </h2>
 
         {/* Program Info */}
@@ -59,9 +83,9 @@ const StudyProgramForm = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <input
               type="text"
-              name="course"
-              placeholder="Course*"
-              value={formData.course}
+              name="name"
+              placeholder="Program Name*"
+              value={formData.name}
               onChange={handleChange}
               required
               className={inputClass}
@@ -113,33 +137,23 @@ const StudyProgramForm = () => {
           </div>
         </section>
 
-        {/* Intakes */}
+        {/* Intake */}
         <section>
           <h3 className="text-lg font-semibold mb-4 text-blue-600 border-b-2 pb-2">
-            Intakes
+            Intake
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             <select
-              name="febIntake"
-              value={formData.febIntake}
+              name="intake"
+              value={formData.intake}
               onChange={handleChange}
               required
               className={inputClass}
             >
-              <option value="">Feb Intake*</option>
-              <option value="Yes">Yes</option>
-              <option value="No">No</option>
-            </select>
-            <select
-              name="septIntake"
-              value={formData.septIntake}
-              onChange={handleChange}
-              required
-              className={inputClass}
-            >
-              <option value="">September Intake*</option>
-              <option value="Yes">Yes</option>
-              <option value="No">No</option>
+              <option value="">Select Intake*</option>
+              <option value="February">February</option>
+              <option value="September">September</option>
+              <option value="Sep and Feb">Sep and Feb</option>
             </select>
           </div>
         </section>
@@ -223,9 +237,17 @@ const StudyProgramForm = () => {
             />
             <input
               type="text"
-              name="marksRequirement"
-              placeholder="Marks Requirement"
-              value={formData.marksRequirement}
+              name="languageTest"
+              placeholder="Language Test (e.g. IELTS, TOEFL)"
+              value={formData.languageTest}
+              onChange={handleChange}
+              className={inputClass}
+            />
+            <input
+              type="text"
+              name="minBands"
+              placeholder="Minimum Bands / Score"
+              value={formData.minBands}
               onChange={handleChange}
               className={inputClass}
             />
@@ -235,9 +257,14 @@ const StudyProgramForm = () => {
         {/* Submit */}
         <button
           type="submit"
-          className="w-full bg-[#F42222] text-white py-3 rounded-lg font-semibold hover:bg-[#980b0b] transition"
+          disabled={isCreating || isUpdating}
+          className="w-full bg-[#F42222] text-white py-3 rounded-lg font-semibold hover:bg-[#980b0b] transition disabled:opacity-50"
         >
-          Register Program
+          {isCreating || isUpdating
+            ? "Saving..."
+            : editProgram
+            ? "Update Program"
+            : "Register Program"}
         </button>
       </form>
     </div>

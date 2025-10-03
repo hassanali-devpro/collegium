@@ -4,7 +4,6 @@ import QRSection from "../../components/QRSection"
 import AdminMessage from "../../components/AdminMessages";
 
 const Index = () => {
-  // Function to get greeting based on time
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good Morning";
@@ -12,7 +11,6 @@ const Index = () => {
     return "Good Evening";
   };
 
-  // Motivational quotes
 const quotes = [
   "Choose a job you love, and you will never have to work a day in your life.",
   "Your work is going to fill a large part of your life, make it meaningful.",
@@ -37,30 +35,25 @@ const quotes = [
 ];
 
 
-  // Pick a random quote once per login/page load
   const randomQuote = useMemo(() => {
     return quotes[Math.floor(Math.random() * quotes.length)];
   }, []);
 
   return (
     <div className="h-full w-full flex flex-col gap-5">
-      {/* Greeting + Motivation Section */}
       <div className="flex flex-col w-full items-start justify-center text-center my-6">
         <h1 className="text-2xl font-bold">{getGreeting()} 👋</h1>
         <p className="mt-2 text-lg italic text-start text-gray-700 max-w-xl">"{randomQuote}"</p>
       </div>
 
-      {/* Update Section */}
       <div className="flex h-auto w-full items-center justify-center text-xl font-bold">
         <UpdatedSection />
       </div>
 
-      {/* QR Section */}
       <div className="flex w-full px-4">
         <QRSection />
       </div>
 
-      {/* Bottom Section */}
       <div className="flex w-full px-4">
         <AdminMessage />
       </div>

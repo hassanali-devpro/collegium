@@ -1,4 +1,3 @@
-// src/components/StudentSearch.jsx
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -6,7 +5,7 @@ const dummyStudents = [
   {
     studentId: "A0609250417",
     name: "Ali Khan",
-    number: "03001234567", // simplified format
+    number: "03001234567", 
     email: "ali.khan@example.com",
   },
   {
@@ -67,7 +66,6 @@ const StudentSearch = () => {
         </button>
       </div>
 
-      {/* Results */}
       {error && <p className="text-red-600 mb-4">{error}</p>}
 
       {student && (
@@ -94,7 +92,6 @@ const StudentSearch = () => {
             </div>
           </div>
 
-          {/* Visit Profile Link */}
           <div className="mt-6 text-center">
             <Link
               to={`/student/${student.studentId}`}

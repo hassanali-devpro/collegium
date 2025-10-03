@@ -1,4 +1,3 @@
-// src/components/StudentRegistrationForm.jsx
 import React, { useState, useEffect } from "react";
 
 const StudentRegistrationForm = () => {
@@ -23,7 +22,7 @@ const StudentRegistrationForm = () => {
     country2: "",
     joinDate: "",
     documents: {
-      profilePicture: null, // ✅ Profile picture added
+      profilePicture: null, 
       matricCertificate: null,
       matricMarksSheet: null,
       intermediateCertificate: null,
@@ -41,7 +40,7 @@ const StudentRegistrationForm = () => {
 
   const [preview, setPreview] = useState(null);
 
-  // Function to generate Student ID
+
   const generateStudentId = () => {
     const now = new Date();
     const day = String(now.getDate()).padStart(2, "0");
@@ -53,7 +52,7 @@ const StudentRegistrationForm = () => {
     return `A${day}${month}${year}${hours}${minutes}`;
   };
 
-  // Generate ID on first render
+
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
@@ -61,13 +60,13 @@ const StudentRegistrationForm = () => {
     }));
   }, []);
 
-  // handle input changes
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // handle file changes
+
   const handleFileChange = (e) => {
     const { name, files } = e.target;
     const file = files[0];
@@ -77,7 +76,7 @@ const StudentRegistrationForm = () => {
       documents: { ...formData.documents, [name]: file },
     });
 
-    // If it's profile picture, show preview
+
     if (name === "profilePicture" && file) {
       const reader = new FileReader();
       reader.onloadend = () => setPreview(reader.result);
@@ -85,14 +84,14 @@ const StudentRegistrationForm = () => {
     }
   };
 
-  // handle submit
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Student Registration Data:", formData);
+    // console.log("Student Registration Data:", formData);
     alert(`Student Registered Successfully! ID: ${formData.studentId}`);
   };
 
-  // Common input styles
+
   const inputClass = "p-2 border-b w-full focus:outline-none focus:ring-0";
 
   return (

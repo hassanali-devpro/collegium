@@ -1,4 +1,3 @@
-// features/offices/officesSlice.js
 import { createSlice } from "@reduxjs/toolkit";
 
 const officesSlice = createSlice({

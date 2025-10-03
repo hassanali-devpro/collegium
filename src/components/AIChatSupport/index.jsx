@@ -1,4 +1,3 @@
-// src/components/ChatWidget.jsx
 import React, { useState } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,14 +9,12 @@ export default function ChatWidget() {
   ]);
   const [input, setInput] = useState("");
 
-  // Handle sending message
   const handleSend = () => {
     if (!input.trim()) return;
 
     const userMessage = { role: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
 
-    // Simulated AI response (replace with API later)
     setTimeout(() => {
       const aiMessage = {
         role: "assistant",
@@ -31,7 +28,6 @@ export default function ChatWidget() {
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-center">
-      {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -87,7 +83,6 @@ export default function ChatWidget() {
         )}
       </AnimatePresence>
 
-{/* Floating Chat Button */}
 {!isOpen && (
   <motion.div
     key="chat-button"

@@ -21,9 +21,10 @@ export default function LoginPage() {
 
   const onSubmit = async (data) => {
     try {
-      const result = await login(data).unwrap();// API call using authApi
+      const result = await login(data).unwrap();// API call
       // console.log(" Full API result:", result);
       dispatch(setCredentials(result.data));
+      // console.log(" Role:", result.data.user.role)
       // console.log(" Dispatched credentials:", result.data);
       navigate("/dashboard");
     } catch (err) {
