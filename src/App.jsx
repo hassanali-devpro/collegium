@@ -23,6 +23,7 @@ function App() {
       <Router>
         <Routes>
           {/* Public routes */}
+          <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/add-course" element={<AddCouse />} />
           <Route path="/add-student" element={<AddStudent />} />
