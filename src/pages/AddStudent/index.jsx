@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useAddStudentMutation } from "../../features/students/studentApi";
 
 const StudentRegistrationForm = () => {
   const [formData, setFormData] = useState({
@@ -20,27 +22,12 @@ const StudentRegistrationForm = () => {
     apostilleAttestation: "",
     country1: "",
     country2: "",
-    joinDate: "",
-    documents: {
-      profilePicture: null, 
-      matricCertificate: null,
-      matricMarksSheet: null,
-      intermediateCertificate: null,
-      intermediateMarkSheet: null,
-      degree: null,
-      transcript: null,
-      languageCertificate: null,
-      passport: null,
-      experienceLetter: null,
-      birthCertificate: null,
-      familyRegistration: null,
-      otherDocs: null,
-    },
   });
 
-  const [preview, setPreview] = useState(null);
+  const { user } = useSelector((state) => state.auth);
+  const [addStudent, { isLoading }] = useAddStudentMutation();
 
-
+  // ✅ Generate a unique student ID
   const generateStudentId = () => {
     const now = new Date();
     const day = String(now.getDate()).padStart(2, "0");
@@ -48,10 +35,8 @@ const StudentRegistrationForm = () => {
     const year = String(now.getFullYear()).slice(-2);
     const hours = String(now.getHours()).padStart(2, "0");
     const minutes = String(now.getMinutes()).padStart(2, "0");
-
     return `A${day}${month}${year}${hours}${minutes}`;
   };
-
 
   useEffect(() => {
     setFormData((prev) => ({
@@ -60,37 +45,84 @@ const StudentRegistrationForm = () => {
     }));
   }, []);
 
-
+  // ✅ Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+  // ✅ Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const handleFileChange = (e) => {
-    const { name, files } = e.target;
-    const file = files[0];
+    if (!user?.officeId || !user?._id) {
+      alert("Missing office or user information!");
+      return;
+    }
 
-    setFormData({
-      ...formData,
-      documents: { ...formData.documents, [name]: file },
-    });
+    const payload = {
+      studentCode: formData.studentId,
+      name: formData.name,
+      email: formData.email,
+      phone: formData.number,
+      officeId: user.officeId,
+      agentId: user._id,
+      qualification: formData.lastQualification,
+      score: parseFloat(formData.lastQualificationScore) || 0,
+      percentage: parseFloat(formData.scorePercentage) || 0,
+      lastInstitute: formData.lastInstitute,
+      experience: formData.workExperience
+        ? `${formData.workExperience} years`
+        : "N/A",
+      test: formData.languageTest,
+      testScore: parseFloat(formData.languageTestScore) || 0,
+      boardAttestation: formData.boardAttestation || "No",
+      ibccAttestation: formData.ibccAttestation || "No",
+      hecAttestation: formData.hecAttestation || "No",
+      mofaAttestation: formData.mofaAttestation || "No",
+      apostilleAttestation: formData.apostilleAttestation || "No",
+      country1: formData.country1,
+      country2: formData.country2,
+    };
 
+    try {
+      await addStudent(payload).unwrap();
+      alert(`✅ Student Registered Successfully! ID: ${formData.studentId}`);
 
-    if (name === "profilePicture" && file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setPreview(reader.result);
-      reader.readAsDataURL(file);
+      // Reset form
+      setFormData({
+        studentId: generateStudentId(),
+        name: "",
+        number: "",
+        email: "",
+        lastQualification: "",
+        lastQualificationScore: "",
+        scorePercentage: "",
+        lastInstitute: "",
+        workExperience: "",
+        languageTest: "",
+        languageTestScore: "",
+        boardAttestation: "",
+        ibccAttestation: "",
+        hecAttestation: "",
+        mofaAttestation: "",
+        apostilleAttestation: "",
+        country1: "",
+        country2: "",
+      });
+    } catch (err) {
+      console.error("❌ Error registering student:", err);
+
+      // ✅ Show backend error message if available
+      const errorMessage =
+        err?.data?.message ||
+        err?.data?.error ||
+        err?.error ||
+        "Failed to register student. Please try again.";
+
+      alert(`❌ ${errorMessage}`);
     }
   };
-
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // console.log("Student Registration Data:", formData);
-    alert(`Student Registered Successfully! ID: ${formData.studentId}`);
-  };
-
 
   const inputClass = "p-2 border-b w-full focus:outline-none focus:ring-0";
 
@@ -103,33 +135,6 @@ const StudentRegistrationForm = () => {
         <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
           Student Registration Form
         </h2>
-
-        {/* Profile Picture */}
-        <div className="flex flex-col items-center mb-6">
-          <div className="w-32 h-32 rounded-full border-4 border-blue-500 overflow-hidden shadow-md">
-            {preview ? (
-              <img
-                src={preview}
-                alt="Profile Preview"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400">
-                No Image
-              </div>
-            )}
-          </div>
-          <label className="mt-4 cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700">
-            Upload Profile Picture
-            <input
-              type="file"
-              name="profilePicture"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-          </label>
-        </div>
 
         {/* Student ID */}
         <div className="mb-6">
@@ -258,7 +263,7 @@ const StudentRegistrationForm = () => {
               <option value="">Select Language Test</option>
               <option value="IELTS">IELTS</option>
               <option value="PTE">PTE</option>
-              <option value="TOFEL">TOFEL</option>
+              <option value="TOEFL">TOEFL</option>
               <option value="Other">Other</option>
             </select>
             <input
@@ -322,46 +327,16 @@ const StudentRegistrationForm = () => {
               onChange={handleChange}
               className={inputClass}
             />
-            <input
-              type="date"
-              name="joinDate"
-              value={formData.joinDate}
-              onChange={handleChange}
-              className={inputClass}
-            />
-          </div>
-        </section>
-
-        {/* Documents Upload */}
-        <section>
-          <h3 className="text-lg font-semibold mb-4 text-blue-600 border-b-2 pb-2">
-            Upload Documents
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {Object.keys(formData.documents)
-              .filter((docKey) => docKey !== "profilePicture") // skip profile picture here
-              .map((docKey) => (
-                <div key={docKey}>
-                  <label className="block text-blue-600 font-medium mb-1">
-                    {docKey.replace(/([A-Z])/g, " $1")}
-                  </label>
-                  <input
-                    type="file"
-                    name={docKey}
-                    onChange={handleFileChange}
-                    className={inputClass}
-                  />
-                </div>
-              ))}
           </div>
         </section>
 
         {/* Submit */}
         <button
           type="submit"
+          disabled={isLoading}
           className="w-full bg-[#F42222] text-white py-3 rounded-lg font-semibold hover:bg-[#980b0b] transition"
         >
-          Register Student
+          {isLoading ? "Registering..." : "Register Student"}
         </button>
       </form>
     </div>

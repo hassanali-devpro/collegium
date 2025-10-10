@@ -1,0 +1,20 @@
+Use student code or phone number instead of ID 
+
+(03350183868 and +923350183868) Use this format in validation everywhere
+
+send agent name in get student API
+
+Add Option to update agent in Update student API.(only for student admin)
+
+Create an API for List of all student an agent
+
+Allow Add comment for each student option for Update Student option API
+
+Use same api for password update
+
+Hide a super admin access
+
+give an option for download the JSON file for course (local backup to use that database again)
+
+
+

@@ -25,9 +25,7 @@ export default function Offices() {
       createdAt: o.createdAt,
     })) || [];
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleAdd = async () => {
     if (!form.name || !form.address || !form.location) return;
@@ -80,15 +78,15 @@ export default function Offices() {
   if (isLoading) return <p>Loading offices...</p>;
   if (error)
     return (
-      <p className="text-red-500">
+      <p className="text-gray-700">
         {error.data?.message || "Error loading offices"}
       </p>
     );
 
   return (
     <div className="min-h-full flex items-start justify-center">
-      <div className="bg-white shadow-2xl rounded-2xl p-6 w-full">
-        <h1 className="text-2xl font-bold mb-6 text-center">
+      <div className="bg-white shadow-md rounded-2xl p-6 w-full max-w-5xl">
+        <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">
           Office Management
         </h1>
 
@@ -99,7 +97,7 @@ export default function Offices() {
               setForm({ id: null, name: "", address: "", location: "" });
               setIsModalOpen(true);
             }}
-            className="bg-[#F42222] text-white px-4 py-2 rounded-lg hover:bg-red-600"
+            className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
           >
             + Add Office
           </button>
@@ -111,10 +109,10 @@ export default function Offices() {
             return (
               <li
                 key={office.id}
-                className="flex justify-between items-center bg-gray-50 p-3 rounded-lg shadow-sm"
+                className="flex justify-between items-center bg-gray-100 p-3 rounded-lg shadow-sm"
               >
                 <div>
-                  <p className="font-semibold">{office.name}</p>
+                  <p className="font-semibold text-gray-800">{office.name}</p>
                   <p className="text-sm text-gray-600">{office.address}</p>
                   <p className="text-xs text-gray-500">Created: {date}</p>
                 </div>
@@ -124,7 +122,7 @@ export default function Offices() {
                       href={office.location.startsWith("http") ? office.location : `https://${office.location}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600"
+                      className="bg-gray-200 text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-300 transition"
                     >
                       View Location
                     </a>
@@ -132,13 +130,13 @@ export default function Offices() {
 
                   <button
                     onClick={() => handleEdit(office)}
-                    className="bg-yellow-400 text-white px-3 py-1 rounded-lg hover:bg-yellow-500"
+                    className="bg-gray-200 text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-300 transition"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(office.id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600"
+                    className=" px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
                   >
                     Delete
                   </button>
@@ -150,9 +148,9 @@ export default function Offices() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-lg w-full max-w-md mx-5 p-6 relative">
-            <h2 className="text-xl font-bold mb-4 text-center">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-lg w-full max-w-md mx-5 p-6">
+            <h2 className="text-xl font-bold mb-4 text-center text-gray-800">
               {isEditing ? "Edit Office" : "Add Office"}
             </h2>
 
@@ -162,7 +160,7 @@ export default function Offices() {
               placeholder="Office Name"
               value={form.name}
               onChange={handleChange}
-              className="border rounded-lg px-3 py-2 w-full mb-3"
+              className="border border-gray-300 rounded-lg px-3 py-2 w-full mb-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400"
             />
 
             <input
@@ -171,7 +169,7 @@ export default function Offices() {
               placeholder="Office Address"
               value={form.address}
               onChange={handleChange}
-              className="border rounded-lg px-3 py-2 w-full mb-3"
+              className="border border-gray-300 rounded-lg px-3 py-2 w-full mb-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400"
             />
 
             <input
@@ -180,13 +178,13 @@ export default function Offices() {
               placeholder="Google Maps Link"
               value={form.location}
               onChange={handleChange}
-              className="border rounded-lg px-3 py-2 w-full mb-4"
+              className="border border-gray-300 rounded-lg px-3 py-2 w-full mb-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400"
             />
 
             <div className="flex justify-end gap-2">
               <button
                 onClick={resetForm}
-                className="bg-gray-300 text-black px-4 py-2 rounded-lg hover:bg-gray-400"
+                className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
               >
                 Cancel
               </button>
@@ -194,14 +192,14 @@ export default function Offices() {
               {isEditing ? (
                 <button
                   onClick={handleUpdate}
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                  className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition"
                 >
                   Update
                 </button>
               ) : (
                 <button
                   onClick={handleAdd}
-                  className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+                  className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition"
                 >
                   Add
                 </button>
@@ -213,3 +211,4 @@ export default function Offices() {
     </div>
   );
 }
+  

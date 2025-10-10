@@ -5,6 +5,8 @@ import { officesApi } from "../features/offices/officeApi";
 import { agentsApi } from "../features/agents/agentApi"; 
 import { courseApi } from "../features/courses/courseApi";
 import { updateApi } from "../features/updates/updateApi";
+import { studentApi } from "../features/students/studentApi";
+import { docApi } from "../features/documents/docApi";
 
 export const store = configureStore({
   reducer: {
@@ -13,6 +15,8 @@ export const store = configureStore({
     [agentsApi.reducerPath]: agentsApi.reducer,
     [courseApi.reducerPath]: courseApi.reducer,
     [updateApi.reducerPath]: updateApi.reducer,
+    [studentApi.reducerPath]: studentApi.reducer,
+    [docApi.reducerPath]: docApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -21,5 +25,7 @@ export const store = configureStore({
       agentsApi.middleware,
       courseApi.middleware,
       updateApi.middleware,
+      studentApi.middleware,
+      docApi.middleware,
     ),
 });

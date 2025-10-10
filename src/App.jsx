@@ -1,87 +1,57 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useSelector } from "react-redux";
 import Layout from "./components/Layout";
-import AIChatSupport from "./components/AIChatSupport";
+import ProtectedRoute from "./components/ProtectedRoute";
+
 import Login from "./pages/login";
 import Dashboard from "./pages/dashboard";
 import ApplicationTracking from "./pages/ApplicationTracking";
 import StudentSearch from "./pages/StudentSearch";
-import AddCouse from "./pages/AddCourse";
+import AddCourse from "./pages/AddCourse";
 import AddStudent from "./pages/AddStudent";
+import UpdateStudent from "./pages/UpdateStudent";
 import CourseSearch from "./pages/CourseSearch";
 import Offices from "./pages/Offices";
 import Agents from "./pages/Agents";
-import ProtectedRoute from "./components/ProtectedRoute"; 
+import Doc from "./pages/Doc";
+import AIChatSupport from "./components/AIChatSupport";
 
 function App() {
   const userRole = "admin";
 
-  return (
-    <>
-      <AIChatSupport />
-      <Router>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Login />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/add-course" element={<AddCouse />} />
-          <Route path="/add-student" element={<AddStudent />} />
+  const protectedRoutes = [
+    { path: "/dashboard", element: <Dashboard /> },
+    { path: "/student-search", element: <StudentSearch /> },
+    { path: "/application-tracking", element: <ApplicationTracking /> },
+    { path: "/course-search", element: <CourseSearch /> },
+    { path: "/offices", element: <Offices /> },
+    { path: "/manage-users", element: <Agents /> },
+  ];
 
-          {/* Protected routes */}
+  return (
+    <Router>
+      {/* <AIChatSupport /> */}
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/add-course" element={<AddCourse />} />
+        <Route path="/add-student" element={<AddStudent />} />
+        <Route path="/student/:id?" element={<UpdateStudent />} />
+        <Route path="/student-documents" element={<Doc />} />
+
+        {protectedRoutes.map(({ path, element }) => (
           <Route
-            path="/dashboard"
+            key={path}
+            path={path}
             element={
               <ProtectedRoute>
-                <Layout role={userRole}>
-                  <Dashboard />
-                </Layout>
+                <Layout role={userRole}>{element}</Layout>
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/application-tracking"
-            element={
-              <ProtectedRoute>
-                <Layout role={userRole}>
-                  <ApplicationTracking />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/course-search"
-            element={
-              <ProtectedRoute>
-                <Layout role={userRole}>
-                  <CourseSearch />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/offices"
-            element={
-              <ProtectedRoute>
-                <Layout role={userRole}>
-                  <Offices />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/manage-users"
-            element={
-              <ProtectedRoute>
-                <Layout role={userRole}>
-                  <Agents />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </Router>
-    </>
+        ))}
+      </Routes>
+    </Router>
   );
 }
 

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../../features/auth/authSlice"; 
+import { logout } from "../../features/auth/authSlice";
 import {
   Home,
   Search,
@@ -20,6 +20,7 @@ export default function Layout({ children }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
+  // console.log(user)
 
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
 
@@ -75,14 +76,20 @@ export default function Layout({ children }) {
             <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
 
-          {/* User Initial Circle */}
-          <div className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-200 border border-gray-300 text-gray-700 font-semibold">
-            {userInitial}
+          {/* User name and Initial Circle */}
+          <div className="flex items-center gap-2">
+            <div className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-200 border border-gray-300 text-gray-700 font-semibold">
+              {userInitial}
+            </div>
+            <span className="hidden sm:block font-medium text-gray-700">
+              {user?.name || "User"}
+            </span>
           </div>
+
 
           {/* Logout button */}
           <button
-            className="px-3 py-2 rounded-md bg-red-500 text-white hover:bg-red-600 transition"
+            className="px-2 py-1 rounded-md text-md bg-[#F42222] text-white hover:bg-red-600 transition"
             onClick={handleLogout}
           >
             Logout
@@ -117,11 +124,10 @@ export default function Layout({ children }) {
                 <li key={index}>
                   <Link
                     to={item.path}
-                    className={`flex items-center gap-3 p-2 rounded-lg transition ${
-                      location.pathname === item.path
+                    className={`flex items-center gap-3 p-2 rounded-lg transition ${location.pathname === item.path
                         ? "bg-gray-300 text-gray-900"
                         : "text-gray-700 hover:bg-gray-200 hover:text-gray-900"
-                    }`}
+                      }`}
                     onClick={toggleSidebar}
                   >
                     {item.icon}

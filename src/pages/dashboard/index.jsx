@@ -42,7 +42,7 @@ const quotes = [
   return (
     <div className="h-full w-full flex flex-col gap-5">
       <div className="flex flex-col w-full items-start justify-center text-center my-6">
-        <h1 className="text-2xl font-bold">{getGreeting()} 👋</h1>
+        <h1 className="text-2xl font-bold">{getGreeting()} </h1>
         <p className="mt-2 text-lg italic text-start text-gray-700 max-w-xl">"{randomQuote}"</p>
       </div>
 

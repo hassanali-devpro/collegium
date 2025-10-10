@@ -40,24 +40,25 @@ const ProgramCard = () => {
 
   return (
     <div className="space-y-6">
-      {/* 🔎 Search Form */}
-      <div className="p-4 bg-gray-100 rounded-lg flex flex-wrap gap-4 items-center">
+      <div className="p-4 shadow-lg rounded-lg flex flex-col md:flex-row flex-wrap gap-4 items-center justify-start">
         <input
           type="text"
           placeholder="Search by name..."
-          className="border p-2 rounded w-1/3"
+          className="border border-gray-300 p-2 rounded-lg w-full md:flex-1 focus:outline-none focus:ring-2 focus:ring-gray-400"
           value={filters.search}
           onChange={(e) => setFilters({ ...filters, search: e.target.value })}
         />
+
         <input
           type="text"
           placeholder="Country"
-          className="border p-2 rounded w-1/4"
+          className="border border-gray-300 p-2 rounded-lg w-full md:w-1/4 focus:outline-none focus:ring-2 focus:ring-gray-400"
           value={filters.country}
           onChange={(e) => setFilters({ ...filters, country: e.target.value })}
         />
+
         <select
-          className="border p-2 rounded w-1/4"
+          className="border border-gray-300 p-2 rounded-lg w-full md:w-1/4 focus:outline-none focus:ring-2 focus:ring-gray-400"
           value={filters.type}
           onChange={(e) => setFilters({ ...filters, type: e.target.value })}
         >
@@ -68,7 +69,7 @@ const ProgramCard = () => {
         </select>
       </div>
 
-      {/* 🔄 Results */}
+
       {isLoading && <p>Loading...</p>}
       {error && <p className="text-red-500">Failed to load courses</p>}
 
@@ -98,7 +99,7 @@ const ProgramCard = () => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleEdit(program)}
-                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                    className="px-3 py-1 text-sm bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
                   >
                     Edit
                   </button>
@@ -112,7 +113,6 @@ const ProgramCard = () => {
               )}
             </div>
 
-            {/* Program Details */}
             <div className="grid grid-cols-2 gap-4 text-sm text-gray-800">
               {program.department && (
                 <div>

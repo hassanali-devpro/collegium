@@ -1,4 +1,3 @@
-// src/pages/ApplicationTracking.jsx
 import React, { useState } from "react";
 import { Check } from "lucide-react";
 
@@ -90,111 +89,118 @@ const ApplicationTracking = () => {
   };
 
   return (
-    <div className="p-6 w-full max-w-3xl mx-auto">
-      <div className="flex gap-2 mb-6">
-        <input
-          type="text"
-          placeholder="Enter Student ID..."
-          value={searchId}
-          onChange={(e) => setSearchId(e.target.value)}
-          className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          onClick={handleSearch}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
-        >
-          Search
-        </button>
-      </div>
+    <section className="min-h-screen bg-white flex flex-col items-center py-10 px-4">
+      <div className="w-full max-w-3xl shadow-md hover:shadow-lg transition-all duration-300 rounded-2xl p-8 border border-gray-100 bg-white">
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8 text-center">
+          Application Tracking
+        </h2>
 
-      {searchedApp ? (
-        <div className="bg-white shadow-lg rounded-2xl p-6 border border-gray-200">
-          <div className="mb-6">
-            <h2 className="text-lg font-bold text-gray-800">
-              {searchedApp.studentName} ({searchedApp.studentId})
-            </h2>
-            <p className="text-gray-700 text-sm">
-              <span className="font-semibold">University:</span>{" "}
-              {searchedApp.university}
-            </p>
-            <p className="text-gray-700 text-sm">
-              <span className="font-semibold">Program:</span>{" "}
-              {searchedApp.program}
-            </p>
-          </div>
-
-          <div className="relative border-l-2 border-gray-300 pl-6 space-y-8">
-            {searchedApp.stages.map((stage, stageIndex) => (
-              <div key={stageIndex} className="relative">
-                <span
-                  className={`absolute -left-[22px] flex items-center justify-center w-8 h-8 rounded-full border-2 ${
-                    stage.passed
-                      ? "bg-green-600 border-green-600 text-white"
-                      : "border-gray-400 text-gray-600 bg-white"
-                  }`}
-                >
-                  {stage.passed ? <Check size={16} /> : stageIndex + 1}
-                </span>
-
-                <div className="bg-gray-50 p-4 rounded-xl shadow-sm">
-                  <h3 className="font-semibold text-gray-800">
-                    {stage.title}
-                  </h3>
-
-                  <div className="mt-2 space-y-1">
-                    {stage.comments.map((c, i) => (
-                      <p
-                        key={i}
-                        className="text-xs text-gray-600 border-b border-gray-200 pb-1"
-                      >
-                        {c}
-                      </p>
-                    ))}
-                  </div>
-
-                  <div className="flex mt-2">
-                    <input
-                      type="text"
-                      placeholder="Add comment..."
-                      className="flex-1 border border-gray-300 rounded-l-md px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          handleAddComment(stageIndex, e.target.value);
-                          e.target.value = "";
-                        }
-                      }}
-                    />
-                    <button
-                      onClick={(e) => {
-                        const input = e.target.previousSibling;
-                        handleAddComment(stageIndex, input.value);
-                        input.value = "";
-                      }}
-                      className="bg-blue-600 text-white px-3 rounded-r-md text-sm"
-                    >
-                      Add
-                    </button>
-                  </div>
-
-                  {!stage.passed && (
-                    <button
-                      onClick={() => handlePassStage(stageIndex)}
-                      className="mt-3 text-xs bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700"
-                    >
-                      Pass Stage
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* 🔍 Search Section */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-8">
+          <input
+            type="text"
+            placeholder="Enter Student ID..."
+            value={searchId}
+            onChange={(e) => setSearchId(e.target.value)}
+            className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <button
+            onClick={handleSearch}
+            className="px-6 py-3 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-800 font-medium transition"
+          >
+            Search
+          </button>
         </div>
-      ) : (
-        <p className="text-gray-500 text-center mt-10">
-          Enter a Student ID and click search.
-        </p>
-      )}
-    </div>
+
+        {/* 🧾 Search Result */}
+        {searchedApp ? (
+          <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-6 transition-all duration-300 hover:shadow-md">
+            <div className="mb-6 text-center">
+              <h3 className="text-lg font-bold text-gray-800">
+                {searchedApp.studentName} ({searchedApp.studentId})
+              </h3>
+              <p className="text-gray-700 text-sm">
+                <span className="font-semibold">University:</span> {searchedApp.university}
+              </p>
+              <p className="text-gray-700 text-sm">
+                <span className="font-semibold">Program:</span> {searchedApp.program}
+              </p>
+            </div>
+
+            <div className="relative border-l-2 border-gray-300 pl-6 space-y-8">
+              {searchedApp.stages.map((stage, stageIndex) => (
+                <div key={stageIndex} className="relative">
+                  <span
+                    className={`absolute -left-[22px] flex items-center justify-center w-8 h-8 rounded-full border-2 ${
+                      stage.passed
+                        ? "bg-green-600 border-green-600 text-white"
+                        : "border-gray-400 text-gray-600 bg-white"
+                    }`}
+                  >
+                    {stage.passed ? <Check size={16} /> : stageIndex + 1}
+                  </span>
+
+                  <div className="bg-gray-50 p-4 rounded-xl shadow-sm">
+                    <h3 className="font-semibold text-gray-800">{stage.title}</h3>
+
+                    {/* Comments */}
+                    <div className="mt-2 space-y-1">
+                      {stage.comments.map((c, i) => (
+                        <p
+                          key={i}
+                          className="text-xs text-gray-600 border-b border-gray-200 pb-1"
+                        >
+                          {c}
+                        </p>
+                      ))}
+                    </div>
+
+                    {/* Comment Input */}
+                    <div className="flex mt-3">
+                      <input
+                        type="text"
+                        placeholder="Add comment..."
+                        className="flex-1 border border-gray-300 rounded-l-md px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleAddComment(stageIndex, e.target.value);
+                            e.target.value = "";
+                          }
+                        }}
+                      />
+                      <button
+                        onClick={(e) => {
+                          const input = e.target.previousSibling;
+                          handleAddComment(stageIndex, input.value);
+                          input.value = "";
+                        }}
+                        className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 rounded-r-md text-sm font-medium transition"
+                      >
+                        Add
+                      </button>
+                    </div>
+
+                    {/* Pass Stage Button */}
+                    {!stage.passed && (
+                      <button
+                        onClick={() => handlePassStage(stageIndex)}
+                        className="mt-3 text-xs bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-800 px-3 py-1 font-medium transition"
+                      >
+                        Pass Stage
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <p className="text-gray-500 text-center mt-10">
+            {/* Enter a Student ID above to view application progress. */}
+          </p>
+        )}
+      </div>
+    </section>
   );
 };
 

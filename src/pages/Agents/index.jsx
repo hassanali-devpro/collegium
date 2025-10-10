@@ -12,12 +12,7 @@ import { useGetOfficesQuery } from "../../features/offices/officeApi";
 const AgentsPage = () => {
   const [page, setPage] = useState(1);
   const { data, error, isLoading } = useGetAgentsQuery({ page, limit: 10 });
-
-  const {
-    data: officesData,
-    error: officesError,
-    isLoading: officesLoading,
-  } = useGetOfficesQuery({ page: 1, limit: 10 });
+  const { data: officesData } = useGetOfficesQuery({ page: 1, limit: 10 });
 
   const [createAgent] = useCreateAgentMutation();
   const [updateAgent] = useUpdateAgentMutation();
@@ -37,11 +32,11 @@ const AgentsPage = () => {
     officeId: "",
   });
 
-  if (isLoading) return <p className="p-4">Loading agents...</p>;
-  if (error) return <p className="p-4 text-red-500">Failed to load agents.</p>;
-
   const agents = data?.data || [];
   const offices = officesData?.data || [];
+
+  if (isLoading) return <p className="p-4">Loading agents...</p>;
+  if (error) return <p className="p-4 text-red-500">Failed to load agents.</p>;
 
   const openCreateModal = () => {
     setEditingAgent(null);
@@ -105,7 +100,6 @@ const AgentsPage = () => {
       }
       setIsModalOpen(false);
     } catch (err) {
-      console.error("Error saving agent:", err);
       if (err?.data?.errors?.length > 0) {
         setFormError(err.data.errors[0].msg);
       } else if (err?.data?.message) {
@@ -116,88 +110,107 @@ const AgentsPage = () => {
     }
   };
 
+  const getRoleColor = (role) => {
+    switch (role) {
+      case "SuperAdmin":
+        return "bg-purple-100 text-purple-700";
+      case "Admin":
+        return "bg-blue-100 text-blue-700";
+      default:
+        return "bg-green-100 text-green-700";
+    }
+  };
+
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="p-4 md:p-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
         <h1 className="text-2xl font-bold">Agents</h1>
         <button
           onClick={openCreateModal}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
         >
           + Create User
         </button>
       </div>
 
-
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow">
+      {/* Responsive Table */}
+      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow">
+        <table className="min-w-full text-sm text-left">
           <thead className="bg-gray-100 text-gray-700">
             <tr>
-              <th className="px-4 py-2 border-b text-left">Name</th>
-              <th className="px-4 py-2 border-b text-left">Email</th>
-              <th className="px-4 py-2 border-b text-left">Phone</th>
-              <th className="px-4 py-2 border-b text-left">Role</th>
-              <th className="px-4 py-2 border-b text-left">Status</th>
-              <th className="px-4 py-2 border-b text-left">Last Login</th>
-              <th className="px-4 py-2 border-b text-center">Actions</th>
+              <th className="px-4 py-2">Name</th>
+              <th className="px-4 py-2">Email</th>
+              <th className="px-4 py-2">Phone</th>
+              <th className="px-4 py-2">Role</th>
+              <th className="px-4 py-2">Status</th>
+              <th className="px-4 py-2">Last Login</th>
+              <th className="px-4 py-2 text-center">Actions</th>
             </tr>
           </thead>
+
           <tbody>
             {agents.map((agent) => (
-              <tr key={agent._id} className="hover:bg-gray-50">
-                <td className="px-4 py-2 border-b">{agent.name}</td>
-                <td className="px-4 py-2 border-b">{agent.email}</td>
-                <td className="px-4 py-2 border-b">{agent.phone}</td>
-                <td className="px-4 py-2 border-b">
-                  <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-700">
+              <tr key={agent._id} className="border-t hover:bg-gray-50">
+                <td className="px-4 py-2">{agent.name}</td>
+                <td className="px-4 py-2">{agent.email}</td>
+                <td className="px-4 py-2">{agent.phone}</td>
+                <td className="px-4 py-2">
+                  <span
+                    className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(
+                      agent.role
+                    )}`}
+                  >
                     {agent.role}
                   </span>
                 </td>
-                <td className="px-4 py-2 border-b">
+
+                <td className="px-4 py-2">
                   <button
                     onClick={() => handleToggleStatus(agent)}
-                    className={`px-2 py-1 text-xs font-semibold rounded-full ${agent.isActive
+                    className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                      agent.isActive
                         ? "bg-green-100 text-green-700 hover:bg-green-200"
                         : "bg-red-100 text-red-700 hover:bg-red-200"
-                      }`}
+                    }`}
                   >
                     {agent.isActive ? "Active" : "Inactive"}
                   </button>
                 </td>
-                <td className="px-4 py-2 border-b">
+
+                <td className="px-4 py-2">
                   {agent.lastLogin
                     ? new Date(agent.lastLogin).toLocaleString()
                     : "Never"}
                 </td>
-                <td className="px-4 py-2 border-b text-center space-x-2">
-                  <button
-                    onClick={() => openEditModal(agent)}
-                    className="my-1 px-3 py-1 text-sm bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(agent._id)}
-                    className="my-1 px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
-                  >
-                    Delete
-                  </button>
 
-
-                  <div className="flex items-center justify-center mt-2">
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={agent.isActive}
-                        onChange={() => handleToggleStatus(agent)}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-500 peer-focus:ring-2 peer-focus:ring-green-300 transition-all"></div>
-                      <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full peer-checked:translate-x-5 transform transition-all"></div>
-                    </label>
+                <td className="px-4 py-2 text-center">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <button
+                      onClick={() => openEditModal(agent)}
+                      className="px-4 py-1 w-20 text-sm bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(agent._id)}
+                      className="px-4 py-1 w-20 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700"
+                    >
+                      Delete
+                    </button>
+                    <div className="flex items-center justify-center mt-2">
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={agent.isActive}
+                          onChange={() => handleToggleStatus(agent)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-green-300 transition-all"></div>
+                        <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full peer-checked:translate-x-5 transform transition-all"></div>
+                      </label>
+                    </div>
                   </div>
                 </td>
-
               </tr>
             ))}
           </tbody>
@@ -206,23 +219,21 @@ const AgentsPage = () => {
 
       {/* Pagination */}
       {data?.pagination?.totalPages > 1 && (
-        <div className="flex items-center justify-between mt-6">
+        <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-3">
           <button
             onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
             disabled={page === 1}
-            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300"
           >
             Previous
           </button>
-
-          <span>
+          <span className="text-sm">
             Page {page} of {data?.pagination?.totalPages}
           </span>
-
           <button
             onClick={() => setPage((prev) => prev + 1)}
             disabled={page === data?.pagination?.totalPages}
-            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300"
           >
             Next
           </button>
@@ -231,7 +242,7 @@ const AgentsPage = () => {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50 p-4">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
             <h2 className="text-xl font-semibold mb-4">
               {editingAgent ? "Edit User" : "Create User"}
@@ -294,8 +305,6 @@ const AgentsPage = () => {
                   setFormData({ ...formData, phone: e.target.value })
                 }
               />
-
-              {/* Office Select */}
               <select
                 className="w-full border p-2 rounded"
                 value={formData.officeId}
@@ -322,7 +331,7 @@ const AgentsPage = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700"
                 >
                   {editingAgent ? "Update" : "Create"}
                 </button>
