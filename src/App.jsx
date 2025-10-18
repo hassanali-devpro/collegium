@@ -15,6 +15,9 @@ import Offices from "./pages/Offices";
 import Agents from "./pages/Agents";
 import Doc from "./pages/Doc";
 import AIChatSupport from "./components/AIChatSupport";
+import Application from "./pages/Application";
+import Resource from "./pages/Resources"
+import AgentStudents from "./pages/AgentStudents";
 
 function App() {
   const userRole = "admin";
@@ -26,11 +29,13 @@ function App() {
     { path: "/course-search", element: <CourseSearch /> },
     { path: "/offices", element: <Offices /> },
     { path: "/manage-users", element: <Agents /> },
+    { path:"/agent-students", element: <AgentStudents />},
+    {path:"/application", element:<Application />},
   ];
 
   return (
     <Router>
-      {/* <AIChatSupport /> */}
+      <AIChatSupport />
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
@@ -38,6 +43,7 @@ function App() {
         <Route path="/add-student" element={<AddStudent />} />
         <Route path="/student/:id?" element={<UpdateStudent />} />
         <Route path="/student-documents" element={<Doc />} />
+        <Route path="/learning-resource" element={<Resource />} />
 
         {protectedRoutes.map(({ path, element }) => (
           <Route

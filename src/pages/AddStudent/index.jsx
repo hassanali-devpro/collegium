@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useAddStudentMutation } from "../../features/students/studentApi";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 
 const StudentRegistrationForm = () => {
   const [formData, setFormData] = useState({
     studentId: "",
     name: "",
-    number: "",
+    phoneNumber: "",
+    countryCode: "+92",
     email: "",
     lastQualification: "",
     lastQualificationScore: "",
@@ -27,7 +31,10 @@ const StudentRegistrationForm = () => {
   const { user } = useSelector((state) => state.auth);
   const [addStudent, { isLoading }] = useAddStudentMutation();
 
-  // ✅ Generate a unique student ID
+  const navigate = useNavigate();
+
+
+  // ✅ Generate unique student ID
   const generateStudentId = () => {
     const now = new Date();
     const day = String(now.getDate()).padStart(2, "0");
@@ -45,13 +52,11 @@ const StudentRegistrationForm = () => {
     }));
   }, []);
 
-  // ✅ Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // ✅ Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -64,7 +69,8 @@ const StudentRegistrationForm = () => {
       studentCode: formData.studentId,
       name: formData.name,
       email: formData.email,
-      phone: formData.number,
+      countryCode: `+${formData.countryCode}`, // react-phone-input gives code without "+"
+      phoneNumber: formData.phoneNumber,
       officeId: user.officeId,
       agentId: user._id,
       qualification: formData.lastQualification,
@@ -88,12 +94,13 @@ const StudentRegistrationForm = () => {
     try {
       await addStudent(payload).unwrap();
       alert(`✅ Student Registered Successfully! ID: ${formData.studentId}`);
+      navigate("/dashboard");
 
-      // Reset form
       setFormData({
         studentId: generateStudentId(),
         name: "",
-        number: "",
+        phoneNumber: "",
+        countryCode: "+92",
         email: "",
         lastQualification: "",
         lastQualificationScore: "",
@@ -112,14 +119,11 @@ const StudentRegistrationForm = () => {
       });
     } catch (err) {
       console.error("❌ Error registering student:", err);
-
-      // ✅ Show backend error message if available
       const errorMessage =
         err?.data?.message ||
         err?.data?.error ||
         err?.error ||
         "Failed to register student. Please try again.";
-
       alert(`❌ ${errorMessage}`);
     }
   };
@@ -130,7 +134,7 @@ const StudentRegistrationForm = () => {
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <form
         onSubmit={handleSubmit}
-        className="bg-white shadow-lg rounded-2xl p-8 my-10 w-full max-w-5xl space-y-10"
+        className="bg-white  p-8 w-full space-y-10"
       >
         <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
           Student Registration Form
@@ -165,15 +169,28 @@ const StudentRegistrationForm = () => {
               required
               className={inputClass}
             />
-            <input
-              type="text"
-              name="number"
-              placeholder="Phone Number*"
-              value={formData.number}
-              onChange={handleChange}
-              required
-              className={inputClass}
-            />
+
+            {/* ✅ Phone Input with all countries */}
+            <div>
+              <PhoneInput
+                country={"pk"}
+                value={formData.countryCode + formData.phoneNumber}
+                onChange={(phone, countryData) =>
+                  setFormData({
+                    ...formData,
+                    countryCode: countryData.dialCode,
+                    phoneNumber: phone.replace(countryData.dialCode, "").trim(),
+                  })
+                }
+                inputStyle={{
+                  width: "100%",
+                  padding: "10px 50px",
+                  fontSize: "16px",
+                }}
+                buttonStyle={{ border: "none" }}
+              />
+            </div>
+
             <input
               type="email"
               name="email"
@@ -186,7 +203,7 @@ const StudentRegistrationForm = () => {
           </div>
         </section>
 
-        {/* Education */}
+        {/* Education Section (unchanged) */}
         <section>
           <h3 className="text-lg font-semibold mb-4 text-blue-600 border-b-2 pb-2">
             Education
@@ -330,7 +347,6 @@ const StudentRegistrationForm = () => {
           </div>
         </section>
 
-        {/* Submit */}
         <button
           type="submit"
           disabled={isLoading}

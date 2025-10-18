@@ -7,6 +7,8 @@ import { courseApi } from "../features/courses/courseApi";
 import { updateApi } from "../features/updates/updateApi";
 import { studentApi } from "../features/students/studentApi";
 import { docApi } from "../features/documents/docApi";
+import {agentStudentApi} from "../features/agentStudent/agentStudentApi";
+
 
 export const store = configureStore({
   reducer: {
@@ -17,6 +19,7 @@ export const store = configureStore({
     [updateApi.reducerPath]: updateApi.reducer,
     [studentApi.reducerPath]: studentApi.reducer,
     [docApi.reducerPath]: docApi.reducer,
+    [agentStudentApi.reducerPath]: agentStudentApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -27,5 +30,6 @@ export const store = configureStore({
       updateApi.middleware,
       studentApi.middleware,
       docApi.middleware,
+      agentStudentApi.middleware
     ),
 });

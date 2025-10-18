@@ -1,14 +1,18 @@
 import React from "react";
 import { PlusCircle, UserPlus } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const AdminActions = () => {
+  const { user } = useSelector((state) => state.auth);
+  console.log(user.role)
   return (
     <section className="w-full mx-auto bg-white shadow-md rounded-2xl border border-gray-200 p-6 flex flex-col">
       <h2 className="text-xl font-bold text-gray-800 text-start mb-4">Quick Actions</h2>
 
       <div className="flex flex-col md:flex-row justify-between items-center gap-6">
         <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+          { user.role == "SuperAdmin" && (
           <Link
             to="/add-course"
             className="flex items-center justify-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-medium transition w-full sm:w-auto"
@@ -16,6 +20,7 @@ const AdminActions = () => {
             <PlusCircle size={18} />
             Add a Course
           </Link>
+          )}
 
           <Link
             to="/add-student"
@@ -23,6 +28,14 @@ const AdminActions = () => {
           >
             <UserPlus size={18} />
             Register a Student
+          </Link>
+
+          <Link
+            to="/learning-resource"
+            className="flex items-center justify-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-medium transition w-full sm:w-auto"
+          >
+            <UserPlus size={18} />
+            Learning Resource
           </Link>
         </div>
 

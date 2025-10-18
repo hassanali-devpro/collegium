@@ -1,91 +1,88 @@
-import React, { useState } from "react";
-import { Check } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Check, Loader2, Pencil } from "lucide-react";
+import {
+  useGetStudentOptionQuery,
+  useUpdateStudentOptionMutation,
+} from "../../features/students/studentApi";
 
 const stageTitles = [
-  "Initial Payment",
-  "Documents",
-  "Applications",
-  "Offer Letter Secured",
-  "Second Payment",
-  "Visa Application",
-  "Visa Secured",
-  "Final Payment",
-  "Orientation",
-  "Enrollment Complete",
+  { key: "clients", label: "Taking Client Requirements" },
+  { key: "initialPayment", label: "Initial Payment" },
+  { key: "documents", label: "Documents" },
+  { key: "applications", label: "Applications" },
+  { key: "offerLetterSecured", label: "Offer Letter Secured" },
+  { key: "secondPaymentDone", label: "Second Payment" },
+  { key: "visaApplication", label: "Visa Application" },
+  { key: "visaSecured", label: "Visa Secured" },
+  { key: "finalPayment", label: "Final Payment" },
 ];
 
 const ApplicationTracking = () => {
   const [searchId, setSearchId] = useState("");
-  const [searchedApp, setSearchedApp] = useState(null);
+  const [studentId, setStudentId] = useState(null);
+  const [localOptions, setLocalOptions] = useState(null);
+  const [editedComments, setEditedComments] = useState({});
+  const [editingComment, setEditingComment] = useState(null);
 
-  const [applications, setApplications] = useState([
-    {
-      studentId: "STU001",
-      studentName: "Ali Khan",
-      university: "University of Oxford",
-      program: "MSc Computer Science",
-      stages: stageTitles.map((title, i) => ({
-        title,
-        passed: i < 3,
-        comments:
-          i === 0
-            ? ["Payment received on Aug 15"]
-            : i === 1
-            ? ["Passport uploaded", "Transcript submitted"]
-            : i === 2
-            ? ["Application form submitted"]
-            : [],
-      })),
-    },
-    {
-      studentId: "STU002",
-      studentName: "Sara Ahmed",
-      university: "Harvard University",
-      program: "MBA",
-      stages: stageTitles.map((title, i) => ({
-        title,
-        passed: i < 5,
-        comments:
-          i === 0
-            ? ["Initial fee cleared"]
-            : i === 4
-            ? ["Second payment verified"]
-            : [],
-      })),
-    },
-  ]);
+  const { data, isFetching, isError } = useGetStudentOptionQuery(studentId, {
+    skip: !studentId,
+  });
+
+  const [updateStudentOption, { isLoading: isUpdating }] =
+    useUpdateStudentOptionMutation();
 
   const handleSearch = () => {
-    const found = applications.find(
-      (app) => app.studentId.toLowerCase() === searchId.toLowerCase()
-    );
-    setSearchedApp(found || null);
+    if (searchId.trim()) {
+      setStudentId(searchId.trim());
+    }
   };
 
-  const handlePassStage = (stageIndex) => {
-    if (!searchedApp) return;
-    const updated = { ...searchedApp };
-    updated.stages[stageIndex].passed = true;
+  useEffect(() => {
+    if (data?.data?.studentOptions) {
+      setLocalOptions(data.data.studentOptions);
+      setEditedComments(
+        Object.fromEntries(
+          Object.entries(data.data.studentOptions)
+            .filter(([key]) => key.endsWith("Comment"))
+            .map(([key, value]) => [key, value || ""])
+        )
+      );
+    }
+  }, [data]);
 
-    setApplications((prev) =>
-      prev.map((app) =>
-        app.studentId === updated.studentId ? updated : app
-      )
-    );
-    setSearchedApp(updated);
+  const student = data?.data;
+
+  const handleToggleStage = async (key) => {
+    if (!student || !localOptions) return;
+    const updated = { ...localOptions, [key]: !localOptions[key] };
+
+    setLocalOptions(updated);
+
+    try {
+      await updateStudentOption({ id: student._id, ...updated }).unwrap();
+    } catch (error) {
+      console.error("Stage update failed:", error);
+    }
   };
 
-  const handleAddComment = (stageIndex, comment) => {
-    if (!comment) return;
-    const updated = { ...searchedApp };
-    updated.stages[stageIndex].comments.push(comment);
+  const handleCommentChange = (key, value) => {
+    setEditedComments((prev) => ({ ...prev, [`${key}Comment`]: value }));
+  };
 
-    setApplications((prev) =>
-      prev.map((app) =>
-        app.studentId === updated.studentId ? updated : app
-      )
-    );
-    setSearchedApp(updated);
+  const handleSaveComment = async (key) => {
+    if (!student) return;
+
+    const commentKey = `${key}Comment`;
+    const updated = { ...localOptions, [commentKey]: editedComments[commentKey] };
+
+    setLocalOptions(updated);
+    setEditingComment(null);
+
+    try {
+      await updateStudentOption({ id: student._id, ...updated }).unwrap();
+    } catch (error) {
+      console.error("Comment update failed:", error);
+    }
   };
 
   return (
@@ -106,97 +103,128 @@ const ApplicationTracking = () => {
           />
           <button
             onClick={handleSearch}
-            className="px-6 py-3 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-800 font-medium transition"
+            disabled={isFetching}
+            className="px-6 py-3 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-800 font-medium transition disabled:opacity-50"
           >
-            Search
+            {isFetching ? "Searching..." : "Search"}
           </button>
         </div>
 
-        {/* 🧾 Search Result */}
-        {searchedApp ? (
+        {/* 🧾 Results */}
+        {isFetching ? (
+          <p className="text-center text-gray-600">Loading...</p>
+        ) : isError ? (
+          <p className="text-center text-red-500">Error fetching data.</p>
+        ) : student && localOptions ? (
           <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-6 transition-all duration-300 hover:shadow-md">
             <div className="mb-6 text-center">
               <h3 className="text-lg font-bold text-gray-800">
-                {searchedApp.studentName} ({searchedApp.studentId})
+                {student.name} ({student._id})
               </h3>
               <p className="text-gray-700 text-sm">
-                <span className="font-semibold">University:</span> {searchedApp.university}
-              </p>
-              <p className="text-gray-700 text-sm">
-                <span className="font-semibold">Program:</span> {searchedApp.program}
+                <span className="font-semibold">Email:</span> {student.email}
               </p>
             </div>
 
             <div className="relative border-l-2 border-gray-300 pl-6 space-y-8">
-              {searchedApp.stages.map((stage, stageIndex) => (
-                <div key={stageIndex} className="relative">
-                  <span
-                    className={`absolute -left-[22px] flex items-center justify-center w-8 h-8 rounded-full border-2 ${
-                      stage.passed
-                        ? "bg-green-600 border-green-600 text-white"
-                        : "border-gray-400 text-gray-600 bg-white"
-                    }`}
-                  >
-                    {stage.passed ? <Check size={16} /> : stageIndex + 1}
-                  </span>
+              {stageTitles.map((stage, index) => {
+                const done = localOptions[stage.key];
+                const commentKey = `${stage.key}Comment`;
+                const commentValue = editedComments[commentKey] || "";
 
-                  <div className="bg-gray-50 p-4 rounded-xl shadow-sm">
-                    <h3 className="font-semibold text-gray-800">{stage.title}</h3>
+                return (
+                  <div key={stage.key} className="relative">
+                    <span
+                      className={`absolute -left-[22px] flex items-center justify-center w-8 h-8 rounded-full border-2 ${
+                        done
+                          ? "bg-green-600 border-green-600 text-white"
+                          : "border-gray-400 text-gray-600 bg-white"
+                      }`}
+                    >
+                      {done ? <Check size={16} /> : index + 1}
+                    </span>
 
-                    {/* Comments */}
-                    <div className="mt-2 space-y-1">
-                      {stage.comments.map((c, i) => (
-                        <p
-                          key={i}
-                          className="text-xs text-gray-600 border-b border-gray-200 pb-1"
-                        >
-                          {c}
-                        </p>
-                      ))}
-                    </div>
+                    <div className="bg-gray-50 p-4 rounded-xl shadow-sm">
+                      <h3 className="font-semibold text-gray-800">
+                        {stage.label}
+                      </h3>
 
-                    {/* Comment Input */}
-                    <div className="flex mt-3">
-                      <input
-                        type="text"
-                        placeholder="Add comment..."
-                        className="flex-1 border border-gray-300 rounded-l-md px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            handleAddComment(stageIndex, e.target.value);
-                            e.target.value = "";
-                          }
-                        }}
-                      />
+                      {/* Comment UI */}
+                      <div className="mt-3">
+                        {commentValue && editingComment !== stage.key ? (
+                          <div className="flex justify-between items-center bg-white border border-gray-300 rounded-md px-3 py-2">
+                            <p className="text-sm text-gray-700 flex-1">
+                              {commentValue}
+                            </p>
+                            <button
+                              onClick={() => setEditingComment(stage.key)}
+                              className="text-blue-600 text-sm flex items-center gap-1 hover:underline"
+                            >
+                              <Pencil size={14} /> Update
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex">
+                            <input
+                              type="text"
+                              placeholder="Add comment..."
+                              value={commentValue}
+                              onChange={(e) =>
+                                handleCommentChange(stage.key, e.target.value)
+                              }
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter")
+                                  handleSaveComment(stage.key);
+                              }}
+                              className="flex-1 border border-gray-300 rounded-l-md px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            />
+                            <button
+                              onClick={() => handleSaveComment(stage.key)}
+                              disabled={isUpdating}
+                              className="bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 rounded-r-md text-sm font-medium transition disabled:opacity-50"
+                            >
+                              {isUpdating ? (
+                                <Loader2
+                                  size={14}
+                                  className="animate-spin inline"
+                                />
+                              ) : (
+                                commentValue
+                                  ? "Save Update"
+                                  : "Add Comment"
+                              )}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Stage Button */}
                       <button
-                        onClick={(e) => {
-                          const input = e.target.previousSibling;
-                          handleAddComment(stageIndex, input.value);
-                          input.value = "";
-                        }}
-                        className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 rounded-r-md text-sm font-medium transition"
+                        onClick={() => handleToggleStage(stage.key)}
+                        disabled={isUpdating}
+                        className={`mt-3 text-xs px-3 py-1 rounded-lg font-medium transition disabled:opacity-50 ${
+                          done
+                            ? "bg-gray-200 hover:bg-gray-300 text-gray-800"
+                            : "bg-green-100 hover:bg-green-200 text-green-800"
+                        }`}
                       >
-                        Add
+                        {isUpdating ? (
+                          <Loader2 size={14} className="animate-spin inline" />
+                        ) : done ? (
+                          "Undone"
+                        ) : (
+                          "Done"
+                        )}
                       </button>
                     </div>
-
-                    {/* Pass Stage Button */}
-                    {!stage.passed && (
-                      <button
-                        onClick={() => handlePassStage(stageIndex)}
-                        className="mt-3 text-xs bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-800 px-3 py-1 font-medium transition"
-                      >
-                        Pass Stage
-                      </button>
-                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         ) : (
           <p className="text-gray-500 text-center mt-10">
-            {/* Enter a Student ID above to view application progress. */}
+            Enter a Student ID above to view application progress.
           </p>
         )}
       </div>

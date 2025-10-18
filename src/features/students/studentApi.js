@@ -55,6 +55,23 @@ export const studentApi = createApi({
             }),
             invalidatesTags: ["Student"],
         }),
+
+        getStudentOption: builder.query({
+            query: (id) => ({
+                url: `students/${id}/options`,
+                method: "GET",
+            }),
+            providesTags: ["Student"],
+        }),
+
+        updateStudentOption: builder.mutation({
+            query: ({ id, ...updatedData }) => ({
+                url: `students/${id}/options`,
+                method: "PUT",
+                body: updatedData,
+            }),
+            invalidatesTags: ["Student"],
+        }),
     }),
 });
 
@@ -64,4 +81,6 @@ export const {
     useAddStudentMutation,
     useUpdateStudentMutation,
     useDeleteStudentMutation,
+    useGetStudentOptionQuery,
+    useUpdateStudentOptionMutation,
 } = studentApi;
