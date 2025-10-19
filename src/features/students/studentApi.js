@@ -72,6 +72,12 @@ export const studentApi = createApi({
             }),
             invalidatesTags: ["Student"],
         }),
+
+        // Get student's linked courses/applications
+        getStudentApplications: builder.query({
+            query: (id) => `students/${id}/courses`,
+            providesTags: ["Student"],
+        }),
     }),
 });
 
@@ -83,4 +89,5 @@ export const {
     useDeleteStudentMutation,
     useGetStudentOptionQuery,
     useUpdateStudentOptionMutation,
+    useGetStudentApplicationsQuery,
 } = studentApi;

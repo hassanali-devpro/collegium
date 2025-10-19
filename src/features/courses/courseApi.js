@@ -69,6 +69,33 @@ export const courseApi = createApi({
         "Courses",
       ],
     }),
+
+    // Link student to course
+    linkStudentToCourse: builder.mutation({
+      query: ({ courseId, studentId }) => ({
+        url: `courses/${courseId}/students/${studentId}`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["Courses", "Student", "Applications"],
+    }),
+
+    // Unlink student from course
+    unlinkStudentFromCourse: builder.mutation({
+      query: ({ courseId, studentId }) => ({
+        url: `courses/${courseId}/students/${studentId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Courses", "Student", "Applications"],
+    }),
+
+    // Get students enrolled in a course
+    getCourseStudents: builder.query({
+      query: (courseId) => `courses/${courseId}/students`,
+      providesTags: (result, error, courseId) => [
+        { type: "Courses", id: courseId },
+        "Student"
+      ],
+    }),
   }),
 });
 
@@ -79,4 +106,7 @@ export const {
   useCreateCourseMutation,
   useUpdateCourseMutation,
   useDeleteCourseMutation,
+  useLinkStudentToCourseMutation,
+  useUnlinkStudentFromCourseMutation,
+  useGetCourseStudentsQuery,
 } = courseApi;

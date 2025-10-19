@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { useAddStudentMutation } from "../../features/students/studentApi";
+import { useAddStudentMutation, useUpdateStudentMutation, useGetStudentByIdQuery } from "../../features/students/studentApi";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
-const StudentRegistrationForm = () => {
+const StudentRegistrationForm = ({ onStudentCreated, existingStudentId }) => {
   const [formData, setFormData] = useState({
     studentId: "",
     name: "",
@@ -29,9 +29,17 @@ const StudentRegistrationForm = () => {
   });
 
   const { user } = useSelector((state) => state.auth);
-  const [addStudent, { isLoading }] = useAddStudentMutation();
+  const [addStudent, { isLoading: isCreating }] = useAddStudentMutation();
+  const [updateStudent, { isLoading: isUpdating }] = useUpdateStudentMutation();
+  
+  // Fetch existing student data if editing
+  const { data: existingStudentData, isLoading: isLoadingStudent } = useGetStudentByIdQuery(existingStudentId, {
+    skip: !existingStudentId
+  });
 
   const navigate = useNavigate();
+  const isLoading = isCreating || isUpdating;
+  const isEditMode = !!existingStudentId;
 
 
   // ✅ Generate unique student ID
@@ -45,12 +53,50 @@ const StudentRegistrationForm = () => {
     return `A${day}${month}${year}${hours}${minutes}`;
   };
 
+  // Effect to set student ID
   useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      studentId: generateStudentId(),
-    }));
-  }, []);
+    if (existingStudentId) {
+      // If editing existing student, don't generate new ID
+      setFormData((prev) => ({
+        ...prev,
+        studentId: existingStudentId,
+      }));
+    } else {
+      // If creating new student, generate new ID
+      setFormData((prev) => ({
+        ...prev,
+        studentId: generateStudentId(),
+      }));
+    }
+  }, [existingStudentId]);
+
+  // Effect to load existing student data when editing
+  useEffect(() => {
+    if (existingStudentData?.data && isEditMode) {
+      const student = existingStudentData.data;
+      setFormData({
+        studentId: student.studentCode || student._id,
+        name: student.name || "",
+        phoneNumber: student.phoneNumber || "",
+        countryCode: student.countryCode || "+92",
+        email: student.email || "",
+        lastQualification: student.qualification || "",
+        lastQualificationScore: student.score?.toString() || "",
+        scorePercentage: student.percentage?.toString() || "",
+        lastInstitute: student.lastInstitute || "",
+        workExperience: student.experience?.replace(" years", "") || "",
+        languageTest: student.test || "",
+        languageTestScore: student.testScore?.toString() || "",
+        boardAttestation: student.boardAttestation || "",
+        ibccAttestation: student.ibccAttestation || "",
+        hecAttestation: student.hecAttestation || "",
+        mofaAttestation: student.mofaAttestation || "",
+        apostilleAttestation: student.apostilleAttestation || "",
+        country1: student.country1 || "",
+        country2: student.country2 || "",
+      });
+    }
+  }, [existingStudentData, isEditMode]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -92,31 +138,49 @@ const StudentRegistrationForm = () => {
     };
 
     try {
-      await addStudent(payload).unwrap();
-      alert(`✅ Student Registered Successfully! ID: ${formData.studentId}`);
-      navigate("/dashboard");
+      let result;
+      if (isEditMode) {
+        // Update existing student
+        result = await updateStudent({ id: existingStudentId, ...payload }).unwrap();
+        alert(`✅ Student Updated Successfully! ID: ${formData.studentId}`);
+      } else {
+        // Create new student
+        result = await addStudent(payload).unwrap();
+        alert(`✅ Student Registered Successfully! ID: ${formData.studentId}`);
+      }
+      
+      // If we have a callback function, call it with the student ID
+      if (onStudentCreated) {
+        onStudentCreated(formData.studentId);
+      } else {
+        // Fallback to navigate to dashboard if no callback
+        navigate("/dashboard");
+      }
 
-      setFormData({
-        studentId: generateStudentId(),
-        name: "",
-        phoneNumber: "",
-        countryCode: "+92",
-        email: "",
-        lastQualification: "",
-        lastQualificationScore: "",
-        scorePercentage: "",
-        lastInstitute: "",
-        workExperience: "",
-        languageTest: "",
-        languageTestScore: "",
-        boardAttestation: "",
-        ibccAttestation: "",
-        hecAttestation: "",
-        mofaAttestation: "",
-        apostilleAttestation: "",
-        country1: "",
-        country2: "",
-      });
+      // Only reset form if creating new student (not editing)
+      if (!isEditMode) {
+        setFormData({
+          studentId: generateStudentId(),
+          name: "",
+          phoneNumber: "",
+          countryCode: "+92",
+          email: "",
+          lastQualification: "",
+          lastQualificationScore: "",
+          scorePercentage: "",
+          lastInstitute: "",
+          workExperience: "",
+          languageTest: "",
+          languageTestScore: "",
+          boardAttestation: "",
+          ibccAttestation: "",
+          hecAttestation: "",
+          mofaAttestation: "",
+          apostilleAttestation: "",
+          country1: "",
+          country2: "",
+        });
+      }
     } catch (err) {
       console.error("❌ Error registering student:", err);
       const errorMessage =
@@ -130,6 +194,18 @@ const StudentRegistrationForm = () => {
 
   const inputClass = "p-2 border-b w-full focus:outline-none focus:ring-0";
 
+  // Show loading state when fetching existing student data
+  if (isEditMode && isLoadingStudent) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading student information...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <form
@@ -137,7 +213,7 @@ const StudentRegistrationForm = () => {
         className="bg-white  p-8 w-full space-y-10"
       >
         <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-          Student Registration Form
+          {isEditMode ? "Update Student Information" : "Student Registration Form"}
         </h2>
 
         {/* Student ID */}
@@ -349,10 +425,10 @@ const StudentRegistrationForm = () => {
 
         <button
           type="submit"
-          disabled={isLoading}
-          className="w-full bg-[#F42222] text-white py-3 rounded-lg font-semibold hover:bg-[#980b0b] transition"
+          disabled={isLoading || isLoadingStudent}
+          className="w-full bg-[#F42222] text-white py-3 rounded-lg font-semibold hover:bg-[#980b0b] transition disabled:opacity-50"
         >
-          {isLoading ? "Registering..." : "Register Student"}
+          {isLoadingStudent ? "Loading..." : isLoading ? (isEditMode ? "Updating..." : "Registering...") : (isEditMode ? "Update Student" : "Register Student")}
         </button>
       </form>
     </div>

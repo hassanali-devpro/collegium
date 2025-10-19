@@ -15,9 +15,13 @@ import Offices from "./pages/Offices";
 import Agents from "./pages/Agents";
 import Doc from "./pages/Doc";
 import AIChatSupport from "./components/AIChatSupport";
-import Application from "./pages/Application";
 import Resource from "./pages/Resources"
 import AgentStudents from "./pages/AgentStudents";
+
+// New restructured components
+import StudentPage from "./pages/Student";
+import StudentForm from "./pages/Student/StudentForm";
+import ApplicationList from "./pages/Application/ApplicationList";
 
 function App() {
   const userRole = "admin";
@@ -30,7 +34,14 @@ function App() {
     { path: "/offices", element: <Offices /> },
     { path: "/manage-users", element: <Agents /> },
     { path:"/agent-students", element: <AgentStudents />},
-    {path:"/application", element:<Application />},
+    
+    // New restructured routes
+    { path: "/student", element: <StudentPage /> },
+    { path: "/student/add", element: <StudentForm /> },
+    { path: "/student/edit/:studentId", element: <StudentForm /> },
+    
+    // Application routes
+    { path: "/applications", element: <ApplicationList /> },
   ];
 
   return (
@@ -41,7 +52,6 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/add-course" element={<AddCourse />} />
         <Route path="/add-student" element={<AddStudent />} />
-        <Route path="/student/:id?" element={<UpdateStudent />} />
         <Route path="/student-documents" element={<Doc />} />
         <Route path="/learning-resource" element={<Resource />} />
 

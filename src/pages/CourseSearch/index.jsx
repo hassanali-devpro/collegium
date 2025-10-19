@@ -5,10 +5,15 @@ import {
   useSearchCoursesQuery,
   useDeleteCourseMutation,
 } from "../../features/courses/courseApi";
+import { useCreateApplicationMutation, useGetApplicationsByStudentQuery } from "../../features/applications/applicationApi";
 
-const ProgramCard = () => {
+const ProgramCard = ({ studentId }) => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
+
+  // Debug logging (remove in production)
+  console.log('CourseSearch - studentId:', studentId);
+  console.log('CourseSearch - user role:', user?.role);
 
   // 🔎 Form state
   const [filters, setFilters] = useState({
@@ -27,6 +32,18 @@ const ProgramCard = () => {
   });
 
   const [deleteCourse] = useDeleteCourseMutation();
+  const [createApplication, { isLoading: isLinking }] = useCreateApplicationMutation();
+
+  // Fetch student's applications to check which courses they've already applied to
+  const { data: studentApplications } = useGetApplicationsByStudentQuery({
+    studentId,
+    page: 1,
+    limit: 100, // Get all applications to check against
+    sortBy: 'applicationDate',
+    sortOrder: 'desc'
+  }, {
+    skip: !studentId // Only fetch if studentId exists
+  });
 
   const handleDelete = async (id) => {
     if (confirm("Are you sure you want to delete this course?")) {
@@ -38,8 +55,51 @@ const ProgramCard = () => {
     navigate("/add-course", { state: { program } });
   };
 
+  // Helper function to check if student has already applied to a course
+  const hasAppliedToCourse = (courseId) => {
+    if (!studentApplications?.data) return false;
+    return studentApplications.data.some(app => app.courseId?._id === courseId);
+  };
+
+  const handleApplyToCourse = async (courseId) => {
+    if (!studentId) {
+      alert("Student ID not found. Please ensure you're on the correct page.");
+      return;
+    }
+
+    if (confirm("Are you sure you want to apply this student to this course?")) {
+      try {
+        // Create application using the new Applications API
+        await createApplication({
+          studentId: studentId,
+          courseId: courseId,
+          priority: "medium",
+          notes: "Application submitted via course search"
+        }).unwrap();
+        alert("✅ Student successfully applied to the course!");
+      } catch (error) {
+        console.error("Error applying to course:", error);
+        alert("❌ Failed to apply to course. Please try again.");
+      }
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {/* Debug info - remove this in production */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+          <strong>Debug:</strong> Student ID: {studentId || 'Not provided'}
+        </div>
+      )}
+
+      {/* Student ID warning */}
+      {!studentId && (
+        <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
+          <strong>Note:</strong> No student selected. Please create a student profile first or navigate from the application page.
+        </div>
+      )}
+
       <div className="p-4 shadow-lg rounded-lg flex flex-col md:flex-row flex-wrap gap-4 items-center justify-start">
         <input
           type="text"
@@ -95,22 +155,45 @@ const ProgramCard = () => {
                 )}
               </div>
 
-              {user?.role === "SuperAdmin" && (
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleEdit(program)}
-                    className="px-3 py-1 text-sm bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(program._id)}
-                    className="px-3 py-1 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-                  >
-                    Delete
-                  </button>
-                </div>
-              )}
+              <div className="flex gap-2">
+                {studentId ? (
+                  // Show Apply button when in application mode (studentId exists)
+                  hasAppliedToCourse(program._id) ? (
+                    <button
+                      disabled
+                      className="px-4 py-2 text-sm font-medium bg-green-600 text-white rounded-lg cursor-not-allowed shadow-sm"
+                    >
+                      ✓ Applied
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleApplyToCourse(program._id)}
+                      disabled={isLinking}
+                      className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 shadow-sm"
+                    >
+                      {isLinking ? "Applying..." : "Apply to Course"}
+                    </button>
+                  )
+                ) : (
+                  // Show admin buttons only when NOT in application mode (no studentId)
+                  user?.role === "SuperAdmin" && (
+                    <>
+                      <button
+                        onClick={() => handleEdit(program)}
+                        className="px-3 py-1 text-sm bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(program._id)}
+                        className="px-3 py-1 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-sm text-gray-800">
