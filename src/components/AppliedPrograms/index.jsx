@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGetStudentByIdQuery } from '../../features/students/studentApi';
 import { useGetApplicationsByStudentQuery } from '../../features/applications/applicationApi';
 import { useUnlinkStudentFromCourseMutation } from '../../features/courses/courseApi';
-import { CheckCircle, XCircle, Clock, AlertCircle, Trash2 } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, AlertCircle, Trash2, MessageCircle } from 'lucide-react';
+import ApplicationComments from '../ApplicationComments';
 
 const AppliedPrograms = ({ studentId }) => {
+  const [selectedApplicationId, setSelectedApplicationId] = useState(null);
 
   const { data: studentData, isLoading: studentLoading } = useGetStudentByIdQuery(studentId, {
     skip: !studentId
@@ -122,6 +124,19 @@ const AppliedPrograms = ({ studentId }) => {
                     )}
                   </div>
                   
+                  {/* Comments Button */}
+                  <button
+                    onClick={() => setSelectedApplicationId(selectedApplicationId === application._id ? null : application._id)}
+                    className={`p-2 rounded-lg transition-colors ${
+                      selectedApplicationId === application._id 
+                        ? 'text-blue-600 bg-blue-50' 
+                        : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                    }`}
+                    title="View Comments"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                  </button>
+
                   {/* Remove Button */}
                   <button
                     onClick={() => handleRemoveApplication(application.courseId?._id)}
@@ -195,6 +210,16 @@ const AppliedPrograms = ({ studentId }) => {
                   </div>
                 )}
               </div>
+
+              {/* Comments Section */}
+              {selectedApplicationId === application._id && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <ApplicationComments 
+                    applicationId={application._id} 
+                    comments={application.comments || []}
+                  />
+                </div>
+              )}
             </div>
           ))
         )}

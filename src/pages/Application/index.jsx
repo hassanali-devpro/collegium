@@ -3,7 +3,7 @@ import { useLocation, useParams } from "react-router-dom";
 import AddStudents from "../AddStudent";
 import Doc from "../Doc";
 import SearchCourse from "../CourseSearch"
-import AppliedPrograms from "../../components/AppliedPrograms"
+import ApplicationTabLayout from "../../components/ApplicationTabLayout"
 
 const TabsPage = () => {
   const [activeTab, setActiveTab] = useState("application"); // Default to application tab for existing students
@@ -92,7 +92,7 @@ const TabsPage = () => {
           <SearchCourse studentId={studentId} />
         )}
         {activeTab === "application" && (
-          <AppliedPrograms studentId={studentId} />
+          <ApplicationTabLayout studentId={studentId} />
         )}
       </div>
     </div>

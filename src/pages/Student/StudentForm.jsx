@@ -9,7 +9,7 @@ import { useCreateApplicationMutation, useGetApplicationsByStudentQuery } from "
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import DocumentsTab from "./DocumentsTab";
-import AppliedPrograms from "../../components/AppliedPrograms";
+import ApplicationTabLayout from "../../components/ApplicationTabLayout";
 
 const StudentForm = () => {
   const navigate = useNavigate();
@@ -805,7 +805,7 @@ const StudentForm = () => {
             )}
 
             {activeTab === "applications" && (
-              <AppliedPrograms studentId={actualStudentId} />
+              <ApplicationTabLayout studentId={actualStudentId} />
             )}
           </div>
         </div>

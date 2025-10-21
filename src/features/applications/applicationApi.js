@@ -170,6 +170,31 @@ export const applicationApi = createApi({
         'Applications'
       ],
     }),
+
+    // Update application comment
+    updateApplicationComment: builder.mutation({
+      query: ({ applicationId, commentId, content }) => ({
+        url: `applications/${applicationId}/comments/${commentId}`,
+        method: 'PUT',
+        body: { content },
+      }),
+      invalidatesTags: (result, error, { applicationId }) => [
+        { type: 'Applications', id: applicationId }, 
+        'Applications'
+      ],
+    }),
+
+    // Delete application comment
+    deleteApplicationComment: builder.mutation({
+      query: ({ applicationId, commentId }) => ({
+        url: `applications/${applicationId}/comments/${commentId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (result, error, { applicationId }) => [
+        { type: 'Applications', id: applicationId }, 
+        'Applications'
+      ],
+    }),
   }),
 });
 
@@ -184,4 +209,6 @@ export const {
   useUpdateApplicationMutation,
   useDeleteApplicationMutation,
   useAddCommentToApplicationMutation,
+  useUpdateApplicationCommentMutation,
+  useDeleteApplicationCommentMutation,
 } = applicationApi;
