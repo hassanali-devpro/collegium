@@ -22,8 +22,8 @@ export const courseApi = createApi({
 
  
     searchCourses: builder.query({
-      query: ({ search, country, type, page = 1, limit = 10 }) => {
-        let queryString = `courses?search=${encodeURIComponent(search || "")}&country=${country || ""}&type=${type || ""}&page=${page}&limit=${limit}`;
+      query: ({ search, country, type, university, intake, feeSort, page = 1, limit = 10 }) => {
+        let queryString = `courses?search=${encodeURIComponent(search || "")}&country=${country || ""}&type=${type || ""}&university=${university || ""}&intake=${intake || ""}&feeSort=${feeSort || ""}&page=${page}&limit=${limit}`;
         return queryString;
       },
       providesTags: ["Courses"],

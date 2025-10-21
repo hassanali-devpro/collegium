@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useAddStudentMutation, useUpdateStudentMutation, useGetStudentByIdQuery } from "../../features/students/studentApi";
@@ -61,20 +61,44 @@ const StudentForm = () => {
     search: "",
     country: "",
     type: "",
+    university: "",
+    intake: "",
+    feeSort: "", // "high-to-low" or "low-to-high"
   });
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+  
+  // Debounced filters for API calls
+  const [debouncedFilters, setDebouncedFilters] = useState(courseFilters);
+  
   const [createApplication, { isLoading: isLinking }] = useCreateApplicationMutation();
 
   const [activeTab, setActiveTab] = useState(
     location.state?.selectedApplicationId ? "applications" : "profile"
   );
 
+  // Debouncing effect for search filters
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedFilters(courseFilters);
+      setCurrentPage(1); // Reset to first page when filters change
+    }, 500); // 500ms debounce delay
+
+    return () => clearTimeout(timer);
+  }, [courseFilters]);
+
   // Course search query - moved after activeTab declaration
   const { data: coursesData, isLoading: isLoadingCourses } = useSearchCoursesQuery({
-    search: courseFilters.search,
-    country: courseFilters.country,
-    type: courseFilters.type,
-    page: 1,
-    limit: 50,
+    search: debouncedFilters.search,
+    country: debouncedFilters.country,
+    type: debouncedFilters.type,
+    university: debouncedFilters.university,
+    intake: debouncedFilters.intake,
+    feeSort: debouncedFilters.feeSort,
+    page: currentPage,
+    limit: pageSize,
   }, {
     skip: activeTab !== "course", // Only fetch when course tab is active
     keepUnusedDataFor: 180 // Cache for 3 minutes (180 seconds)
@@ -686,8 +710,10 @@ const StudentForm = () => {
                 
                 {/* Course Search Filters */}
                 <div className="mb-8 p-6 bg-gray-50 rounded-lg">
-                  <h3 className="text-lg font-semibold mb-4 text-blue-600">Search Courses</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <h3 className="text-lg font-semibold mb-4 text-blue-600">Course Filters</h3>
+                  
+                  {/* First Row - Search and Country */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <input
                       type="text"
                       placeholder="Search courses..."
@@ -701,12 +727,32 @@ const StudentForm = () => {
                       className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">All Countries</option>
+                      <option value="Australia">Australia</option>
+                      <option value="Canada">Canada</option>
+                      <option value="Germany">Germany</option>
+                      <option value="New Zealand">New Zealand</option>
+                      <option value="Singapore">Singapore</option>
                       <option value="UK">UK</option>
                       <option value="USA">USA</option>
-                      <option value="Canada">Canada</option>
-                      <option value="Australia">Australia</option>
-                      <option value="Germany">Germany</option>
                     </select>
+                  </div>
+
+                  {/* Second Row - University, Intake, Type, Fee Sort */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <input
+                      type="text"
+                      placeholder="University..."
+                      value={courseFilters.university}
+                      onChange={(e) => setCourseFilters({...courseFilters, university: e.target.value})}
+                      className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Intake..."
+                      value={courseFilters.intake}
+                      onChange={(e) => setCourseFilters({...courseFilters, intake: e.target.value})}
+                      className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                     <select
                       value={courseFilters.type}
                       onChange={(e) => setCourseFilters({...courseFilters, type: e.target.value})}
@@ -717,6 +763,32 @@ const StudentForm = () => {
                       <option value="Masters">Masters</option>
                       <option value="PhD">PhD</option>
                     </select>
+                    <select
+                      value={courseFilters.feeSort}
+                      onChange={(e) => setCourseFilters({...courseFilters, feeSort: e.target.value})}
+                      className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Fee Sort</option>
+                      <option value="high-to-low">Fee: High to Low</option>
+                      <option value="low-to-high">Fee: Low to High</option>
+                    </select>
+                  </div>
+
+                  {/* Clear Filters Button */}
+                  <div className="mt-4 flex justify-end">
+                    <button
+                      onClick={() => setCourseFilters({
+                        search: "",
+                        country: "",
+                        type: "",
+                        university: "",
+                        intake: "",
+                        feeSort: "",
+                      })}
+                      className="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                    >
+                      Clear All Filters
+                    </button>
                   </div>
                 </div>
 
@@ -786,6 +858,50 @@ const StudentForm = () => {
                   )}
                 </div>
 
+                {/* Pagination */}
+                {coursesData?.data?.length > 0 && coursesData?.pagination && (
+                  <div className="mt-6 flex items-center justify-between">
+                    <div className="text-sm text-gray-700">
+                      Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, coursesData.pagination.total)} of {coursesData.pagination.total} courses
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Previous
+                      </button>
+                      
+                      {/* Page numbers */}
+                      {Array.from({ length: Math.min(5, coursesData.pagination.totalPages) }, (_, i) => {
+                        const pageNum = i + 1;
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => setCurrentPage(pageNum)}
+                            className={`px-3 py-2 text-sm font-medium rounded-md ${
+                              currentPage === pageNum
+                                ? 'bg-blue-600 text-white'
+                                : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                      
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, coursesData.pagination.totalPages))}
+                        disabled={currentPage === coursesData.pagination.totalPages}
+                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Navigation */}
                 <div className="flex justify-between mt-8">
                   <button
@@ -805,7 +921,10 @@ const StudentForm = () => {
             )}
 
             {activeTab === "applications" && (
-              <ApplicationTabLayout studentId={actualStudentId} />
+              <ApplicationTabLayout 
+                studentId={actualStudentId} 
+                initialSelectedApplicationId={location.state?.selectedApplicationId}
+              />
             )}
           </div>
         </div>

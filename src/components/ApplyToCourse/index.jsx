@@ -1,19 +1,12 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import {
   useSearchCoursesQuery,
-  useDeleteCourseMutation,
 } from "../../features/courses/courseApi";
 import { useCreateApplicationMutation, useGetApplicationsByStudentQuery } from "../../features/applications/applicationApi";
 
-const ProgramCard = ({ studentId }) => {
+const ApplyToCourse = ({ studentId }) => {
   const { user } = useSelector((state) => state.auth);
-  const navigate = useNavigate();
-
-  // Debug logging (remove in production)
-  console.log('CourseSearch - studentId:', studentId);
-  console.log('CourseSearch - user role:', user?.role);
 
   // 🔎 Form state
   const [filters, setFilters] = useState({
@@ -34,10 +27,9 @@ const ProgramCard = ({ studentId }) => {
     intake: filters.intake,
     feeSort: filters.feeSort,
     page: 1,
-    limit: 10,
+    limit: 20,
   });
 
-  const [deleteCourse] = useDeleteCourseMutation();
   const [createApplication, { isLoading: isLinking }] = useCreateApplicationMutation();
 
   // Fetch student's applications to check which courses they've already applied to
@@ -50,16 +42,6 @@ const ProgramCard = ({ studentId }) => {
   }, {
     skip: !studentId // Only fetch if studentId exists
   });
-
-  const handleDelete = async (id) => {
-    if (confirm("Are you sure you want to delete this course?")) {
-      await deleteCourse(id);
-    }
-  };
-
-  const handleEdit = (program) => {
-    navigate("/add-course", { state: { program } });
-  };
 
   // Helper function to check if student has already applied to a course
   const hasAppliedToCourse = (courseId) => {
@@ -80,7 +62,7 @@ const ProgramCard = ({ studentId }) => {
           studentId: studentId,
           courseId: courseId,
           priority: "medium",
-          notes: "Application submitted via course search"
+          notes: "Application submitted via application module"
         }).unwrap();
         alert("✅ Student successfully applied to the course!");
       } catch (error) {
@@ -90,30 +72,29 @@ const ProgramCard = ({ studentId }) => {
     }
   };
 
+  if (!studentId) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="w-12 h-12 text-gray-400 mx-auto mb-4">⚠️</div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No Student Selected</h3>
+          <p className="text-gray-500">Please navigate to this page with a valid student ID.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {/* Debug info - remove this in production */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
-          <strong>Debug:</strong> Student ID: {studentId || 'Not provided'}
-        </div>
-      )}
-
-      {/* Student ID warning */}
-      {!studentId && (
-        <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
-          <strong>Note:</strong> No student selected. Please create a student profile first or navigate from the application page.
-        </div>
-      )}
-
-      <div className="p-4 shadow-lg rounded-lg">
+      {/* Course Filters */}
+      <div className="p-4 shadow-lg rounded-lg bg-white">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Course Filters</h3>
         
         {/* First Row - Search and Country */}
         <div className="flex flex-col md:flex-row gap-4 mb-4">
           <input
             type="text"
-            placeholder="Search courses..."
+            placeholder="Search by course name..."
             className="border border-gray-300 p-2 rounded-lg w-full md:flex-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
             value={filters.search}
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
@@ -132,7 +113,7 @@ const ProgramCard = ({ studentId }) => {
         <div className="flex flex-col md:flex-row gap-4">
           <input
             type="text"
-            placeholder="University..."
+            placeholder="University"
             className="border border-gray-300 p-2 rounded-lg w-full md:w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-400"
             value={filters.university}
             onChange={(e) => setFilters({ ...filters, university: e.target.value })}
@@ -140,7 +121,7 @@ const ProgramCard = ({ studentId }) => {
 
           <input
             type="text"
-            placeholder="Intake..."
+            placeholder="Intake (e.g., Fall 2024, Spring 2025)"
             className="border border-gray-300 p-2 rounded-lg w-full md:w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-400"
             value={filters.intake}
             onChange={(e) => setFilters({ ...filters, intake: e.target.value })}
@@ -186,133 +167,97 @@ const ProgramCard = ({ studentId }) => {
         </div>
       </div>
 
+      {/* Loading and Error States */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-2 text-gray-600">Loading courses...</span>
+        </div>
+      )}
+      
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          Failed to load courses. Please try again.
+        </div>
+      )}
 
-      {isLoading && <p>Loading...</p>}
-      {error && <p className="text-red-500">Failed to load courses</p>}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Course Results */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {data?.data?.length === 0 && (
-          <p className="text-gray-500 col-span-2">No courses found.</p>
+          <div className="col-span-full text-center py-8">
+            <div className="w-16 h-16 text-gray-300 mx-auto mb-4">🔍</div>
+            <p className="text-gray-500 text-lg">No courses found matching your criteria.</p>
+            <p className="text-gray-400 text-sm mt-2">Try adjusting your filters or search terms.</p>
+          </div>
         )}
 
         {data?.data?.map((program) => (
           <div
             key={program._id}
-            className="max-w-md w-full bg-white shadow-lg rounded-2xl p-6 border border-gray-200 relative"
+            className="bg-white shadow-lg rounded-2xl p-6 border border-gray-200 hover:shadow-xl transition-shadow"
           >
             {/* Title & University */}
-            <div className="mb-4 flex justify-between items-start">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">{program.name}</h2>
-                <p className="text-sm text-gray-600">
-                  {program.university} • {program.country}
-                </p>
-                {program.city && (
-                  <p className="text-xs text-gray-500">{program.city}</p>
-                )}
-              </div>
-
-              <div className="flex gap-2">
-                {studentId ? (
-                  // Show Apply button when in application mode (studentId exists)
-                  hasAppliedToCourse(program._id) ? (
-                    <button
-                      disabled
-                      className="px-4 py-2 text-sm font-medium bg-green-600 text-white rounded-lg cursor-not-allowed shadow-sm"
-                    >
-                      ✓ Applied
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleApplyToCourse(program._id)}
-                      disabled={isLinking}
-                      className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 shadow-sm"
-                    >
-                      {isLinking ? "Applying..." : "Apply to Course"}
-                    </button>
-                  )
-                ) : (
-                  // Show admin buttons only when NOT in application mode (no studentId)
-                  user?.role === "SuperAdmin" && (
-                    <>
-                      <button
-                        onClick={() => handleEdit(program)}
-                        className="px-3 py-1 text-sm bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(program._id)}
-                        className="px-3 py-1 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-                      >
-                        Delete
-                      </button>
-                    </>
-                  )
-                )}
-              </div>
+            <div className="mb-4">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">{program.name}</h3>
+              <p className="text-sm text-gray-600 mb-1">
+                {program.university} • {program.country}
+              </p>
+              {program.city && (
+                <p className="text-xs text-gray-500">{program.city}</p>
+              )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4 text-sm text-gray-800">
+            {/* Course Details */}
+            <div className="space-y-2 text-sm text-gray-700 mb-4">
               {program.department && (
-                <div>
-                  <p className="font-semibold">Department:</p>
-                  <p>{program.department}</p>
+                <div className="flex justify-between">
+                  <span className="font-medium">Department:</span>
+                  <span>{program.department}</span>
                 </div>
               )}
               {program.intake && (
-                <div>
-                  <p className="font-semibold">Intake:</p>
-                  <p>{program.intake}</p>
+                <div className="flex justify-between">
+                  <span className="font-medium">Intake:</span>
+                  <span>{program.intake}</span>
                 </div>
               )}
               {program.type && (
-                <div>
-                  <p className="font-semibold">Type:</p>
-                  <p>{program.type}</p>
+                <div className="flex justify-between">
+                  <span className="font-medium">Type:</span>
+                  <span>{program.type}</span>
                 </div>
               )}
               {program.fee && (
-                <div>
-                  <p className="font-semibold">Fee:</p>
-                  <p>{program.fee}</p>
+                <div className="flex justify-between">
+                  <span className="font-medium">Fee:</span>
+                  <span className="font-semibold text-green-600">{program.fee}</span>
                 </div>
               )}
               {program.timePeriod && (
-                <div>
-                  <p className="font-semibold">Time Period:</p>
-                  <p>{program.timePeriod}</p>
+                <div className="flex justify-between">
+                  <span className="font-medium">Duration:</span>
+                  <span>{program.timePeriod}</span>
                 </div>
               )}
-              {program.percentageRequirement && (
-                <div>
-                  <p className="font-semibold">Percentage Requirement:</p>
-                  <p>{program.percentageRequirement}</p>
-                </div>
-              )}
-              {program.cgpaRequirement && (
-                <div>
-                  <p className="font-semibold">CGPA Requirement:</p>
-                  <p>{program.cgpaRequirement}</p>
-                </div>
-              )}
-              {program.isPrivate && (
-                <div>
-                  <p className="font-semibold">Private:</p>
-                  <p>{program.isPrivate}</p>
-                </div>
-              )}
-              {program.languageTest && (
-                <div>
-                  <p className="font-semibold">Language Test:</p>
-                  <p>{program.languageTest}</p>
-                </div>
-              )}
-              {program.minBands && (
-                <div>
-                  <p className="font-semibold">Minimum Bands / Score:</p>
-                  <p>{program.minBands}</p>
-                </div>
+            </div>
+
+            {/* Apply Button */}
+            <div className="pt-4 border-t border-gray-200">
+              {hasAppliedToCourse(program._id) ? (
+                <button
+                  disabled
+                  className="w-full px-4 py-2 text-sm font-medium bg-green-600 text-white rounded-lg cursor-not-allowed shadow-sm"
+                >
+                  ✓ Already Applied
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleApplyToCourse(program._id)}
+                  disabled={isLinking}
+                  className="w-full px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 shadow-sm"
+                >
+                  {isLinking ? "Applying..." : "Apply to Course"}
+                </button>
               )}
             </div>
           </div>
@@ -322,4 +267,4 @@ const ProgramCard = ({ studentId }) => {
   );
 };
 
-export default ProgramCard;
+export default ApplyToCourse;
