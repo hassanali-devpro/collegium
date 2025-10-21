@@ -66,12 +66,12 @@ export default function Layout({ children }) {
       <div className="w-full h-16 bg-white shadow-md flex items-center justify-between px-4 sm:px-6 relative">
         <div className="flex items-center gap-3">
           <button
-            className="sm:hidden p-2 rounded-md hover:bg-gray-100"
+            className="md:hidden p-2 rounded-md hover:bg-gray-100"
             onClick={toggleSidebar}
           >
             <Menu size={22} />
           </button>
-          <img src={logo} alt="Logo" className="h-10 w-auto hidden sm:block" />
+          <img src={logo} alt="Logo" className="h-10 w-auto hidden md:block" />
         </div>
 
         <div className="flex items-center gap-4 sm:gap-6">
@@ -105,24 +105,24 @@ export default function Layout({ children }) {
       <div className="flex flex-1 overflow-hidden">
         {isSidebarOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-40 z-40 sm:hidden"
+            className="fixed inset-0 bg-black bg-opacity-40 z-40 md:hidden"
             onClick={toggleSidebar}
           />
         )}
 
         {/* Sidebar */}
         <div
-          className={`fixed sm:static top-0 left-0 h-screen w-64 bg-gray-100 text-gray-800 flex flex-col shadow-md transform transition-transform z-50
-          ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} sm:translate-x-0`}
+          className={`fixed md:static top-0 left-0 h-screen w-64 bg-gray-100 text-gray-800 flex flex-col shadow-md transform transition-transform z-50
+          ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
         >
-          <div className="sm:hidden flex items-center justify-between p-4 border-b border-gray-300 shadow-3xl">
+          <div className="md:hidden flex items-center justify-between p-4 border-b border-gray-300 shadow-3xl">
             <img src={logo} alt="Logo" className="h-10 w-auto" />
             <button onClick={toggleSidebar}>
               <X size={22} />
             </button>
           </div>
 
-          <nav className="flex-1 p-4 mt-2 sm:mt-6">
+          <nav className="flex-1 p-4 mt-2 md:mt-6">
             <ul className="space-y-2">
               {menuItems.map((item, index) => (
                 <li key={index}>

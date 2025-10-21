@@ -44,17 +44,6 @@ const StudentForm = () => {
     }
   );
 
-  // Debug logging (only in development)
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      if (officesData) {
-        console.log("Offices data:", officesData);
-      }
-      if (agentsData) {
-        console.log("Agents data:", agentsData);
-      }
-    }
-  }, [officesData, agentsData]);
 
   // Course search state and API
   const [courseFilters, setCourseFilters] = useState({
@@ -351,49 +340,49 @@ const StudentForm = () => {
   }
 
   return (
-    <div>
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
+        <div className="mb-4 sm:mb-8">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
             {isEditMode ? "Update Student Information" : "Add New Student"}
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
             {isEditMode ? "Update student profile and manage applications" : "Create a new student profile and apply to courses"}
           </p>
         </div>
 
         {/* Tabs */}
-        <div className="bg-white rounded-lg shadow mb-8">
+        <div className="bg-white rounded-lg shadow mb-4 sm:mb-8">
           <div className="border-b border-gray-200">
-            <nav className="flex space-x-8 px-6">
+            <nav className="flex overflow-x-auto scrollbar-hide">
               {[
-                { id: "profile", label: "Profile Information" },
-                { id: "documents", label: "Documents" },
-                { id: "course", label: "Apply for Course" },
-                { id: "applications", label: "Applications" },
+                { id: "profile", label: "Profile", fullLabel: "Profile Information" },
+                { id: "documents", label: "Documents", fullLabel: "Documents" },
+                { id: "course", label: "Apply Course", fullLabel: "Apply for Course" },
+                { id: "applications", label: "Applications", fullLabel: "Applications" },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  className={`py-3 sm:py-4 px-2 sm:px-4 lg:px-6 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
                     activeTab === tab.id
                       ? "border-blue-500 text-blue-600"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
                 >
-                  {tab.label}
+                  <span className="hidden sm:inline">{tab.fullLabel}</span>
+                  <span className="sm:hidden">{tab.label}</span>
                 </button>
               ))}
             </nav>
           </div>
 
           {/* Tab Content */}
-          <div className="p-8">
+          <div className="p-2 sm:p-4 lg:p-8">
             {activeTab === "profile" && (
-              <form onSubmit={handleSubmit} className="space-y-10">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+              <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8 lg:space-y-10">
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 text-center">
                   {isEditMode ? "Update Student Information" : "Student Registration Form"}
                 </h2>
 
@@ -414,11 +403,11 @@ const StudentForm = () => {
                 {/* SuperAdmin Office and Agent Selection */}
                 {user?.role === "SuperAdmin" && (
                   <section>
-                    <h3 className="text-lg font-semibold mb-4 text-blue-600 border-b-2 pb-2">
+                    <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-blue-600 border-b-2 pb-2">
                       Office & Agent Assignment
                     </h3>
                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                       <div>
                         <label className="block text-blue-600 font-semibold mb-2">
                           Office *
@@ -493,10 +482,10 @@ const StudentForm = () => {
 
                 {/* Personal Information */}
                 <section>
-                  <h3 className="text-lg font-semibold mb-4 text-blue-600 border-b-2 pb-2">
+                  <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-blue-600 border-b-2 pb-2">
                     Personal Information
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                     <input
                       type="text"
                       name="name"
@@ -542,10 +531,10 @@ const StudentForm = () => {
 
                 {/* Education Section */}
                 <section>
-                  <h3 className="text-lg font-semibold mb-4 text-blue-600 border-b-2 pb-2">
+                  <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-blue-600 border-b-2 pb-2">
                     Education
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                     <input
                       type="text"
                       name="lastQualification"
@@ -604,10 +593,10 @@ const StudentForm = () => {
 
                 {/* Language Test */}
                 <section>
-                  <h3 className="text-lg font-semibold mb-4 text-blue-600 border-b-2 pb-2">
+                  <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-blue-600 border-b-2 pb-2">
                     Language Test
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                     <select
                       name="languageTest"
                       value={formData.languageTest}
@@ -633,10 +622,10 @@ const StudentForm = () => {
 
                 {/* Attestations */}
                 <section>
-                  <h3 className="text-lg font-semibold mb-4 text-blue-600 border-b-2 pb-2">
+                  <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-blue-600 border-b-2 pb-2">
                     Attestations
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {[
                       "boardAttestation",
                       "ibccAttestation",
@@ -661,10 +650,10 @@ const StudentForm = () => {
 
                 {/* Study Preferences */}
                 <section>
-                  <h3 className="text-lg font-semibold mb-4 text-blue-600 border-b-2 pb-2">
+                  <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-blue-600 border-b-2 pb-2">
                     Study Preferences
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                     <input
                       type="text"
                       name="country1"
@@ -703,28 +692,28 @@ const StudentForm = () => {
             )}
 
             {activeTab === "course" && (
-              <div className="py-8">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+              <div className="py-4 sm:py-6 lg:py-8">
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 text-center">
                   Apply for Course
                 </h2>
                 
                 {/* Course Search Filters */}
-                <div className="mb-8 p-6 bg-gray-50 rounded-lg">
-                  <h3 className="text-lg font-semibold mb-4 text-blue-600">Course Filters</h3>
+                <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gray-50 rounded-lg">
+                  <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-blue-600">Course Filters</h3>
                   
                   {/* First Row - Search and Country */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
                     <input
                       type="text"
-                      placeholder="Search courses..."
+                      placeholder="Search courses (partial match)..."
                       value={courseFilters.search}
                       onChange={(e) => setCourseFilters({...courseFilters, search: e.target.value})}
-                      className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="p-2 sm:p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                     />
                     <select
                       value={courseFilters.country}
                       onChange={(e) => setCourseFilters({...courseFilters, country: e.target.value})}
-                      className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="p-2 sm:p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                     >
                       <option value="">All Countries</option>
                       <option value="Australia">Australia</option>
@@ -738,25 +727,25 @@ const StudentForm = () => {
                   </div>
 
                   {/* Second Row - University, Intake, Type, Fee Sort */}
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     <input
                       type="text"
-                      placeholder="University..."
+                      placeholder="University (partial match)..."
                       value={courseFilters.university}
                       onChange={(e) => setCourseFilters({...courseFilters, university: e.target.value})}
-                      className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="p-2 sm:p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                     />
                     <input
                       type="text"
-                      placeholder="Intake..."
+                      placeholder="Intake (partial match)..."
                       value={courseFilters.intake}
                       onChange={(e) => setCourseFilters({...courseFilters, intake: e.target.value})}
-                      className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="p-2 sm:p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                     />
                     <select
                       value={courseFilters.type}
                       onChange={(e) => setCourseFilters({...courseFilters, type: e.target.value})}
-                      className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="p-2 sm:p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                     >
                       <option value="">All Types</option>
                       <option value="Bachelors">Bachelors</option>
@@ -766,7 +755,7 @@ const StudentForm = () => {
                     <select
                       value={courseFilters.feeSort}
                       onChange={(e) => setCourseFilters({...courseFilters, feeSort: e.target.value})}
-                      className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="p-2 sm:p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                     >
                       <option value="">Fee Sort</option>
                       <option value="high-to-low">Fee: High to Low</option>
@@ -775,7 +764,7 @@ const StudentForm = () => {
                   </div>
 
                   {/* Clear Filters Button */}
-                  <div className="mt-4 flex justify-end">
+                  <div className="mt-3 sm:mt-4 flex justify-end">
                     <button
                       onClick={() => setCourseFilters({
                         search: "",
@@ -785,7 +774,7 @@ const StudentForm = () => {
                         intake: "",
                         feeSort: "",
                       })}
-                      className="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                      className="px-3 sm:px-4 py-2 text-xs sm:text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
                     >
                       Clear All Filters
                     </button>
@@ -793,54 +782,57 @@ const StudentForm = () => {
                 </div>
 
                 {/* Course List */}
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {isLoadingCourses ? (
-                    <div className="text-center py-8">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                      <p className="text-gray-600">Loading courses...</p>
+                    <div className="text-center py-6 sm:py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-b-2 border-blue-600 mx-auto mb-3 sm:mb-4"></div>
+                      <p className="text-sm sm:text-base text-gray-600">Loading courses...</p>
                     </div>
                   ) : coursesData?.data?.length > 0 ? (
                     coursesData.data.map((course) => (
-                      <div key={course._id} className="border rounded-lg p-6 hover:shadow-md transition-shadow">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h3 className="text-xl font-semibold text-gray-800 mb-2">{course.name}</h3>
-                            <p className="text-gray-600 mb-2">{course.university}</p>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-500">
-                              <div>
-                                <span className="font-medium">Country:</span> {course.country}
-                              </div>
-                              <div>
-                                <span className="font-medium">Type:</span> {course.type}
-                              </div>
-                              <div>
-                                <span className="font-medium">Fee:</span> {course.fee}
-                              </div>
-                              <div>
-                                <span className="font-medium">Duration:</span> {course.timePeriod}
-                              </div>
+                      <div key={course._id} className="border rounded-lg p-3 sm:p-4 lg:p-6 hover:shadow-md transition-shadow">
+                        {/* Title and Button Row */}
+                        <div className="flex items-start justify-between mb-2 sm:mb-3">
+                          <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-800 flex-1 pr-3">{course.name}</h3>
+                          {hasAppliedToCourse(course._id) ? (
+                            <button
+                              disabled
+                              className="px-3 sm:px-4 lg:px-6 py-1 sm:py-2 text-xs sm:text-sm bg-green-600 text-white rounded-lg cursor-not-allowed flex-shrink-0"
+                            >
+                              ✓ Applied
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleApplyToCourse(course._id)}
+                              disabled={isLinking}
+                              className="px-3 sm:px-4 lg:px-6 py-1 sm:py-2 text-xs sm:text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                            >
+                              {isLinking ? "Applying..." : "Apply to Course"}
+                            </button>
+                          )}
+                        </div>
+                        
+                        {/* University */}
+                        <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">{course.university}</p>
+                        
+                        {/* Course Details - Full Width */}
+                        <div className="w-full">
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500 mb-2 sm:mb-3">
+                            <div>
+                              <span className="font-medium">Country:</span> {course.country}
                             </div>
-                            <div className="mt-3 text-sm text-gray-500">
-                              <span className="font-medium">Requirements:</span> {course.percentageRequirement}% | {course.languageTest}: {course.minBands}
+                            <div>
+                              <span className="font-medium">Type:</span> {course.type}
+                            </div>
+                            <div>
+                              <span className="font-medium">Fee:</span> {course.fee}
+                            </div>
+                            <div>
+                              <span className="font-medium">Duration:</span> {course.timePeriod}
                             </div>
                           </div>
-                          <div className="ml-4">
-                            {hasAppliedToCourse(course._id) ? (
-                              <button
-                                disabled
-                                className="px-6 py-2 bg-green-600 text-white rounded-lg cursor-not-allowed"
-                              >
-                                ✓ Applied
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => handleApplyToCourse(course._id)}
-                                disabled={isLinking}
-                                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                {isLinking ? "Applying..." : "Apply to Course"}
-                              </button>
-                            )}
+                          <div className="text-xs sm:text-sm text-gray-500">
+                            <span className="font-medium">Requirements:</span> {course.percentageRequirement}% | {course.languageTest}: {course.minBands}
                           </div>
                         </div>
                       </div>
@@ -860,59 +852,61 @@ const StudentForm = () => {
 
                 {/* Pagination */}
                 {coursesData?.data?.length > 0 && coursesData?.pagination && (
-                  <div className="mt-6 flex items-center justify-between">
-                    <div className="text-sm text-gray-700">
-                      Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, coursesData.pagination.total)} of {coursesData.pagination.total} courses
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                        disabled={currentPage === 1}
-                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Previous
-                      </button>
-                      
-                      {/* Page numbers */}
-                      {Array.from({ length: Math.min(5, coursesData.pagination.totalPages) }, (_, i) => {
-                        const pageNum = i + 1;
-                        return (
-                          <button
-                            key={pageNum}
-                            onClick={() => setCurrentPage(pageNum)}
-                            className={`px-3 py-2 text-sm font-medium rounded-md ${
-                              currentPage === pageNum
-                                ? 'bg-blue-600 text-white'
-                                : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-                            }`}
-                          >
-                            {pageNum}
-                          </button>
-                        );
-                      })}
-                      
-                      <button
-                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, coursesData.pagination.totalPages))}
-                        disabled={currentPage === coursesData.pagination.totalPages}
-                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Next
-                      </button>
+                  <div className="mt-4 sm:mt-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+                      <div className="text-xs sm:text-sm text-gray-700 text-center sm:text-left">
+                        Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, coursesData.pagination.total)} of {coursesData.pagination.total} courses
+                      </div>
+                      <div className="flex items-center justify-center space-x-1 sm:space-x-2">
+                        <button
+                          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                          disabled={currentPage === 1}
+                          className="px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Prev
+                        </button>
+                        
+                        {/* Page numbers */}
+                        {Array.from({ length: Math.min(3, coursesData.pagination.totalPages) }, (_, i) => {
+                          const pageNum = i + 1;
+                          return (
+                            <button
+                              key={pageNum}
+                              onClick={() => setCurrentPage(pageNum)}
+                              className={`px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm font-medium rounded-md ${
+                                currentPage === pageNum
+                                  ? 'bg-blue-600 text-white'
+                                  : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        })}
+                        
+                        <button
+                          onClick={() => setCurrentPage(prev => Math.min(prev + 1, coursesData.pagination.totalPages))}
+                          disabled={currentPage === coursesData.pagination.totalPages}
+                          className="px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Next
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
 
                 {/* Navigation */}
-                <div className="flex justify-between mt-8">
+                <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-6 sm:mt-8">
                   <button
                     onClick={handlePrevTab}
-                    className="bg-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-400 transition"
+                    className="bg-gray-300 text-gray-700 px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-gray-400 transition text-sm sm:text-base"
                   >
                     Previous
                   </button>
                   <button
                     onClick={() => setActiveTab("applications")}
-                    className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition"
+                    className="bg-green-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-green-700 transition text-sm sm:text-base"
                   >
                     View Applications
                   </button>
