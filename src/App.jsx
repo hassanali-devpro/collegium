@@ -2,6 +2,8 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ToastContainer from "./components/Toast/ToastContainer";
+import { ToastProvider, useToastContext } from "./contexts/ToastContext";
 
 import Login from "./pages/login";
 import Dashboard from "./pages/dashboard";
@@ -23,8 +25,9 @@ import StudentPage from "./pages/Student";
 import StudentForm from "./pages/Student/StudentForm";
 import ApplicationList from "./pages/Application/ApplicationList";
 
-function App() {
+function AppContent() {
   const userRole = "admin";
+  const { toasts, removeToast } = useToastContext();
 
   const protectedRoutes = [
     { path: "/dashboard", element: <Dashboard /> },
@@ -67,7 +70,16 @@ function App() {
           />
         ))}
       </Routes>
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
     </Router>
+  );
+}
+
+function App() {
+  return (
+    <ToastProvider>
+      <AppContent />
+    </ToastProvider>
   );
 }
 

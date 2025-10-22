@@ -92,7 +92,7 @@ const TabsPage = () => {
           <SearchCourse studentId={studentId} />
         )}
         {activeTab === "application" && (
-          <ApplicationTabLayout studentId={studentId} onNavigateToPrograms={() => setActiveTab("programs")} />
+          <ApplicationTabLayout studentId={studentId} onNavigateToPrograms={() => setActiveTab("course")} />
         )}
       </div>
     </div>

@@ -6,6 +6,7 @@ import { useGetOfficesQuery } from "../../features/offices/officeApi";
 import { useGetAgentsQuery } from "../../features/agents/agentApi";
 import { useSearchCoursesQuery } from "../../features/courses/courseApi";
 import { useCreateApplicationMutation, useGetApplicationsByStudentQuery } from "../../features/applications/applicationApi";
+import { useToastContext } from "../../contexts/ToastContext";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import DocumentsTab from "./DocumentsTab";
@@ -18,6 +19,7 @@ const StudentForm = () => {
   const isEditMode = !!studentId;
   
   const { user } = useSelector((state) => state.auth);
+  const { success, error: showError } = useToastContext();
   const [addStudent, { isLoading: isCreating }] = useAddStudentMutation();
   const [updateStudent, { isLoading: isUpdating }] = useUpdateStudentMutation();
   
@@ -63,6 +65,9 @@ const StudentForm = () => {
   const [debouncedFilters, setDebouncedFilters] = useState(courseFilters);
   
   const [createApplication, { isLoading: isLinking }] = useCreateApplicationMutation();
+  
+  // Track which specific course is being applied to
+  const [applyingToCourseId, setApplyingToCourseId] = useState(null);
 
   const [activeTab, setActiveTab] = useState(
     location.state?.selectedApplicationId ? "applications" : "profile"
@@ -211,13 +216,13 @@ const StudentForm = () => {
     if (user?.role === "SuperAdmin") {
       // SuperAdmin must select officeId and agentId
       if (!formData.selectedOfficeId || !formData.selectedAgentId) {
-        alert("Please select Office and Agent for the student!");
+        showError("Please select Office and Agent for the student!");
         return;
       }
     } else {
       // Agent/Admin must have officeId and agentId from their profile
       if (!user?.officeId || !user?._id) {
-        alert("Missing office or user information!");
+        showError("Missing office or user information!");
         return;
       }
     }
@@ -252,12 +257,12 @@ const StudentForm = () => {
       let result;
       if (isEditMode) {
         result = await updateStudent({ id: studentId, ...payload }).unwrap();
-        alert(`✅ Student Updated Successfully! ID: ${formData.studentId}`);
+        success(`Student Updated Successfully! ID: ${formData.studentId}`);
         // Store the actual student ID for course applications
         setActualStudentId(studentId);
       } else {
         result = await addStudent(payload).unwrap();
-        alert(`✅ Student Registered Successfully! ID: ${formData.studentId}`);
+        success(`Student Registered Successfully! ID: ${formData.studentId}`);
         // Store the actual student ID from the API response
         setActualStudentId(result.data._id);
       }
@@ -271,7 +276,7 @@ const StudentForm = () => {
         err?.data?.error ||
         err?.error ||
         "Failed to save student. Please try again.";
-      alert(`❌ ${errorMessage}`);
+      showError(errorMessage);
     }
   };
 
@@ -299,11 +304,14 @@ const StudentForm = () => {
 
   const handleApplyToCourse = async (courseId) => {
     if (!actualStudentId) {
-      alert("Please complete student registration first!");
+      showError("Please complete student registration first!");
       return;
     }
 
     try {
+      // Set the specific course being applied to
+      setApplyingToCourseId(courseId);
+      
       // Create application using the new Applications API
       await createApplication({
         studentId: actualStudentId,
@@ -311,9 +319,9 @@ const StudentForm = () => {
         priority: "medium",
         notes: `Application submitted for ${formData.name}`
       }).unwrap();
-      alert("✅ Successfully applied to course!");
-      // Navigate to the application detail page
-      navigate(`/application/student/${actualStudentId}`);
+      success("Successfully applied to course!");
+      // Switch to applications tab to show the updated applications
+      setActiveTab("applications");
     } catch (err) {
       console.error("❌ Error applying to course:", err);
       const errorMessage =
@@ -321,7 +329,10 @@ const StudentForm = () => {
         err?.data?.error ||
         err?.error ||
         "Failed to apply to course. Please try again.";
-      alert(`❌ ${errorMessage}`);
+      showError(errorMessage);
+    } finally {
+      // Clear the applying state
+      setApplyingToCourseId(null);
     }
   };
 
@@ -692,7 +703,7 @@ const StudentForm = () => {
             )}
 
             {activeTab === "course" && (
-              <div className="py-4 sm:py-6 lg:py-8">
+              <div className="pb-4 sm:pb-6 lg:pb-8">
                 <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 text-center">
                   Apply for Course
                 </h2>
@@ -804,10 +815,10 @@ const StudentForm = () => {
                           ) : (
                             <button
                               onClick={() => handleApplyToCourse(course._id)}
-                              disabled={isLinking}
+                              disabled={applyingToCourseId === course._id}
                               className="px-3 sm:px-4 lg:px-6 py-1 sm:py-2 text-xs sm:text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                             >
-                              {isLinking ? "Applying..." : "Apply to Course"}
+                              {applyingToCourseId === course._id ? "Applying..." : "Apply to Course"}
                             </button>
                           )}
                         </div>
@@ -918,6 +929,7 @@ const StudentForm = () => {
               <ApplicationTabLayout 
                 studentId={actualStudentId} 
                 initialSelectedApplicationId={location.state?.selectedApplicationId}
+                onNavigateToPrograms={() => setActiveTab("course")}
               />
             )}
           </div>

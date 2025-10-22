@@ -1,68 +1,83 @@
 import React, { useState } from "react";
 import { Trash2, FileText, Loader2, UploadCloud } from "lucide-react";
 import { useUploadDocumentsMutation } from "../../features/documents/docApi";
+import { useToastContext } from "../../contexts/ToastContext";
+import { useConfirmationModal } from "../../hooks/useConfirmationModal";
+import ConfirmationModal from "../../components/ConfirmationModal";
 
 const documentTypes = [
-  "Profile Picture",
-  "Matric Certificate",
-  "Matric Marks Sheet",
-  "Intermediate Certificate",
-  "Intermediate Marks Sheet",
-  "Degree",
-  "Transcript",
-  "Language Test",
-  "Passport",
-  "Experience Letter",
-  "Birth Certificate",
-  "Family Registration",
-  "Other Documents",
+  { displayName: "Profile Picture", fieldName: "profilePicture" },
+  { displayName: "Matric Certificate", fieldName: "matricCertificate" },
+  { displayName: "Matric Marks Sheet", fieldName: "matricMarksSheet" },
+  { displayName: "Intermediate Certificate", fieldName: "intermediateCertificate" },
+  { displayName: "Intermediate Marks Sheet", fieldName: "intermediateMarkSheet" },
+  { displayName: "Degree", fieldName: "degree" },
+  { displayName: "Transcript", fieldName: "transcript" },
+  { displayName: "Language Test", fieldName: "languageCertificate" },
+  { displayName: "Passport", fieldName: "passport" },
+  { displayName: "Experience Letter", fieldName: "experienceLetter" },
+  { displayName: "Birth Certificate", fieldName: "birthCertificate" },
+  { displayName: "Family Registration", fieldName: "familyRegistration" },
+  { displayName: "Other Documents", fieldName: "otherDocs" },
 ];
 
 const DocumentsTab = ({ studentId, onPrev, onNext }) => {
   const [selectedFiles, setSelectedFiles] = useState({});
   const [uploading, setUploading] = useState(false);
   const [uploadDocuments] = useUploadDocumentsMutation();
+  const { success, error: showError } = useToastContext();
+  const { modalState, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationModal();
 
-  const handleFileSelect = (type, file) => {
-    setSelectedFiles((prev) => ({ ...prev, [type]: file }));
+  const handleFileSelect = (fieldName, file) => {
+    setSelectedFiles((prev) => ({ ...prev, [fieldName]: file }));
   };
 
-  const handleDelete = (type) => {
-    if (window.confirm(`Delete ${type}?`)) {
-      setSelectedFiles((prev) => {
-        const updated = { ...prev };
-        delete updated[type];
-        return updated;
-      });
-    }
+  const handleDelete = (fieldName) => {
+    const documentType = documentTypes.find(dt => dt.fieldName === fieldName);
+    const displayName = documentType?.displayName || fieldName;
+    
+    showConfirmation({
+      title: "Delete Document",
+      message: `Are you sure you want to delete ${displayName}? This action cannot be undone.`,
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      type: "danger",
+      onConfirm: () => {
+        setSelectedFiles((prev) => {
+          const updated = { ...prev };
+          delete updated[fieldName];
+          return updated;
+        });
+      }
+    });
   };
 
   const handleUploadAll = async () => {
     if (!studentId) {
-      alert("Student ID is required for document upload.");
+      showError("Student ID is required for document upload.");
       return;
     }
 
     const filesToUpload = Object.entries(selectedFiles).filter(([_, f]) => f);
     if (filesToUpload.length === 0) {
-      alert("Please select at least one file before submitting.");
+      showError("Please select at least one file before submitting.");
       return;
     }
 
     const formData = new FormData();
-    filesToUpload.forEach(([type, file]) => {
-      formData.append("documents", file); // key name depends on your backend
-      formData.append("types", type); // to identify document type
+    filesToUpload.forEach(([fieldName, file]) => {
+      // Use the correct field name for each document type
+      formData.append(fieldName, file);
     });
 
     try {
       setUploading(true);
       await uploadDocuments({ studentId, formData }).unwrap();
-      alert("All selected files uploaded successfully!");
+      success("All selected files uploaded successfully!");
       setSelectedFiles({});
     } catch (error) {
       console.error(error);
-      alert("Upload failed. Please try again.");
+      showError("Upload failed. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -87,15 +102,15 @@ const DocumentsTab = ({ studentId, onPrev, onNext }) => {
 
       {/* Two-column grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        {documentTypes.map((type) => {
-          const selectedFile = selectedFiles[type];
+        {documentTypes.map((docType) => {
+          const selectedFile = selectedFiles[docType.fieldName];
           return (
             <div
-              key={type}
+              key={docType.fieldName}
               className="bg-gray-50 p-4 rounded-lg border hover:shadow-md transition"
             >
               <div className="flex items-center justify-between mb-3">
-                <h4 className="font-medium text-gray-800 text-sm">{type}</h4>
+                <h4 className="font-medium text-gray-800 text-sm">{docType.displayName}</h4>
                 <FileText className="text-blue-500" size={16} />
               </div>
 
@@ -107,7 +122,7 @@ const DocumentsTab = ({ studentId, onPrev, onNext }) => {
                     accept="image/*,.pdf,.doc,.docx"
                     className="hidden"
                     onChange={(e) =>
-                      handleFileSelect(type, e.target.files[0] || null)
+                      handleFileSelect(docType.fieldName, e.target.files[0] || null)
                     }
                   />
                 </label>
@@ -121,7 +136,7 @@ const DocumentsTab = ({ studentId, onPrev, onNext }) => {
                 {selectedFile && (
                   <button
                     type="button"
-                    onClick={() => handleDelete(type)}
+                    onClick={() => handleDelete(docType.fieldName)}
                     className="flex items-center justify-center gap-1 bg-red-100 text-red-600 p-1 rounded text-xs font-medium hover:bg-red-200 transition"
                   >
                     <Trash2 size={12} /> Delete
@@ -171,6 +186,18 @@ const DocumentsTab = ({ studentId, onPrev, onNext }) => {
           Next
         </button>
       </div>
+      
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={modalState.isOpen}
+        title={modalState.title}
+        message={modalState.message}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        type={modalState.type}
+        onConfirm={handleConfirm}
+        onCancel={hideConfirmation}
+      />
     </div>
   );
 };

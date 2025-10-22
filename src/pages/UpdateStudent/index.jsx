@@ -5,10 +5,12 @@ import {
   useAddStudentMutation,
   useUpdateStudentMutation,
 } from "../../features/students/studentApi";
+import { useToastContext } from "../../contexts/ToastContext";
 
 const StudentUpdateForm = () => {
   const { id } = useParams();
   const navigate = useNavigate(); // ✅ for navigation
+  const { success, error: showError } = useToastContext();
 
   // ✅ Skip fetching when creating a new student
   const { data, isLoading, isError } = useGetStudentByIdQuery(id, {
@@ -77,10 +79,10 @@ const StudentUpdateForm = () => {
     try {
       if (id) {
         await updateStudent({ id, ...formData }).unwrap();
-        alert("✅ Student updated successfully!");
+        success("Student updated successfully!");
       } else {
         await addStudent(formData).unwrap();
-        alert("✅ Student created successfully!");
+        success("Student created successfully!");
       }
 
       // ✅ Navigate after success
@@ -88,11 +90,11 @@ const StudentUpdateForm = () => {
 
     } catch (err) {
       console.error("Submission failed:", err);
-      alert(
+      showError(
         err?.data?.message ||
           err?.data?.error ||
           err?.error ||
-          "❌ Failed to submit student."
+          "Failed to submit student."
       );
     }
   };

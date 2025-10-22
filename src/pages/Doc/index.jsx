@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { Trash2, FileText, Loader2, UploadCloud } from "lucide-react";
 import { useUploadDocumentsMutation } from "../../features/documents/docApi";
+import { useToastContext } from "../../contexts/ToastContext";
+import { useConfirmationModal } from "../../hooks/useConfirmationModal";
+import ConfirmationModal from "../../components/ConfirmationModal";
 
 const documentTypes = [
   "Profile Picture",
@@ -22,6 +25,8 @@ const DocumentsPage = () => {
   const [selectedFiles, setSelectedFiles] = useState({});
   const [uploading, setUploading] = useState(false);
   const [uploadDocuments] = useUploadDocumentsMutation();
+  const { success, error: showError } = useToastContext();
+  const { modalState, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationModal();
 
   // 🔹 Replace with actual student ID (from Redux, params, or context)
   const studentId = "123"; 
@@ -31,19 +36,26 @@ const DocumentsPage = () => {
   };
 
   const handleDelete = (type) => {
-    if (window.confirm(`Delete ${type}?`)) {
-      setSelectedFiles((prev) => {
-        const updated = { ...prev };
-        delete updated[type];
-        return updated;
-      });
-    }
+    showConfirmation({
+      title: "Delete Document",
+      message: `Are you sure you want to delete ${type}? This action cannot be undone.`,
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      type: "danger",
+      onConfirm: () => {
+        setSelectedFiles((prev) => {
+          const updated = { ...prev };
+          delete updated[type];
+          return updated;
+        });
+      }
+    });
   };
 
   const handleUploadAll = async () => {
     const filesToUpload = Object.entries(selectedFiles).filter(([_, f]) => f);
     if (filesToUpload.length === 0) {
-      alert("Please select at least one file before submitting.");
+      showError("Please select at least one file before submitting.");
       return;
     }
 
@@ -56,11 +68,11 @@ const DocumentsPage = () => {
     try {
       setUploading(true);
       await uploadDocuments({ studentId, formData }).unwrap();
-      alert("All selected files uploaded successfully!");
+      success("All selected files uploaded successfully!");
       setSelectedFiles({});
     } catch (error) {
       console.error(error);
-      alert("Upload failed. Please try again.");
+      showError("Upload failed. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -149,6 +161,18 @@ const DocumentsPage = () => {
           )}
         </button>
       </div>
+      
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={modalState.isOpen}
+        title={modalState.title}
+        message={modalState.message}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        type={modalState.type}
+        onConfirm={handleConfirm}
+        onCancel={hideConfirmation}
+      />
     </div>
   );
 };

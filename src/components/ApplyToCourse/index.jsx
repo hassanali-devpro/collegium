@@ -4,9 +4,14 @@ import {
   useSearchCoursesQuery,
 } from "../../features/courses/courseApi";
 import { useCreateApplicationMutation, useGetApplicationsByStudentQuery } from "../../features/applications/applicationApi";
+import { useToastContext } from "../../contexts/ToastContext";
+import { useConfirmationModal } from "../../hooks/useConfirmationModal";
+import ConfirmationModal from "../ConfirmationModal";
 
 const ApplyToCourse = ({ studentId }) => {
   const { user } = useSelector((state) => state.auth);
+  const { success, error: showError } = useToastContext();
+  const { modalState, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationModal();
 
   // 🔎 Form state
   const [filters, setFilters] = useState({
@@ -31,6 +36,9 @@ const ApplyToCourse = ({ studentId }) => {
   });
 
   const [createApplication, { isLoading: isLinking }] = useCreateApplicationMutation();
+  
+  // Track which specific course is being applied to
+  const [applyingToCourseId, setApplyingToCourseId] = useState(null);
 
   // Fetch student's applications to check which courses they've already applied to
   const { data: studentApplications } = useGetApplicationsByStudentQuery({
@@ -51,25 +59,41 @@ const ApplyToCourse = ({ studentId }) => {
 
   const handleApplyToCourse = async (courseId) => {
     if (!studentId) {
-      alert("Student ID not found. Please ensure you're on the correct page.");
+      showError("Student ID not found. Please ensure you're on the correct page.");
       return;
     }
 
-    if (confirm("Are you sure you want to apply this student to this course?")) {
-      try {
-        // Create application using the new Applications API
-        await createApplication({
-          studentId: studentId,
-          courseId: courseId,
-          priority: "medium",
-          notes: "Application submitted via application module"
-        }).unwrap();
-        alert("✅ Student successfully applied to the course!");
-      } catch (error) {
-        console.error("Error applying to course:", error);
-        alert("❌ Failed to apply to course. Please try again.");
+    const course = data?.data?.find(c => c._id === courseId);
+    const courseName = course?.name || 'this course';
+    
+    showConfirmation({
+      title: "Apply to Course",
+      message: `Are you sure you want to apply this student to ${courseName}?`,
+      confirmText: "Apply",
+      cancelText: "Cancel",
+      type: "info",
+      onConfirm: async () => {
+        try {
+          // Set the specific course being applied to
+          setApplyingToCourseId(courseId);
+          
+          // Create application using the new Applications API
+          await createApplication({
+            studentId: studentId,
+            courseId: courseId,
+            priority: "medium",
+            notes: "Application submitted via application module"
+          }).unwrap();
+          success("Student successfully applied to the course!");
+        } catch (error) {
+          console.error("Error applying to course:", error);
+          showError("Failed to apply to course. Please try again.");
+        } finally {
+          // Clear the applying state
+          setApplyingToCourseId(null);
+        }
       }
-    }
+    });
   };
 
   if (!studentId) {
@@ -253,16 +277,28 @@ const ApplyToCourse = ({ studentId }) => {
               ) : (
                 <button
                   onClick={() => handleApplyToCourse(program._id)}
-                  disabled={isLinking}
+                  disabled={applyingToCourseId === program._id}
                   className="w-full px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 shadow-sm"
                 >
-                  {isLinking ? "Applying..." : "Apply to Course"}
+                  {applyingToCourseId === program._id ? "Applying..." : "Apply to Course"}
                 </button>
               )}
             </div>
           </div>
         ))}
       </div>
+      
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={modalState.isOpen}
+        title={modalState.title}
+        message={modalState.message}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        type={modalState.type}
+        onConfirm={handleConfirm}
+        onCancel={hideConfirmation}
+      />
     </div>
   );
 };

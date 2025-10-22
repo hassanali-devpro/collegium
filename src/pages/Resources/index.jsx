@@ -1,4 +1,6 @@
 import React, { useState, useRef } from "react";
+import { useConfirmationModal } from "../../hooks/useConfirmationModal";
+import ConfirmationModal from "../../components/ConfirmationModal";
 
 const COUNTRIES = [
   "USA",
@@ -14,6 +16,7 @@ const COUNTRIES = [
 ];
 
 export default function LearningResources() {
+  const { modalState, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationModal();
   const [data, setData] = useState(
     COUNTRIES.reduce((acc, country) => {
       acc[country] = [
@@ -54,11 +57,22 @@ export default function LearningResources() {
   };
 
   const handleDelete = (country, id) => {
-    if (!confirm("Delete this file from list?")) return;
-    setData((prev) => ({
-      ...prev,
-      [country]: (prev[country] || []).filter((f) => f.id !== id),
-    }));
+    const file = data[country]?.find(f => f.id === id);
+    const fileName = file?.name || 'this file';
+    
+    showConfirmation({
+      title: "Delete File",
+      message: `Are you sure you want to delete ${fileName}? This action cannot be undone.`,
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      type: "danger",
+      onConfirm: () => {
+        setData((prev) => ({
+          ...prev,
+          [country]: (prev[country] || []).filter((f) => f.id !== id),
+        }));
+      }
+    });
   };
 
   const handleDownload = (file) => {
@@ -132,6 +146,18 @@ export default function LearningResources() {
           </section>
         ))}
       </div>
+      
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={modalState.isOpen}
+        title={modalState.title}
+        message={modalState.message}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        type={modalState.type}
+        onConfirm={handleConfirm}
+        onCancel={hideConfirmation}
+      />
     </div>
   );
 }

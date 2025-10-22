@@ -121,6 +121,21 @@ export const applicationApi = createApi({
       providesTags: ['Applications'],
     }),
 
+    // Unified search for students and applications
+    unifiedSearch: builder.query({
+      query: ({ 
+        q, 
+        limit = 10
+      }) => {
+        const params = new URLSearchParams();
+        params.append('q', q);
+        params.append('limit', limit);
+        
+        return `applications/unified-search?${params.toString()}`;
+      },
+      providesTags: ['Applications'],
+    }),
+
     // Get application statistics
     getApplicationStats: builder.query({
       query: () => 'applications/stats',
@@ -204,6 +219,7 @@ export const {
   useGetApplicationsByStudentQuery,
   useGetApplicationsByCourseQuery,
   useSearchApplicationsQuery,
+  useUnifiedSearchQuery,
   useGetApplicationStatsQuery,
   useCreateApplicationMutation,
   useUpdateApplicationMutation,

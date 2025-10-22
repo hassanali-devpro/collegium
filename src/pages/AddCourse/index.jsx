@@ -6,12 +6,14 @@ import {
 } from "../../features/courses/courseApi";
 import { useConfirmationModal } from "../../hooks/useConfirmationModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
+import { useToastContext } from "../../contexts/ToastContext";
 
 const StudyProgramForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const editProgram = location.state?.program || null;
   const { modalState, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationModal();
+  const { success, error: showError } = useToastContext();
 
   const [createCourse, { isLoading: isCreating }] = useCreateCourseMutation();
   const [updateCourse, { isLoading: isUpdating }] = useUpdateCourseMutation();
@@ -49,15 +51,15 @@ const StudyProgramForm = () => {
     try {
       if (editProgram) {
         await updateCourse({ id: editProgram._id, ...formData }).unwrap();
-        alert("Program Updated Successfully!");
+        success("Program Updated Successfully!");
       } else {
         await createCourse(formData).unwrap();
-        alert("Program Registered Successfully!");
+        success("Program Registered Successfully!");
       }
       navigate("/course-search");
     } catch (err) {
       console.error("Error:", err);
-      alert("Something went wrong!");
+      showError("Something went wrong!");
     }
   };
 

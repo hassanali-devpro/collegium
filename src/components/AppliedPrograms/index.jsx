@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { useGetStudentByIdQuery } from '../../features/students/studentApi';
-import { useGetApplicationsByStudentQuery } from '../../features/applications/applicationApi';
-import { useUnlinkStudentFromCourseMutation } from '../../features/courses/courseApi';
+import { useGetApplicationsByStudentQuery, useDeleteApplicationMutation } from '../../features/applications/applicationApi';
+import { useToastContext } from '../../contexts/ToastContext';
+import { useConfirmationModal } from '../../hooks/useConfirmationModal';
+import ConfirmationModal from '../ConfirmationModal';
 import { CheckCircle, XCircle, Clock, AlertCircle, Trash2, MessageCircle } from 'lucide-react';
 import ApplicationComments from '../ApplicationComments';
 
 const AppliedPrograms = ({ studentId }) => {
   const [selectedApplicationId, setSelectedApplicationId] = useState(null);
+  const { success, error: showError } = useToastContext();
+  const { modalState, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationModal();
 
   const { data: studentData, isLoading: studentLoading } = useGetStudentByIdQuery(studentId, {
     skip: !studentId
@@ -22,19 +26,29 @@ const AppliedPrograms = ({ studentId }) => {
     skip: !studentId
   });
 
-  const [unlinkStudentFromCourse, { isLoading: isUnlinking }] = useUnlinkStudentFromCourseMutation();
+  const [deleteApplication, { isLoading: isDeleting }] = useDeleteApplicationMutation();
 
-  const handleRemoveApplication = async (courseId) => {
-    if (confirm("Are you sure you want to remove this application?")) {
-      try {
-        await unlinkStudentFromCourse({ courseId, studentId }).unwrap();
-        alert("✅ Application removed successfully!");
-        refetch(); // Refresh the applications list
-      } catch (error) {
-        console.error("Error removing application:", error);
-        alert("❌ Failed to remove application. Please try again.");
+  const handleRemoveApplication = async (applicationId) => {
+    const application = applications.find(app => app._id === applicationId);
+    const courseName = application?.courseId?.name || 'this course';
+    
+    showConfirmation({
+      title: "Remove Application",
+      message: `Are you sure you want to remove the application for ${courseName}? This action cannot be undone.`,
+      confirmText: "Remove",
+      cancelText: "Cancel",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          await deleteApplication(applicationId).unwrap();
+          success("Application removed successfully!");
+          refetch(); // Refresh the applications list
+        } catch (error) {
+          console.error("Error removing application:", error);
+          showError("Failed to remove application. Please try again.");
+        }
       }
-    }
+    });
   };
 
 
@@ -139,8 +153,8 @@ const AppliedPrograms = ({ studentId }) => {
 
                   {/* Remove Button */}
                   <button
-                    onClick={() => handleRemoveApplication(application.courseId?._id)}
-                    disabled={isUnlinking}
+                    onClick={() => handleRemoveApplication(application._id)}
+                    disabled={isDeleting}
                     className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50"
                     title="Remove Application"
                   >
@@ -224,6 +238,18 @@ const AppliedPrograms = ({ studentId }) => {
           ))
         )}
       </div>
+      
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={modalState.isOpen}
+        title={modalState.title}
+        message={modalState.message}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        type={modalState.type}
+        onConfirm={handleConfirm}
+        onCancel={hideConfirmation}
+      />
     </div>
   );
 };

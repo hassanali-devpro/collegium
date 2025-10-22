@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useGetStudentByIdQuery } from '../../features/students/studentApi';
-import { useGetApplicationsByStudentQuery } from '../../features/applications/applicationApi';
-import { useUnlinkStudentFromCourseMutation } from '../../features/courses/courseApi';
+import { useGetApplicationsByStudentQuery, useDeleteApplicationMutation } from '../../features/applications/applicationApi';
+import { useToastContext } from '../../contexts/ToastContext';
+import { useConfirmationModal } from '../../hooks/useConfirmationModal';
+import ConfirmationModal from '../ConfirmationModal';
 import { CheckCircle, XCircle, Clock, AlertCircle, Trash2, MessageCircle, Eye, Plus } from 'lucide-react';
 import ApplicationComments from '../ApplicationComments';
 
 const ApplicationTabLayout = ({ studentId, onNavigateToPrograms, initialSelectedApplicationId }) => {
   const [selectedApplicationId, setSelectedApplicationId] = useState(initialSelectedApplicationId || null);
   const [activeCommentTab, setActiveCommentTab] = useState('kcTeam');
+  const { success, error: showError } = useToastContext();
+  const { modalState, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationModal();
 
   const { data: studentData, isLoading: studentLoading } = useGetStudentByIdQuery(studentId, {
     skip: !studentId
@@ -23,7 +27,7 @@ const ApplicationTabLayout = ({ studentId, onNavigateToPrograms, initialSelected
     skip: !studentId
   });
 
-  const [unlinkStudentFromCourse, { isLoading: isUnlinking }] = useUnlinkStudentFromCourseMutation();
+  const [deleteApplication, { isLoading: isDeleting }] = useDeleteApplicationMutation();
 
   // Auto-select first application if no initial selection and applications are loaded
   useEffect(() => {
@@ -41,21 +45,31 @@ const ApplicationTabLayout = ({ studentId, onNavigateToPrograms, initialSelected
     }
   }, [initialSelectedApplicationId]);
 
-  const handleRemoveApplication = async (courseId) => {
-    if (confirm("Are you sure you want to remove this application?")) {
-      try {
-        await unlinkStudentFromCourse({ courseId, studentId }).unwrap();
-        alert("✅ Application removed successfully!");
-        refetch(); // Refresh the applications list
-        // If the removed application was selected, clear selection
-        if (selectedApplicationId && applicationsData?.data?.find(app => app._id === selectedApplicationId)?.courseId?._id === courseId) {
-          setSelectedApplicationId(null);
+  const handleRemoveApplication = async (applicationId) => {
+    const application = applications.find(app => app._id === applicationId);
+    const courseName = application?.courseId?.name || 'this course';
+    
+    showConfirmation({
+      title: "Remove Application",
+      message: `Are you sure you want to remove the application for ${courseName}? This action cannot be undone.`,
+      confirmText: "Remove",
+      cancelText: "Cancel",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          await deleteApplication(applicationId).unwrap();
+          success("Application removed successfully!");
+          refetch(); // Refresh the applications list
+          // If the removed application was selected, clear selection
+          if (selectedApplicationId === applicationId) {
+            setSelectedApplicationId(null);
+          }
+        } catch (error) {
+          console.error("Error removing application:", error);
+          showError("Failed to remove application. Please try again.");
         }
-      } catch (error) {
-        console.error("Error removing application:", error);
-        alert("❌ Failed to remove application. Please try again.");
       }
-    }
+    });
   };
 
   if (!studentId) {
@@ -217,9 +231,9 @@ const ApplicationTabLayout = ({ studentId, onNavigateToPrograms, initialSelected
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleRemoveApplication(application.courseId?._id);
+                              handleRemoveApplication(application._id);
                             }}
-                            disabled={isUnlinking}
+                            disabled={isDeleting}
                             className="p-1 text-red-600 hover:bg-red-50 rounded transition disabled:opacity-50"
                             title="Remove Application"
                           >
@@ -303,9 +317,9 @@ const ApplicationTabLayout = ({ studentId, onNavigateToPrograms, initialSelected
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleRemoveApplication(application.courseId?._id);
+                              handleRemoveApplication(application._id);
                             }}
-                            disabled={isUnlinking}
+                            disabled={isDeleting}
                             className="p-1 text-red-600 hover:bg-red-50 rounded transition disabled:opacity-50"
                             title="Remove Application"
                           >
@@ -404,6 +418,18 @@ const ApplicationTabLayout = ({ studentId, onNavigateToPrograms, initialSelected
           </div>
         </div>
       </div>
+      
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={modalState.isOpen}
+        title={modalState.title}
+        message={modalState.message}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        type={modalState.type}
+        onConfirm={handleConfirm}
+        onCancel={hideConfirmation}
+      />
     </div>
   );
 };

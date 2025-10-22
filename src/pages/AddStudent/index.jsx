@@ -2,10 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useAddStudentMutation, useUpdateStudentMutation, useGetStudentByIdQuery } from "../../features/students/studentApi";
+import { useToastContext } from "../../contexts/ToastContext";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
 const StudentRegistrationForm = ({ onStudentCreated, existingStudentId }) => {
+  const { user } = useSelector((state) => state.auth);
+  const { success, error: showError } = useToastContext();
   const [formData, setFormData] = useState({
     studentId: "",
     name: "",
@@ -28,7 +31,6 @@ const StudentRegistrationForm = ({ onStudentCreated, existingStudentId }) => {
     country2: "",
   });
 
-  const { user } = useSelector((state) => state.auth);
   const [addStudent, { isLoading: isCreating }] = useAddStudentMutation();
   const [updateStudent, { isLoading: isUpdating }] = useUpdateStudentMutation();
   
@@ -107,7 +109,7 @@ const StudentRegistrationForm = ({ onStudentCreated, existingStudentId }) => {
     e.preventDefault();
 
     if (!user?.officeId || !user?._id) {
-      alert("Missing office or user information!");
+      showError("Missing office or user information!");
       return;
     }
 
@@ -142,11 +144,11 @@ const StudentRegistrationForm = ({ onStudentCreated, existingStudentId }) => {
       if (isEditMode) {
         // Update existing student
         result = await updateStudent({ id: existingStudentId, ...payload }).unwrap();
-        alert(`✅ Student Updated Successfully! ID: ${formData.studentId}`);
+        success(`Student Updated Successfully! ID: ${formData.studentId}`);
       } else {
         // Create new student
         result = await addStudent(payload).unwrap();
-        alert(`✅ Student Registered Successfully! ID: ${formData.studentId}`);
+        success(`Student Registered Successfully! ID: ${formData.studentId}`);
       }
       
       // If we have a callback function, call it with the student ID
@@ -188,7 +190,7 @@ const StudentRegistrationForm = ({ onStudentCreated, existingStudentId }) => {
         err?.data?.error ||
         err?.error ||
         "Failed to register student. Please try again.";
-      alert(`❌ ${errorMessage}`);
+      showError(errorMessage);
     }
   };
 

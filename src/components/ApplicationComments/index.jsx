@@ -2,10 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { io } from 'socket.io-client';
 import { useAddCommentToApplicationMutation, useUpdateApplicationCommentMutation, useDeleteApplicationCommentMutation } from '../../features/applications/applicationApi';
+import { useToastContext } from '../../contexts/ToastContext';
+import { useConfirmationModal } from '../../hooks/useConfirmationModal';
+import ConfirmationModal from '../ConfirmationModal';
 import { MessageCircle, Send, Edit2, Trash2, X, Check } from 'lucide-react';
 
 const ApplicationComments = ({ applicationId, comments = [], activeTab = 'kcTeam' }) => {
   const { user } = useSelector((state) => state.auth);
+  const { error: showError } = useToastContext();
+  const { modalState, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationModal();
   const [newComment, setNewComment] = useState('');
   const [editingComment, setEditingComment] = useState(null);
   const [editText, setEditText] = useState('');
@@ -95,7 +100,7 @@ const ApplicationComments = ({ applicationId, comments = [], activeTab = 'kcTeam
       setHideFromCounselor(false);
     } catch (error) {
       console.error('Error adding comment:', error);
-      alert('Failed to add comment. Please try again.');
+      showError('Failed to add comment. Please try again.');
     }
   };
 
@@ -117,22 +122,29 @@ const ApplicationComments = ({ applicationId, comments = [], activeTab = 'kcTeam
       setEditText('');
     } catch (error) {
       console.error('Error updating comment:', error);
-      alert('Failed to update comment. Please try again.');
+      showError('Failed to update comment. Please try again.');
     }
   };
 
   const handleDeleteComment = async (commentId) => {
-    if (!confirm('Are you sure you want to delete this comment?')) return;
-
-    try {
-      await deleteComment({
-        applicationId,
-        commentId
-      }).unwrap();
-    } catch (error) {
-      console.error('Error deleting comment:', error);
-      alert('Failed to delete comment. Please try again.');
-    }
+    showConfirmation({
+      title: "Delete Comment",
+      message: "Are you sure you want to delete this comment? This action cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          await deleteComment({
+            applicationId,
+            commentId
+          }).unwrap();
+        } catch (error) {
+          console.error('Error deleting comment:', error);
+          showError('Failed to delete comment. Please try again.');
+        }
+      }
+    });
   };
 
   const cancelEdit = () => {
@@ -277,6 +289,18 @@ const ApplicationComments = ({ applicationId, comments = [], activeTab = 'kcTeam
           </div>
         </div>
       </div>
+      
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={modalState.isOpen}
+        title={modalState.title}
+        message={modalState.message}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        type={modalState.type}
+        onConfirm={handleConfirm}
+        onCancel={hideConfirmation}
+      />
     </div>
   );
 };
