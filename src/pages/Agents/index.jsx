@@ -8,11 +8,14 @@ import {
   useDeactivateAgentMutation,
 } from "../../features/agents/agentApi";
 import { useGetOfficesQuery } from "../../features/offices/officeApi";
+import { useConfirmationModal } from "../../hooks/useConfirmationModal";
+import ConfirmationModal from "../../components/ConfirmationModal";
 
 const AgentsPage = () => {
   const [page, setPage] = useState(1);
   const { data, error, isLoading } = useGetAgentsQuery({ page, limit: 10 });
   const { data: officesData } = useGetOfficesQuery({ page: 1, limit: 10 });
+  const { modalState, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationModal();
 
   const [createAgent] = useCreateAgentMutation();
   const [updateAgent] = useUpdateAgentMutation();
@@ -67,13 +70,20 @@ const AgentsPage = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this agent?")) {
-      try {
-        await deleteAgent(id).unwrap();
-      } catch (err) {
-        console.error("Failed to delete agent:", err);
+    showConfirmation({
+      title: "Delete Agent",
+      message: "Are you sure you want to delete this agent? This action cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          await deleteAgent(id).unwrap();
+        } catch (err) {
+          console.error("Failed to delete agent:", err);
+        }
       }
-    }
+    });
   };
 
   const handleToggleStatus = async (agent) => {
@@ -340,6 +350,18 @@ const AgentsPage = () => {
           </div>
         </div>
       )}
+      
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={modalState.isOpen}
+        onClose={hideConfirmation}
+        onConfirm={handleConfirm}
+        title={modalState.title}
+        message={modalState.message}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        type={modalState.type}
+      />
     </div>
   );
 };

@@ -42,6 +42,8 @@ function App() {
     
     // Application routes
     { path: "/applications", element: <ApplicationList /> },
+    {path:"/add-course", element:<AddCourse />},
+    {path:"/add-student", element:<AddStudent />}
   ];
 
   return (
@@ -50,8 +52,6 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/add-course" element={<AddCourse />} />
-        <Route path="/add-student" element={<AddStudent />} />
         <Route path="/student-documents" element={<Doc />} />
         <Route path="/learning-resource" element={<Resource />} />
 

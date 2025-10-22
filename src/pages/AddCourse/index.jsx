@@ -4,11 +4,14 @@ import {
   useCreateCourseMutation,
   useUpdateCourseMutation,
 } from "../../features/courses/courseApi";
+import { useConfirmationModal } from "../../hooks/useConfirmationModal";
+import ConfirmationModal from "../../components/ConfirmationModal";
 
 const StudyProgramForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const editProgram = location.state?.program || null;
+  const { modalState, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationModal();
 
   const [createCourse, { isLoading: isCreating }] = useCreateCourseMutation();
   const [updateCourse, { isLoading: isUpdating }] = useUpdateCourseMutation();
@@ -55,6 +58,26 @@ const StudyProgramForm = () => {
     } catch (err) {
       console.error("Error:", err);
       alert("Something went wrong!");
+    }
+  };
+
+  const handleCancel = () => {
+    // Check if form has unsaved changes
+    const hasChanges = Object.values(formData).some(value => value !== "");
+    
+    if (hasChanges) {
+      showConfirmation({
+        title: "Cancel Changes",
+        message: "You have unsaved changes. Are you sure you want to cancel?",
+        confirmText: "Yes, Cancel",
+        cancelText: "Keep Editing",
+        type: "warning",
+        onConfirm: () => {
+          navigate("/course-search");
+        }
+      });
+    } else {
+      navigate("/course-search");
     }
   };
 
@@ -254,19 +277,40 @@ const StudyProgramForm = () => {
           </div>
         </section>
 
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={isCreating || isUpdating}
-          className="w-full bg-[#F42222] text-white py-3 rounded-lg font-semibold hover:bg-[#980b0b] transition disabled:opacity-50"
-        >
-          {isCreating || isUpdating
-            ? "Saving..."
-            : editProgram
-            ? "Update Program"
-            : "Register Program"}
-        </button>
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="w-full sm:w-1/3 bg-gray-500 text-white py-3 rounded-lg font-semibold hover:bg-gray-600 transition"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isCreating || isUpdating}
+            className="w-full sm:w-2/3 bg-[#F42222] text-white py-3 rounded-lg font-semibold hover:bg-[#980b0b] transition disabled:opacity-50"
+          >
+            {isCreating || isUpdating
+              ? "Saving..."
+              : editProgram
+              ? "Update Program"
+              : "Register Program"}
+          </button>
+        </div>
       </form>
+      
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={modalState.isOpen}
+        onClose={hideConfirmation}
+        onConfirm={handleConfirm}
+        title={modalState.title}
+        message={modalState.message}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        type={modalState.type}
+      />
     </div>
   );
 };
