@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Check, Loader2, Pencil, Search, User, FileText, AlertCircle } from "lucide-react";
 import {
   useGetStudentOptionQuery,
@@ -26,6 +26,7 @@ const stageTitles = [
 
 const ApplicationTracking = () => {
   const [searchId, setSearchId] = useState("");
+  const [debouncedSearchId, setDebouncedSearchId] = useState("");
   const [studentId, setStudentId] = useState(null);
   const [localOptions, setLocalOptions] = useState(null);
   const [editedComments, setEditedComments] = useState({});
@@ -46,13 +47,22 @@ const ApplicationTracking = () => {
   });
 
   const { data: unifiedSearchData, isLoading: isUnifiedSearching, error: unifiedSearchError } = useUnifiedSearchQuery({
-    q: searchId,
+    q: debouncedSearchId,
     limit: 10
   }, {
-    skip: !searchId || searchId.length < 2
+    skip: !debouncedSearchId || debouncedSearchId.length < 2
   });
 
   const [updateStudentOption, { isLoading: isUpdating }] = useUpdateStudentOptionMutation();
+
+  // Debouncing effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchId(searchId);
+    }, 300); // 300ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchId]);
 
   const handleSearch = () => {
     if (searchId.trim()) {
@@ -61,30 +71,55 @@ const ApplicationTracking = () => {
   };
 
   const handleSearchResultSelect = (result) => {
+    console.log('Search result selected:', result);
+    console.log('Result type:', result.type);
+    console.log('Student ID from result:', result.studentId);
+    
     if (result.type === 'student') {
       setStudentId(result._id);
       setActiveTab("tracking");
       setShowDropdown(false);
       setSearchId("");
+      setSearchResults(null);
     } else if (result.type === 'application') {
-      setStudentId(result.studentId?._id);
+      console.log('Application selected, student ID:', result.studentId);
+      if (result.studentId) {
+        // Extract the _id from the studentId object
+        const studentIdValue = typeof result.studentId === 'object' ? result.studentId._id : result.studentId;
+        console.log('Extracted student ID:', studentIdValue);
+        setStudentId(studentIdValue);
       setSelectedApplicationId(result._id);
       setActiveTab("applications");
       setShowDropdown(false);
       setSearchId("");
+        setSearchResults(null);
+      } else {
+        console.error('No studentId found in application result:', result);
+      }
     }
   };
 
   const handleExactMatch = (data, type) => {
+    console.log('Exact match found:', data, type);
     if (type === 'exact_student') {
       setStudentId(data._id);
       setActiveTab("tracking");
       setSearchId("");
+      setSearchResults(null);
     } else if (type === 'exact_application') {
-      setStudentId(data.studentId?._id);
+      console.log('Exact application match, student ID:', data.studentId);
+      if (data.studentId) {
+        // Extract the _id from the studentId object
+        const studentIdValue = typeof data.studentId === 'object' ? data.studentId._id : data.studentId;
+        console.log('Extracted student ID:', studentIdValue);
+        setStudentId(studentIdValue);
       setSelectedApplicationId(data._id);
       setActiveTab("applications");
       setSearchId("");
+        setSearchResults(null);
+      } else {
+        console.error('No studentId found in exact application match:', data);
+      }
     }
   };
 
@@ -133,7 +168,13 @@ const ApplicationTracking = () => {
     }
   }, [unifiedSearchData, unifiedSearchError, isUnifiedSearching]);
 
-  const student = data?.data;
+  const student = studentData?.data || data?.data;
+  
+  // Debug student data
+  console.log('Student data from studentData:', studentData?.data);
+  console.log('Student data from data:', data?.data);
+  console.log('Final student data:', student);
+  console.log('Student studentCode:', student?.studentCode);
 
   const handleToggleStage = async (key) => {
     if (!student || !localOptions) return;
@@ -194,6 +235,7 @@ const ApplicationTracking = () => {
                     } else {
                       setShowDropdown(false);
                       setSearchResults(null);
+                      setDebouncedSearchId(""); // Clear debounced search immediately
                     }
                   }}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -215,74 +257,74 @@ const ApplicationTracking = () => {
                       </div>
                     ) : searchResults ? (
                       <>
-                        {/* Students Section */}
-                        {searchResults.students.length > 0 && (
-                          <div className="p-2">
-                            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-2">
-                              Students ({searchResults.students.length})
-                            </div>
-                            {searchResults.students.map((student) => (
-                              <div
-                                key={student._id}
-                                onClick={() => handleSearchResultSelect(student)}
-                                className="flex items-center p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                              >
-                                <User className="w-5 h-5 text-blue-500 mr-3 flex-shrink-0" />
-                                <div className="flex-1 min-w-0">
-                                  <div className="text-sm font-medium text-gray-900 truncate">
-                                    {student.name}
-                                  </div>
-                                  <div className="text-xs text-gray-500 truncate">
-                                    {student.studentCode} • {student.email}
-                                  </div>
-                                  <div className="text-xs text-gray-400">
-                                    Agent: {student.agent} • Office: {student.office}
-                                  </div>
-                                </div>
+                    {/* Students Section */}
+                    {searchResults.students.length > 0 && (
+                      <div className="p-2">
+                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-2">
+                          Students ({searchResults.students.length})
+                        </div>
+                        {searchResults.students.map((student) => (
+                          <div
+                            key={student._id}
+                            onClick={() => handleSearchResultSelect(student)}
+                            className="flex items-center p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                          >
+                            <User className="w-5 h-5 text-blue-500 mr-3 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium text-gray-900 truncate">
+                                {student.name}
                               </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Applications Section */}
-                        {searchResults.applications.length > 0 && (
-                          <div className="p-2">
-                            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-2">
-                              Applications ({searchResults.applications.length})
-                            </div>
-                            {searchResults.applications.map((application) => (
-                              <div
-                                key={application._id}
-                                onClick={() => handleSearchResultSelect(application)}
-                                className="flex items-center p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                              >
-                                <FileText className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
-                                <div className="flex-1 min-w-0">
-                                  <div className="text-sm font-medium text-gray-900 truncate">
-                                    {application.applicationNumber}
-                                  </div>
-                                  <div className="text-xs text-gray-500 truncate">
-                                    {application.studentName} • {application.courseName}
-                                  </div>
-                                  <div className="text-xs text-gray-400">
-                                    {application.university} • {new Date(application.createdAt).toLocaleDateString()}
-                                  </div>
-                                </div>
-                                {application.priority && (
-                                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityTagColor(application.priority)} ml-2`}>
-                                    {application.priority}
-                                  </span>
-                                )}
+                              <div className="text-xs text-gray-500 truncate">
+                                {student.studentCode} • {student.email}
                               </div>
-                            ))}
+                              <div className="text-xs text-gray-400">
+                                Agent: {student.agent} • Office: {student.office}
+                              </div>
+                            </div>
                           </div>
-                        )}
+                        ))}
+                      </div>
+                    )}
 
-                        {/* No Results */}
-                        {searchResults.students.length === 0 && searchResults.applications.length === 0 && (
-                          <div className="p-4 text-center text-gray-500">
-                            <AlertCircle className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                            <p className="text-sm">No results found</p>
+                    {/* Applications Section */}
+                    {searchResults.applications.length > 0 && (
+                      <div className="p-2">
+                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-2">
+                          Applications ({searchResults.applications.length})
+                        </div>
+                        {searchResults.applications.map((application) => (
+                          <div
+                            key={application._id}
+                            onClick={() => handleSearchResultSelect(application)}
+                            className="flex items-center p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                          >
+                            <FileText className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium text-gray-900 truncate">
+                                {application.applicationNumber}
+                              </div>
+                              <div className="text-xs text-gray-500 truncate">
+                                {application.studentName} • {application.courseName}
+                              </div>
+                              <div className="text-xs text-gray-400">
+                                {application.university} • {new Date(application.createdAt).toLocaleDateString()}
+                              </div>
+                            </div>
+                            {application.priority && (
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityTagColor(application.priority)} ml-2`}>
+                                {application.priority}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* No Results */}
+                    {searchResults.students.length === 0 && searchResults.applications.length === 0 && (
+                      <div className="p-4 text-center text-gray-500">
+                        <AlertCircle className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                        <p className="text-sm">No results found</p>
                           </div>
                         )}
                       </>
@@ -356,7 +398,7 @@ const ApplicationTracking = () => {
                     }`}
                   >
                     <FileText className="w-4 h-4 inline mr-2" />
-                    Applications ({applications.length})
+                    Applications
                   </button>
                 </div>
               </div>
@@ -454,7 +496,7 @@ const ApplicationTracking = () => {
                             ) : done ? (
                               "Undone"
                             ) : (
-                              "Done"
+                              "Mark as Done"
                             )}
                           </button>
                         </div>
