@@ -64,7 +64,7 @@ const AgentStudents = () => {
 
           <div className="mt-8 text-center">
             <Link
-              to={`/student/${student._id}`}
+              to={`/student/edit/${student._id}`}
               className="inline-block px-6 py-3 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-800 font-medium transition"
             >
               Visit Profile

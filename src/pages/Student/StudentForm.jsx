@@ -17,12 +17,12 @@ const StudentForm = () => {
   const { studentId } = useParams();
   const location = useLocation();
   const isEditMode = !!studentId;
-  
+
   const { user } = useSelector((state) => state.auth);
   const { success, error: showError } = useToastContext();
   const [addStudent, { isLoading: isCreating }] = useAddStudentMutation();
   const [updateStudent, { isLoading: isUpdating }] = useUpdateStudentMutation();
-  
+
   // Fetch existing student data if editing
   const { data: existingStudentData, isLoading: isLoadingStudent } = useGetStudentByIdQuery(studentId, {
     skip: !studentId
@@ -33,14 +33,14 @@ const StudentForm = () => {
   // This approach is more efficient than making separate API calls for each office
   const { data: officesData, isLoading: isLoadingOffices, error: officesError } = useGetOfficesQuery(
     { page: 1, limit: 100 },
-    { 
+    {
       skip: user?.role !== "SuperAdmin", // Only fetch for SuperAdmin
       keepUnusedDataFor: 300 // Cache for 5 minutes (300 seconds)
     }
   );
   const { data: agentsData, isLoading: isLoadingAgents, error: agentsError } = useGetAgentsQuery(
     { page: 1, limit: 100 },
-    { 
+    {
       skip: user?.role !== "SuperAdmin", // Only fetch for SuperAdmin
       keepUnusedDataFor: 300 // Cache for 5 minutes (300 seconds)
     }
@@ -56,16 +56,16 @@ const StudentForm = () => {
     intake: "",
     feeSort: "", // "high-to-low" or "low-to-high"
   });
-  
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
-  
+
   // Debounced filters for API calls
   const [debouncedFilters, setDebouncedFilters] = useState(courseFilters);
-  
+
   const [createApplication, { isLoading: isLinking }] = useCreateApplicationMutation();
-  
+
   // Track which specific course is being applied to
   const [applyingToCourseId, setApplyingToCourseId] = useState(null);
 
@@ -200,7 +200,7 @@ const StudentForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Reset agent selection when office changes
     if (name === "selectedOfficeId") {
       setFormData({ ...formData, [name]: value, selectedAgentId: "" });
@@ -266,7 +266,7 @@ const StudentForm = () => {
         // Store the actual student ID from the API response
         setActualStudentId(result.data._id);
       }
-      
+
       // Move to documents tab after successful save
       setActiveTab("documents");
     } catch (err) {
@@ -311,7 +311,7 @@ const StudentForm = () => {
     try {
       // Set the specific course being applied to
       setApplyingToCourseId(courseId);
-      
+
       // Create application using the new Applications API
       await createApplication({
         studentId: actualStudentId,
@@ -376,11 +376,10 @@ const StudentForm = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`py-3 sm:py-4 px-2 sm:px-4 lg:px-6 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
-                    activeTab === tab.id
+                  className={`py-3 sm:py-4 px-2 sm:px-4 lg:px-6 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${activeTab === tab.id
                       ? "border-blue-500 text-blue-600"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
+                    }`}
                 >
                   <span className="hidden sm:inline">{tab.fullLabel}</span>
                   <span className="sm:hidden">{tab.label}</span>
@@ -417,7 +416,7 @@ const StudentForm = () => {
                     <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-blue-600 border-b-2 pb-2">
                       Office & Agent Assignment
                     </h3>
-                   
+
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                       <div>
                         <label className="block text-blue-600 font-semibold mb-2">
@@ -459,14 +458,14 @@ const StudentForm = () => {
                           disabled={!formData.selectedOfficeId || isLoadingAgents}
                         >
                           <option value="">
-                            {!formData.selectedOfficeId 
-                              ? "Select Office first" 
-                              : isLoadingAgents 
-                                ? "Loading agents..." 
+                            {!formData.selectedOfficeId
+                              ? "Select Office first"
+                              : isLoadingAgents
+                                ? "Loading agents..."
                                 : "Select Agent"
                             }
                           </option>
-                          {formData.selectedOfficeId && agentsData?.data?.filter(agent => 
+                          {formData.selectedOfficeId && agentsData?.data?.filter(agent =>
                             agent.officeId === formData.selectedOfficeId && agent.role === "Agent"
                           ).map((agent) => (
                             <option key={agent._id} value={agent._id}>
@@ -479,13 +478,13 @@ const StudentForm = () => {
                             Error loading agents: {agentsError?.data?.message || agentsError?.message}
                           </p>
                         )}
-                        {formData.selectedOfficeId && agentsData?.data?.filter(agent => 
+                        {formData.selectedOfficeId && agentsData?.data?.filter(agent =>
                           agent.officeId === formData.selectedOfficeId && agent.role === "Agent"
                         ).length === 0 && !isLoadingAgents && (
-                          <p className="text-orange-500 text-sm mt-1">
-                            No agents found for this office
-                          </p>
-                        )}
+                            <p className="text-orange-500 text-sm mt-1">
+                              No agents found for this office
+                            </p>
+                          )}
                       </div>
                     </div>
                   </section>
@@ -695,7 +694,7 @@ const StudentForm = () => {
             )}
 
             {activeTab === "documents" && (
-              <DocumentsTab 
+              <DocumentsTab
                 studentId={actualStudentId || formData.studentId}
                 onPrev={handlePrevTab}
                 onNext={handleNextTab}
@@ -707,23 +706,23 @@ const StudentForm = () => {
                 <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 text-center">
                   Apply for Course
                 </h2>
-                
+
                 {/* Course Search Filters */}
                 <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gray-50 rounded-lg">
                   <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-blue-600">Course Filters</h3>
-                  
+
                   {/* First Row - Search and Country */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
                     <input
                       type="text"
                       placeholder="Search courses (partial match)..."
                       value={courseFilters.search}
-                      onChange={(e) => setCourseFilters({...courseFilters, search: e.target.value})}
+                      onChange={(e) => setCourseFilters({ ...courseFilters, search: e.target.value })}
                       className="p-2 sm:p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                     />
                     <select
                       value={courseFilters.country}
-                      onChange={(e) => setCourseFilters({...courseFilters, country: e.target.value})}
+                      onChange={(e) => setCourseFilters({ ...courseFilters, country: e.target.value })}
                       className="p-2 sm:p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                     >
                       <option value="">All Countries</option>
@@ -743,19 +742,32 @@ const StudentForm = () => {
                       type="text"
                       placeholder="University (partial match)..."
                       value={courseFilters.university}
-                      onChange={(e) => setCourseFilters({...courseFilters, university: e.target.value})}
-                      className="p-2 sm:p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Intake (partial match)..."
-                      value={courseFilters.intake}
-                      onChange={(e) => setCourseFilters({...courseFilters, intake: e.target.value})}
+                      onChange={(e) => setCourseFilters({ ...courseFilters, university: e.target.value })}
                       className="p-2 sm:p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                     />
                     <select
+                      value={courseFilters.intake}
+                      onChange={(e) => setCourseFilters({ ...courseFilters, intake: e.target.value })}
+                      className="p-2 sm:p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                    >
+                      <option value="">Select Intake</option>
+                      <option value="January">January</option>
+                      <option value="February">February</option>
+                      <option value="March">March</option>
+                      <option value="April">April</option>
+                      <option value="May">May</option>
+                      <option value="June">June</option>
+                      <option value="July">July</option>
+                      <option value="August">August</option>
+                      <option value="September">September</option>
+                      <option value="October">October</option>
+                      <option value="November">November</option>
+                      <option value="December">December</option>
+                    </select>
+
+                    <select
                       value={courseFilters.type}
-                      onChange={(e) => setCourseFilters({...courseFilters, type: e.target.value})}
+                      onChange={(e) => setCourseFilters({ ...courseFilters, type: e.target.value })}
                       className="p-2 sm:p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                     >
                       <option value="">All Types</option>
@@ -763,9 +775,10 @@ const StudentForm = () => {
                       <option value="Masters">Masters</option>
                       <option value="PhD">PhD</option>
                     </select>
+
                     <select
                       value={courseFilters.feeSort}
-                      onChange={(e) => setCourseFilters({...courseFilters, feeSort: e.target.value})}
+                      onChange={(e) => setCourseFilters({ ...courseFilters, feeSort: e.target.value })}
                       className="p-2 sm:p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                     >
                       <option value="">Fee Sort</option>
@@ -822,10 +835,10 @@ const StudentForm = () => {
                             </button>
                           )}
                         </div>
-                        
+
                         {/* University */}
                         <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">{course.university}</p>
-                        
+
                         {/* Course Details - Full Width */}
                         <div className="w-full">
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500 mb-2 sm:mb-3">
@@ -876,7 +889,7 @@ const StudentForm = () => {
                         >
                           Prev
                         </button>
-                        
+
                         {/* Page numbers */}
                         {Array.from({ length: Math.min(3, coursesData.pagination.totalPages) }, (_, i) => {
                           const pageNum = i + 1;
@@ -884,17 +897,16 @@ const StudentForm = () => {
                             <button
                               key={pageNum}
                               onClick={() => setCurrentPage(pageNum)}
-                              className={`px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm font-medium rounded-md ${
-                                currentPage === pageNum
+                              className={`px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm font-medium rounded-md ${currentPage === pageNum
                                   ? 'bg-blue-600 text-white'
                                   : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-                              }`}
+                                }`}
                             >
                               {pageNum}
                             </button>
                           );
                         })}
-                        
+
                         <button
                           onClick={() => setCurrentPage(prev => Math.min(prev + 1, coursesData.pagination.totalPages))}
                           disabled={currentPage === coursesData.pagination.totalPages}
@@ -926,8 +938,8 @@ const StudentForm = () => {
             )}
 
             {activeTab === "applications" && (
-              <ApplicationTabLayout 
-                studentId={actualStudentId} 
+              <ApplicationTabLayout
+                studentId={actualStudentId}
                 initialSelectedApplicationId={location.state?.selectedApplicationId}
                 onNavigateToPrograms={() => setActiveTab("course")}
               />

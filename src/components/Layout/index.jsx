@@ -40,7 +40,7 @@ export default function Layout({ children }) {
     { name: "Applications", path: "/applications", icon: <FileText size={18} /> },
     { name: "Application Tracking", path: "/application-tracking", icon: <FileText size={18} /> },
     { name: "Course Search", path: "/course-search", icon: <Search size={18} /> },
-    { name: "Student Search", path: "/student-search", icon: <Search size={18} /> },
+    // { name: "Student Search", path: "/student-search", icon: <Search size={18} /> },
     { name: "My Students", path: "/agent-students", icon: <User size={18} /> },
 
     user?.role === "SuperAdmin" && {

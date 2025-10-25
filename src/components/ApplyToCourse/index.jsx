@@ -36,7 +36,7 @@ const ApplyToCourse = ({ studentId }) => {
   });
 
   const [createApplication, { isLoading: isLinking }] = useCreateApplicationMutation();
-  
+
   // Track which specific course is being applied to
   const [applyingToCourseId, setApplyingToCourseId] = useState(null);
 
@@ -65,7 +65,7 @@ const ApplyToCourse = ({ studentId }) => {
 
     const course = data?.data?.find(c => c._id === courseId);
     const courseName = course?.name || 'this course';
-    
+
     showConfirmation({
       title: "Apply to Course",
       message: `Are you sure you want to apply this student to ${courseName}?`,
@@ -76,7 +76,7 @@ const ApplyToCourse = ({ studentId }) => {
         try {
           // Set the specific course being applied to
           setApplyingToCourseId(courseId);
-          
+
           // Create application using the new Applications API
           await createApplication({
             studentId: studentId,
@@ -113,7 +113,7 @@ const ApplyToCourse = ({ studentId }) => {
       {/* Course Filters */}
       <div className="p-4 shadow-lg rounded-lg bg-white">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Course Filters</h3>
-        
+
         {/* First Row - Search and Country */}
         <div className="flex flex-col md:flex-row gap-4 mb-4">
           <input
@@ -143,13 +143,26 @@ const ApplyToCourse = ({ studentId }) => {
             onChange={(e) => setFilters({ ...filters, university: e.target.value })}
           />
 
-          <input
-            type="text"
-            placeholder="Intake (e.g., Fall 2024, Spring 2025)"
+          <select
             className="border border-gray-300 p-2 rounded-lg w-full md:w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-400"
             value={filters.intake}
             onChange={(e) => setFilters({ ...filters, intake: e.target.value })}
-          />
+          >
+            <option value="">Select Intake</option>
+            <option value="January">January</option>
+            <option value="February">February</option>
+            <option value="March">March</option>
+            <option value="April">April</option>
+            <option value="May">May</option>
+            <option value="June">June</option>
+            <option value="July">July</option>
+            <option value="August">August</option>
+            <option value="September">September</option>
+            <option value="October">October</option>
+            <option value="November">November</option>
+            <option value="December">December</option>
+          </select>
+
 
           <select
             className="border border-gray-300 p-2 rounded-lg w-full md:w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -161,6 +174,7 @@ const ApplyToCourse = ({ studentId }) => {
             <option value="Masters">Masters</option>
             <option value="PhD">PhD</option>
           </select>
+
 
           <select
             className="border border-gray-300 p-2 rounded-lg w-full md:w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -198,7 +212,7 @@ const ApplyToCourse = ({ studentId }) => {
           <span className="ml-2 text-gray-600">Loading courses...</span>
         </div>
       )}
-      
+
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           Failed to load courses. Please try again.
@@ -287,7 +301,7 @@ const ApplyToCourse = ({ studentId }) => {
           </div>
         ))}
       </div>
-      
+
       {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={modalState.isOpen}

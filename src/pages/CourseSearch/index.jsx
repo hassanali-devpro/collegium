@@ -87,7 +87,7 @@ const ProgramCard = ({ studentId }) => {
           success("Course deleted successfully!");
         } catch (error) {
           console.error("Error deleting course:", error);
-          
+
           // Handle specific error messages from backend
           if (error?.data?.message) {
             showError(error.data.message);
@@ -146,7 +146,7 @@ const ProgramCard = ({ studentId }) => {
       console.warn(`Invalid page number: ${page}. Valid range: 1-${totalPages}`);
       return;
     }
-    
+
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -179,7 +179,7 @@ const ProgramCard = ({ studentId }) => {
       <div className="p-3 sm:p-4 lg:p-6 shadow-lg rounded-lg bg-white">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3 sm:mb-4 gap-3 sm:gap-4">
           <h3 className="text-base sm:text-lg font-semibold text-gray-800">Course Filters</h3>
-          
+
           {/* Add Course Button - Only show for admin users when not in application mode */}
           {!studentId && user?.role && ['SuperAdmin', 'Admin', 'Agent'].includes(user.role) && (
             <button
@@ -193,7 +193,7 @@ const ProgramCard = ({ studentId }) => {
             </button>
           )}
         </div>
-        
+
         {/* Search Bar - Full width on mobile */}
         <div className="mb-3 sm:mb-4">
           <input
@@ -206,7 +206,7 @@ const ProgramCard = ({ studentId }) => {
         </div>
 
         {/* Filter Grid - Responsive layout */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <input
             type="text"
             placeholder="Country"
@@ -223,13 +223,25 @@ const ProgramCard = ({ studentId }) => {
             onChange={(e) => setFilters({ ...filters, university: e.target.value })}
           />
 
-          <input
-            type="text"
-            placeholder="Intake..."
+          <select
             className="border border-gray-300 p-2 sm:p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
             value={filters.intake}
             onChange={(e) => setFilters({ ...filters, intake: e.target.value })}
-          />
+          >
+            <option value="">Select Intake Month</option>
+            <option value="January">January</option>
+            <option value="February">February</option>
+            <option value="March">March</option>
+            <option value="April">April</option>
+            <option value="May">May</option>
+            <option value="June">June</option>
+            <option value="July">July</option>
+            <option value="August">August</option>
+            <option value="September">September</option>
+            <option value="October">October</option>
+            <option value="November">November</option>
+            <option value="December">December</option>
+          </select>
 
           <select
             className="border border-gray-300 p-2 sm:p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
@@ -241,6 +253,7 @@ const ProgramCard = ({ studentId }) => {
             <option value="Masters">Masters</option>
             <option value="PhD">PhD</option>
           </select>
+
         </div>
 
         {/* Fee Sort - Full width on mobile, half on larger screens */}
@@ -277,7 +290,7 @@ const ProgramCard = ({ studentId }) => {
           </div>
         </div>
       )}
-      
+
       {/* Show when filters are being applied (debounced) */}
       {!isLoading && filters !== debouncedFilters && (
         <div className="flex justify-center items-center py-4">
@@ -287,7 +300,7 @@ const ProgramCard = ({ studentId }) => {
           </div>
         </div>
       )}
-      
+
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
           <p className="text-sm sm:text-base text-red-600">Failed to load courses. Please try again.</p>
@@ -470,11 +483,10 @@ const ProgramCard = ({ studentId }) => {
                   key={pageNum}
                   onClick={() => handlePageChange(pageNum)}
                   disabled={isLoading}
-                  className={`px-3 py-2 text-sm font-medium rounded-lg ${
-                    currentPage === pageNum
+                  className={`px-3 py-2 text-sm font-medium rounded-lg ${currentPage === pageNum
                       ? 'bg-blue-600 text-white'
                       : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-                  } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {pageNum}
                 </button>
@@ -502,10 +514,10 @@ const ProgramCard = ({ studentId }) => {
           </button>
         </div>
       )}
-      
+
       {/* Toast Container */}
       <ToastContainer toasts={toasts} removeToast={removeToast} />
-      
+
       {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={modalState.isOpen}
