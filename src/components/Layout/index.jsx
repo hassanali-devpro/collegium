@@ -12,11 +12,17 @@ import {
   X,
   Bell,
   Menu,
+  KeyRound,
+  Lock,
+  ChevronDown,
 } from "lucide-react";
 import logo from "/Logo-R.png";
+import PasswordResetModal from "../PasswordResetModal";
 
 export default function Layout({ children }) {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isProfileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [isPasswordResetModalOpen, setIsPasswordResetModalOpen] = useState(false);
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -80,24 +86,55 @@ export default function Layout({ children }) {
             <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
 
-          {/* User name and Initial Circle */}
-          <div className="flex items-center gap-2">
-            <div className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-200 border border-gray-300 text-gray-700 font-semibold">
-              {userInitial}
-            </div>
-            <span className="hidden sm:block font-medium text-gray-700">
-              {user?.name || "User"}
-            </span>
+          {/* User Profile Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setProfileDropdownOpen(!isProfileDropdownOpen)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition"
+            >
+              <div className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-200 border border-gray-300 text-gray-700 font-semibold">
+                {userInitial}
+              </div>
+              <span className="hidden sm:block font-medium text-gray-700">
+                {user?.name || "User"}
+              </span>
+              <ChevronDown size={18} className="text-gray-600" />
+            </button>
+
+            {/* Profile Dropdown Menu */}
+            {isProfileDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                <div className="px-4 py-3 border-b border-gray-200">
+                  <p className="text-sm font-medium text-gray-900">{user?.name || "User"}</p>
+                  <p className="text-xs text-gray-500 truncate">{user?.email || ""}</p>
+                  <p className="text-xs text-gray-400 mt-1 capitalize">{user?.role || ""}</p>
+                </div>
+                
+                <div className="py-1">
+                  <button
+                    onClick={() => {
+                      setIsPasswordResetModalOpen(true);
+                      setProfileDropdownOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
+                  >
+                    <KeyRound size={18} className="text-blue-600" />
+                    Reset Password
+                  </button>
+                </div>
+
+                <div className="border-t border-gray-200 py-1">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
+                  >
+                    <Lock size={18} />
+                    Logout
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-
-
-          {/* Logout button */}
-          <button
-            className="px-2 py-1 rounded-md text-md bg-[#F42222] text-white hover:bg-red-600 transition"
-            onClick={handleLogout}
-          >
-            Logout
-          </button>
         </div>
       </div>
 
@@ -146,6 +183,21 @@ export default function Layout({ children }) {
         {/* Main content */}
         <div className="flex-1 p-6 overflow-y-auto">{children}</div>
       </div>
+
+      {/* Password Reset Modal */}
+      <PasswordResetModal
+        isOpen={isPasswordResetModalOpen}
+        onClose={() => setIsPasswordResetModalOpen(false)}
+        userId={user?._id}
+      />
+
+      {/* Click outside to close dropdown */}
+      {isProfileDropdownOpen && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setProfileDropdownOpen(false)}
+        />
+      )}
     </div>
   );
 }
