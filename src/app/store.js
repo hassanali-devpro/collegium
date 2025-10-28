@@ -9,6 +9,7 @@ import { studentApi } from "../features/students/studentApi";
 import { docApi } from "../features/documents/docApi";
 import {agentStudentApi} from "../features/agentStudent/agentStudentApi";
 import { applicationApi } from "../features/applications/applicationApi";
+import { notificationApi } from "../features/notifications/notificationApi";
 
 
 export const store = configureStore({
@@ -22,6 +23,7 @@ export const store = configureStore({
     [docApi.reducerPath]: docApi.reducer,
     [agentStudentApi.reducerPath]: agentStudentApi.reducer,
     [applicationApi.reducerPath]: applicationApi.reducer,
+    [notificationApi.reducerPath]: notificationApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -33,6 +35,7 @@ export const store = configureStore({
       studentApi.middleware,
       docApi.middleware,
       agentStudentApi.middleware,
-      applicationApi.middleware
+      applicationApi.middleware,
+      notificationApi.middleware
     ),
 });

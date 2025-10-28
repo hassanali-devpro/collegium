@@ -24,6 +24,7 @@ import AgentStudents from "./pages/AgentStudents";
 import StudentPage from "./pages/Student";
 import StudentForm from "./pages/Student/StudentForm";
 import ApplicationList from "./pages/Application/ApplicationList";
+import ApplicationDetail from "./pages/ApplicationDetail";
 
 function AppContent() {
   const userRole = "admin";

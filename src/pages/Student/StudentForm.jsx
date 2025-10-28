@@ -73,6 +73,13 @@ const StudentForm = () => {
     location.state?.selectedApplicationId ? "applications" : "profile"
   );
 
+  // Switch to applications tab when navigating from notification
+  useEffect(() => {
+    if (location.state?.selectedApplicationId && activeTab !== "applications") {
+      setActiveTab("applications");
+    }
+  }, [location.state?.selectedApplicationId]);
+
   // Debouncing effect for search filters
   useEffect(() => {
     const timer = setTimeout(() => {
