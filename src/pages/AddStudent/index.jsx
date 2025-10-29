@@ -33,7 +33,7 @@ const StudentRegistrationForm = ({ onStudentCreated, existingStudentId }) => {
 
   const [addStudent, { isLoading: isCreating }] = useAddStudentMutation();
   const [updateStudent, { isLoading: isUpdating }] = useUpdateStudentMutation();
-  
+
   // Fetch existing student data if editing
   const { data: existingStudentData, isLoading: isLoadingStudent } = useGetStudentByIdQuery(existingStudentId, {
     skip: !existingStudentId
@@ -150,7 +150,7 @@ const StudentRegistrationForm = ({ onStudentCreated, existingStudentId }) => {
         result = await addStudent(payload).unwrap();
         success(`Student Registered Successfully! ID: ${formData.studentId}`);
       }
-      
+
       // If we have a callback function, call it with the student ID
       if (onStudentCreated) {
         onStudentCreated(formData.studentId);
@@ -165,7 +165,7 @@ const StudentRegistrationForm = ({ onStudentCreated, existingStudentId }) => {
           studentId: generateStudentId(),
           name: "",
           phoneNumber: "",
-          countryCode: "+92",
+          countryCode: "",
           email: "",
           lastQualification: "",
           lastQualificationScore: "",
@@ -359,6 +359,7 @@ const StudentRegistrationForm = ({ onStudentCreated, existingStudentId }) => {
               <option value="IELTS">IELTS</option>
               <option value="PTE">PTE</option>
               <option value="TOEFL">TOEFL</option>
+              <option value="Duolingo">Duolingo</option>
               <option value="Other">Other</option>
             </select>
             <input
@@ -395,6 +396,7 @@ const StudentRegistrationForm = ({ onStudentCreated, existingStudentId }) => {
                 <option value="">Select {attestation}</option>
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
+                <option value="Partial">Partial</option>
               </select>
             ))}
           </div>
@@ -406,23 +408,71 @@ const StudentRegistrationForm = ({ onStudentCreated, existingStudentId }) => {
             Study Preferences
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <input
-              type="text"
+            <select
               name="country1"
-              placeholder="Country for Study 1"
               value={formData.country1}
               onChange={handleChange}
               className={inputClass}
-            />
-            <input
-              type="text"
+            >
+              <option value="">Select Country for Study 1</option>
+              <option value="France">France</option>
+              <option value="Italy">Italy</option>
+              <option value="Cyprus">Cyprus</option>
+              <option value="Malta">Malta</option>
+              <option value="Sweden">Sweden</option>
+              <option value="Finland">Finland</option>
+              <option value="Germany">Germany</option>
+              <option value="Belgium">Belgium</option>
+              <option value="UK">UK</option>
+              <option value="Spain">Spain</option>
+              <option value="USA">USA</option>
+              <option value="Australia">Australia</option>
+              <option value="Canada">Canada</option>
+              <option value="Hungary">Hungary</option>
+              <option value="Netherlands">Netherlands</option>
+              <option value="Denmark">Denmark</option>
+              <option value="Lithuania">Lithuania</option>
+              <option value="Latvia">Latvia</option>
+              <option value="Estonia">Estonia</option>
+              <option value="Belarus">Belarus</option>
+              <option value="Georgia">Georgia</option>
+              <option value="Austria">Austria</option>
+              <option value="Other">Other</option>
+            </select>
+
+            <select
               name="country2"
-              placeholder="Country for Study 2"
               value={formData.country2}
               onChange={handleChange}
               className={inputClass}
-            />
+            >
+              <option value="">Select Country for Study 2</option>
+              <option value="France">France</option>
+              <option value="Italy">Italy</option>
+              <option value="Cyprus">Cyprus</option>
+              <option value="Malta">Malta</option>
+              <option value="Sweden">Sweden</option>
+              <option value="Finland">Finland</option>
+              <option value="Germany">Germany</option>
+              <option value="Belgium">Belgium</option>
+              <option value="UK">UK</option>
+              <option value="Spain">Spain</option>
+              <option value="USA">USA</option>
+              <option value="Australia">Australia</option>
+              <option value="Canada">Canada</option>
+              <option value="Hungary">Hungary</option>
+              <option value="Netherlands">Netherlands</option>
+              <option value="Denmark">Denmark</option>
+              <option value="Lithuania">Lithuania</option>
+              <option value="Latvia">Latvia</option>
+              <option value="Estonia">Estonia</option>
+              <option value="Belarus">Belarus</option>
+              <option value="Georgia">Georgia</option>
+              <option value="Austria">Austria</option>
+              <option value="Other">Other</option>
+            </select>
           </div>
+
         </section>
 
         <button

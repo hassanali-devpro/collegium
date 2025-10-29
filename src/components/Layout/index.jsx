@@ -220,11 +220,11 @@ export default function Layout({ children }) {
       path: "/manage-users",
       icon: <Users size={18} />,
     },
-    user?.role === "SuperAdmin" && {
-      name: "Payments",
-      path: "/payments",
-      icon: <CreditCard size={18} />,
-    },
+    // user?.role === "SuperAdmin" && {
+    //   name: "Payments",
+    //   path: "/payments",
+    //   icon: <CreditCard size={18} />,
+    // },
     user?.role === "SuperAdmin" && {
       name: "Offices",
       path: "/offices",
