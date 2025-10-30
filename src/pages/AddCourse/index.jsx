@@ -66,7 +66,7 @@ const StudyProgramForm = () => {
   const handleCancel = () => {
     // Check if form has unsaved changes
     const hasChanges = Object.values(formData).some(value => value !== "");
-    
+
     if (hasChanges) {
       showConfirmation({
         title: "Cancel Changes",
@@ -141,15 +141,39 @@ const StudyProgramForm = () => {
             Location
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <input
-              type="text"
+            <select
               name="country"
-              placeholder="Country*"
               value={formData.country}
               onChange={handleChange}
               required
               className={inputClass}
-            />
+            >
+              <option value="">Select Country*</option>
+              <option value="France">France</option>
+              <option value="Italy">Italy</option>
+              <option value="Cyprus">Cyprus</option>
+              <option value="Malta">Malta</option>
+              <option value="Sweden">Sweden</option>
+              <option value="Finland">Finland</option>
+              <option value="Germany">Germany</option>
+              <option value="Belgium">Belgium</option>
+              <option value="UK">UK</option>
+              <option value="Spain">Spain</option>
+              <option value="USA">USA</option>
+              <option value="Australia">Australia</option>
+              <option value="Canada">Canada</option>
+              <option value="Hungary">Hungary</option>
+              <option value="Netherlands">Netherlands</option>
+              <option value="Denmark">Denmark</option>
+              <option value="Lithuania">Lithuania</option>
+              <option value="Latvia">Latvia</option>
+              <option value="Estonia">Estonia</option>
+              <option value="Belarus">Belarus</option>
+              <option value="Georgia">Georgia</option>
+              <option value="Austria">Austria</option>
+              <option value="Other">Other</option>
+            </select>
+
             <input
               type="text"
               name="city"
@@ -176,9 +200,20 @@ const StudyProgramForm = () => {
               className={inputClass}
             >
               <option value="">Select Intake*</option>
+              <option value="January">January</option>
               <option value="February">February</option>
+              <option value="March">March</option>
+              <option value="April">April</option>
+              <option value="May">May</option>
+              <option value="June">June</option>
+              <option value="July">July</option>
+              <option value="August">August</option>
               <option value="September">September</option>
+              <option value="October">October</option>
+              <option value="November">November</option>
+              <option value="December">December</option>
               <option value="Sep and Feb">Sep and Feb</option>
+
             </select>
           </div>
         </section>
@@ -260,14 +295,20 @@ const StudyProgramForm = () => {
               onChange={handleChange}
               className={inputClass}
             />
-            <input
-              type="text"
+            <select
               name="languageTest"
-              placeholder="Language Test (e.g. IELTS, TOEFL)"
               value={formData.languageTest}
               onChange={handleChange}
               className={inputClass}
-            />
+            >
+              <option value="">Select Language Test</option>
+              <option value="IELTS">IELTS</option>
+              <option value="TOEFL">TOEFL</option>
+              <option value="PTE">PTE</option>
+              <option value="Duolingo">Duolingo</option>
+              <option value="Other">Other</option>
+            </select>
+
             <input
               type="text"
               name="minBands"
@@ -296,12 +337,12 @@ const StudyProgramForm = () => {
             {isCreating || isUpdating
               ? "Saving..."
               : editProgram
-              ? "Update Program"
-              : "Register Program"}
+                ? "Update Program"
+                : "Register Program"}
           </button>
         </div>
       </form>
-      
+
       {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={modalState.isOpen}

@@ -1,13 +1,11 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { Check, Loader2, Pencil, Search, User, FileText, AlertCircle } from "lucide-react";
 import {
   useGetStudentOptionQuery,
   useUpdateStudentOptionMutation,
   useGetStudentByIdQuery,
 } from "../../features/students/studentApi";
-import {
-  useUnifiedSearchQuery,
-} from "../../features/applications/applicationApi";
+import { useUnifiedSearchQuery } from "../../features/applications/applicationApi";
 import { useConfirmationModal } from "../../hooks/useConfirmationModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import ApplicationTabLayout from "../../components/ApplicationTabLayout";
@@ -32,10 +30,10 @@ const ApplicationTracking = () => {
   const [editedComments, setEditedComments] = useState({});
   const [editingComment, setEditingComment] = useState(null);
   const [selectedApplicationId, setSelectedApplicationId] = useState(null);
-  const [activeTab, setActiveTab] = useState("tracking"); // "tracking" or "applications"
+  const [activeTab, setActiveTab] = useState("tracking");
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchResults, setSearchResults] = useState(null);
-  
+
   const { modalState, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationModal();
 
   const { data, isFetching, isError } = useGetStudentOptionQuery(studentId, {
@@ -43,24 +41,26 @@ const ApplicationTracking = () => {
   });
 
   const { data: studentData, isLoading: studentLoading } = useGetStudentByIdQuery(studentId, {
-    skip: !studentId
+    skip: !studentId,
   });
 
-  const { data: unifiedSearchData, isLoading: isUnifiedSearching, error: unifiedSearchError } = useUnifiedSearchQuery({
-    q: debouncedSearchId,
-    limit: 10
-  }, {
-    skip: !debouncedSearchId || debouncedSearchId.length < 2
-  });
+  const { data: unifiedSearchData, isLoading: isUnifiedSearching, error: unifiedSearchError } =
+    useUnifiedSearchQuery(
+      {
+        q: debouncedSearchId,
+        limit: 10,
+      },
+      {
+        skip: !debouncedSearchId || debouncedSearchId.length < 2,
+      }
+    );
 
   const [updateStudentOption, { isLoading: isUpdating }] = useUpdateStudentOptionMutation();
 
-  // Debouncing effect
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchId(searchId);
-    }, 300); // 300ms delay
-
+    }, 300);
     return () => clearTimeout(timer);
   }, [searchId]);
 
@@ -71,55 +71,38 @@ const ApplicationTracking = () => {
   };
 
   const handleSearchResultSelect = (result) => {
-    console.log('Search result selected:', result);
-    console.log('Result type:', result.type);
-    console.log('Student ID from result:', result.studentId);
-    
-    if (result.type === 'student') {
+    if (result.type === "student") {
       setStudentId(result._id);
       setActiveTab("tracking");
       setShowDropdown(false);
       setSearchId("");
       setSearchResults(null);
-    } else if (result.type === 'application') {
-      console.log('Application selected, student ID:', result.studentId);
-      if (result.studentId) {
-        // Extract the _id from the studentId object
-        const studentIdValue = typeof result.studentId === 'object' ? result.studentId._id : result.studentId;
-        console.log('Extracted student ID:', studentIdValue);
-        setStudentId(studentIdValue);
+    } else if (result.type === "application") {
+      const studentIdValue =
+        typeof result.studentId === "object" ? result.studentId._id : result.studentId;
+      setStudentId(studentIdValue);
       setSelectedApplicationId(result._id);
       setActiveTab("applications");
       setShowDropdown(false);
       setSearchId("");
-        setSearchResults(null);
-      } else {
-        console.error('No studentId found in application result:', result);
-      }
+      setSearchResults(null);
     }
   };
 
   const handleExactMatch = (data, type) => {
-    console.log('Exact match found:', data, type);
-    if (type === 'exact_student') {
+    if (type === "exact_student") {
       setStudentId(data._id);
       setActiveTab("tracking");
       setSearchId("");
       setSearchResults(null);
-    } else if (type === 'exact_application') {
-      console.log('Exact application match, student ID:', data.studentId);
-      if (data.studentId) {
-        // Extract the _id from the studentId object
-        const studentIdValue = typeof data.studentId === 'object' ? data.studentId._id : data.studentId;
-        console.log('Extracted student ID:', studentIdValue);
-        setStudentId(studentIdValue);
+    } else if (type === "exact_application") {
+      const studentIdValue =
+        typeof data.studentId === "object" ? data.studentId._id : data.studentId;
+      setStudentId(studentIdValue);
       setSelectedApplicationId(data._id);
       setActiveTab("applications");
       setSearchId("");
-        setSearchResults(null);
-      } else {
-        console.error('No studentId found in exact application match:', data);
-      }
+      setSearchResults(null);
     }
   };
 
@@ -151,17 +134,15 @@ const ApplicationTracking = () => {
     }
   }, [data]);
 
-  // Handle unified search results
   useEffect(() => {
-    console.log('Unified search data:', unifiedSearchData);
-    console.log('Unified search error:', unifiedSearchError);
-    console.log('Is unified searching:', isUnifiedSearching);
     if (unifiedSearchData) {
-      if (unifiedSearchData.type === 'exact_student' || unifiedSearchData.type === 'exact_application') {
+      if (
+        unifiedSearchData.type === "exact_student" ||
+        unifiedSearchData.type === "exact_application"
+      ) {
         handleExactMatch(unifiedSearchData.data, unifiedSearchData.type);
         setShowDropdown(false);
-      } else if (unifiedSearchData.type === 'multiple_results') {
-        console.log('Setting search results:', unifiedSearchData.data);
+      } else if (unifiedSearchData.type === "multiple_results") {
         setSearchResults(unifiedSearchData.data);
         setShowDropdown(true);
       }
@@ -169,17 +150,10 @@ const ApplicationTracking = () => {
   }, [unifiedSearchData, unifiedSearchError, isUnifiedSearching]);
 
   const student = studentData?.data || data?.data;
-  
-  // Debug student data
-  console.log('Student data from studentData:', studentData?.data);
-  console.log('Student data from data:', data?.data);
-  console.log('Final student data:', student);
-  console.log('Student studentCode:', student?.studentCode);
 
   const handleToggleStage = async (key) => {
     if (!student || !localOptions) return;
     const updated = { ...localOptions, [key]: !localOptions[key] };
-
     setLocalOptions(updated);
 
     try {
@@ -195,13 +169,10 @@ const ApplicationTracking = () => {
 
   const handleSaveComment = async (key) => {
     if (!student) return;
-
     const commentKey = `${key}Comment`;
     const updated = { ...localOptions, [commentKey]: editedComments[commentKey] };
-
     setLocalOptions(updated);
     setEditingComment(null);
-
     try {
       await updateStudentOption({ id: student._id, ...updated }).unwrap();
     } catch (error) {
@@ -228,115 +199,19 @@ const ApplicationTracking = () => {
                   value={searchId}
                   onChange={(e) => {
                     const value = e.target.value;
-                    console.log('Search input changed:', value);
                     setSearchId(value);
                     if (value.length >= 2) {
                       setShowDropdown(true);
                     } else {
                       setShowDropdown(false);
                       setSearchResults(null);
-                      setDebouncedSearchId(""); // Clear debounced search immediately
+                      setDebouncedSearchId("");
                     }
                   }}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 />
-                
-                {/* Search Dropdown */}
-                {showDropdown && (
-                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-80 overflow-y-auto">
-                    {isUnifiedSearching ? (
-                      <div className="p-4 text-center">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                        <p className="text-sm text-gray-500">Searching...</p>
-                      </div>
-                    ) : unifiedSearchError ? (
-                      <div className="p-4 text-center text-red-500">
-                        <AlertCircle className="w-6 h-6 mx-auto mb-2" />
-                        <p className="text-sm">Search failed. Please try again.</p>
-                      </div>
-                    ) : searchResults ? (
-                      <>
-                    {/* Students Section */}
-                    {searchResults.students.length > 0 && (
-                      <div className="p-2">
-                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-2">
-                          Students ({searchResults.students.length})
-                        </div>
-                        {searchResults.students.map((student) => (
-                          <div
-                            key={student._id}
-                            onClick={() => handleSearchResultSelect(student)}
-                            className="flex items-center p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                          >
-                            <User className="w-5 h-5 text-blue-500 mr-3 flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium text-gray-900 truncate">
-                                {student.name}
-                              </div>
-                              <div className="text-xs text-gray-500 truncate">
-                                {student.studentCode} • {student.email}
-                              </div>
-                              <div className="text-xs text-gray-400">
-                                Agent: {student.agent} • Office: {student.office}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Applications Section */}
-                    {searchResults.applications.length > 0 && (
-                      <div className="p-2">
-                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-2">
-                          Applications ({searchResults.applications.length})
-                        </div>
-                        {searchResults.applications.map((application) => (
-                          <div
-                            key={application._id}
-                            onClick={() => handleSearchResultSelect(application)}
-                            className="flex items-center p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                          >
-                            <FileText className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium text-gray-900 truncate">
-                                {application.applicationNumber}
-                              </div>
-                              <div className="text-xs text-gray-500 truncate">
-                                {application.studentName} • {application.courseName}
-                              </div>
-                              <div className="text-xs text-gray-400">
-                                {application.university} • {new Date(application.createdAt).toLocaleDateString()}
-                              </div>
-                            </div>
-                            {application.priority && (
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityTagColor(application.priority)} ml-2`}>
-                                {application.priority}
-                              </span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* No Results */}
-                    {searchResults.students.length === 0 && searchResults.applications.length === 0 && (
-                      <div className="p-4 text-center text-gray-500">
-                        <AlertCircle className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                        <p className="text-sm">No results found</p>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="p-4 text-center text-gray-500">
-                        <p className="text-sm">Type at least 2 characters to search</p>
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
-              
               <button
                 onClick={handleSearch}
                 disabled={isUnifiedSearching || !searchId.trim()}
@@ -370,12 +245,18 @@ const ApplicationTracking = () => {
                     {student.name} ({student.studentCode || student._id})
                   </h3>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-gray-600">
-                    <span><strong>Email:</strong> {student.email}</span>
-                    <span><strong>Phone:</strong> {student.phone || 'N/A'}</span>
-                    <span><strong>Agent:</strong> {student.agentId?.name || 'N/A'}</span>
+                    <span>
+                      <strong>Email:</strong> {student.email}
+                    </span>
+                    <span>
+                      <strong>Phone:</strong> {student.phone || "N/A"}
+                    </span>
+                    <span>
+                      <strong>Agent:</strong> {student.agentId?.name || "N/A"}
+                    </span>
                   </div>
                 </div>
-                
+
                 {/* Tab Navigation */}
                 <div className="flex bg-gray-100 rounded-lg p-1">
                   <button
@@ -406,10 +287,9 @@ const ApplicationTracking = () => {
 
             {/* Tab Content */}
             {activeTab === "tracking" ? (
-              /* Progress Tracking Tab */
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-6">Application Progress</h3>
-                <div className="relative border-l-2 border-gray-300 pl-6 space-y-8">
+                <div className="relative border-l-2 border-gray-300 pl-6 space-y-10">
                   {stageTitles.map((stage, index) => {
                     const done = localOptions[stage.key];
                     const commentKey = `${stage.key}Comment`;
@@ -417,6 +297,7 @@ const ApplicationTracking = () => {
 
                     return (
                       <div key={stage.key} className="relative">
+                        {/* Stage Circle */}
                         <span
                           className={`absolute -left-[22px] flex items-center justify-center w-8 h-8 rounded-full border-2 ${
                             done
@@ -427,18 +308,14 @@ const ApplicationTracking = () => {
                           {done ? <Check size={16} /> : index + 1}
                         </span>
 
+                        {/* Stage Content */}
                         <div className="bg-gray-50 p-4 rounded-xl shadow-sm">
-                          <h3 className="font-semibold text-gray-800 mb-3">
-                            {stage.label}
-                          </h3>
+                          <h3 className="font-semibold text-gray-800 mb-3">{stage.label}</h3>
 
-                          {/* Comment UI */}
                           <div className="mb-3">
                             {commentValue && editingComment !== stage.key ? (
                               <div className="flex justify-between items-center bg-white border border-gray-300 rounded-md px-3 py-2">
-                                <p className="text-sm text-gray-700 flex-1">
-                                  {commentValue}
-                                </p>
+                                <p className="text-sm text-gray-700 flex-1">{commentValue}</p>
                                 <button
                                   onClick={() => setEditingComment(stage.key)}
                                   className="text-blue-600 text-sm flex items-center gap-1 hover:underline"
@@ -452,13 +329,8 @@ const ApplicationTracking = () => {
                                   type="text"
                                   placeholder="Add comment..."
                                   value={commentValue}
-                                  onChange={(e) =>
-                                    handleCommentChange(stage.key, e.target.value)
-                                  }
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Enter")
-                                      handleSaveComment(stage.key);
-                                  }}
+                                  onChange={(e) => handleCommentChange(stage.key, e.target.value)}
+                                  onKeyDown={(e) => e.key === "Enter" && handleSaveComment(stage.key)}
                                   className="flex-1 border border-gray-300 rounded-l-md px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                                 />
                                 <button
@@ -467,21 +339,17 @@ const ApplicationTracking = () => {
                                   className="bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 rounded-r-md text-sm font-medium transition disabled:opacity-50"
                                 >
                                   {isUpdating ? (
-                                    <Loader2
-                                      size={14}
-                                      className="animate-spin inline"
-                                    />
+                                    <Loader2 size={14} className="animate-spin inline" />
+                                  ) : commentValue ? (
+                                    "Save Update"
                                   ) : (
-                                    commentValue
-                                      ? "Save Update"
-                                      : "Add Comment"
+                                    "Add Comment"
                                   )}
                                 </button>
                               </div>
                             )}
                           </div>
 
-                          {/* Stage Button */}
                           <button
                             onClick={() => handleToggleStage(stage.key)}
                             disabled={isUpdating}
@@ -500,15 +368,30 @@ const ApplicationTracking = () => {
                             )}
                           </button>
                         </div>
+
+                        {/* Down Arrow between stages */}
+                        {index < stageTitles.length - 1 && (
+                          <div className="absolute -left-[13px] top-full mt-1 text-gray-400">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="w-5 h-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
                 </div>
               </div>
             ) : (
-              /* Applications Tab - Using ApplicationTabLayout Component */
-              <ApplicationTabLayout 
-                studentId={studentId} 
+              <ApplicationTabLayout
+                studentId={studentId}
                 initialSelectedApplicationId={selectedApplicationId}
                 onNavigateToPrograms={() => setActiveTab("tracking")}
               />
@@ -519,13 +402,13 @@ const ApplicationTracking = () => {
             <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">Search for Applications</h3>
             <p className="text-gray-500">
-              Enter a Student ID, Student Code, Email, or Application Number above to view application progress and details.
+              Enter a Student ID, Student Code, Email, or Application Number above to view
+              application progress and details.
             </p>
           </div>
         )}
       </div>
 
-      {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={modalState.isOpen}
         onClose={hideConfirmation}

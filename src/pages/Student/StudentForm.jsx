@@ -384,8 +384,8 @@ const StudentForm = () => {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`py-3 sm:py-4 px-2 sm:px-4 lg:px-6 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${activeTab === tab.id
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                     }`}
                 >
                   <span className="hidden sm:inline">{tab.fullLabel}</span>
@@ -624,6 +624,7 @@ const StudentForm = () => {
                       <option value="IELTS">IELTS</option>
                       <option value="PTE">PTE</option>
                       <option value="TOEFL">TOEFL</option>
+                      <option value="Duolingo">Duolingo</option>
                       <option value="Other">Other</option>
                     </select>
                     <input
@@ -660,6 +661,7 @@ const StudentForm = () => {
                         <option value="">Select {attestation}</option>
                         <option value="Yes">Yes</option>
                         <option value="No">No</option>
+                        <option value="Partial">Partial</option>
                       </select>
                     ))}
                   </div>
@@ -671,23 +673,71 @@ const StudentForm = () => {
                     Study Preferences
                   </h3>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                    <input
-                      type="text"
+                    <select
                       name="country1"
-                      placeholder="Country for Study 1"
                       value={formData.country1}
                       onChange={handleChange}
                       className={inputClass}
-                    />
-                    <input
-                      type="text"
+                    >
+                      <option value="">Select Country for Study 1</option>
+                      <option value="France">France</option>
+                      <option value="Italy">Italy</option>
+                      <option value="Cyprus">Cyprus</option>
+                      <option value="Malta">Malta</option>
+                      <option value="Sweden">Sweden</option>
+                      <option value="Finland">Finland</option>
+                      <option value="Germany">Germany</option>
+                      <option value="Belgium">Belgium</option>
+                      <option value="UK">UK</option>
+                      <option value="Spain">Spain</option>
+                      <option value="USA">USA</option>
+                      <option value="Australia">Australia</option>
+                      <option value="Canada">Canada</option>
+                      <option value="Hungary">Hungary</option>
+                      <option value="Netherlands">Netherlands</option>
+                      <option value="Denmark">Denmark</option>
+                      <option value="Lithuania">Lithuania</option>
+                      <option value="Latvia">Latvia</option>
+                      <option value="Estonia">Estonia</option>
+                      <option value="Belarus">Belarus</option>
+                      <option value="Georgia">Georgia</option>
+                      <option value="Austria">Austria</option>
+                      <option value="Other">Other</option>
+                    </select>
+
+                    <select
                       name="country2"
-                      placeholder="Country for Study 2"
                       value={formData.country2}
                       onChange={handleChange}
                       className={inputClass}
-                    />
+                    >
+                      <option value="">Select Country for Study 2</option>
+                      <option value="France">France</option>
+                      <option value="Italy">Italy</option>
+                      <option value="Cyprus">Cyprus</option>
+                      <option value="Malta">Malta</option>
+                      <option value="Sweden">Sweden</option>
+                      <option value="Finland">Finland</option>
+                      <option value="Germany">Germany</option>
+                      <option value="Belgium">Belgium</option>
+                      <option value="UK">UK</option>
+                      <option value="Spain">Spain</option>
+                      <option value="USA">USA</option>
+                      <option value="Australia">Australia</option>
+                      <option value="Canada">Canada</option>
+                      <option value="Hungary">Hungary</option>
+                      <option value="Netherlands">Netherlands</option>
+                      <option value="Denmark">Denmark</option>
+                      <option value="Lithuania">Lithuania</option>
+                      <option value="Latvia">Latvia</option>
+                      <option value="Estonia">Estonia</option>
+                      <option value="Belarus">Belarus</option>
+                      <option value="Georgia">Georgia</option>
+                      <option value="Austria">Austria</option>
+                      <option value="Other">Other</option>
+                    </select>
                   </div>
+
                 </section>
 
                 <button
@@ -905,8 +955,8 @@ const StudentForm = () => {
                               key={pageNum}
                               onClick={() => setCurrentPage(pageNum)}
                               className={`px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm font-medium rounded-md ${currentPage === pageNum
-                                  ? 'bg-blue-600 text-white'
-                                  : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                                ? 'bg-blue-600 text-white'
+                                : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
                                 }`}
                             >
                               {pageNum}

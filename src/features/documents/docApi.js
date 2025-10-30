@@ -5,7 +5,6 @@ export const docApi = createApi({
   reducerPath: "docApi",
   baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
-    // 🔹 Bulk upload documents
     uploadDocuments: builder.mutation({
       query: ({ studentId, formData }) => ({
         url: `students/${studentId}/documents/bulk`,
@@ -13,7 +12,14 @@ export const docApi = createApi({
         body: formData,
       }),
     }),
+
+    getDocuments: builder.query({
+      query: (studentId) => ({
+        url: `students/${studentId}/documents`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
-export const { useUploadDocumentsMutation } = docApi;
+export const { useUploadDocumentsMutation, useGetDocumentsQuery } = docApi;

@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+// Import the FAQ array
+import { faqRules } from "../../content/faqData";
+
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
@@ -9,22 +12,32 @@ export default function ChatWidget() {
   ]);
   const [input, setInput] = useState("");
 
+  // Function to find matching FAQ
+  const getReply = (message) => {
+    const lowerMsg = message.toLowerCase();
+    for (let rule of faqRules) {
+      if (rule.keywords.some((kw) => lowerMsg.includes(kw.toLowerCase()))) {
+        return rule.response;
+      }
+    }
+    return "🤔 Sorry, I don't have an answer for that. Please ask another question.";
+  };
+
   const handleSend = () => {
     if (!input.trim()) return;
 
     const userMessage = { role: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
 
+    const reply = getReply(input);
+
     setTimeout(() => {
-      const aiMessage = {
-        role: "assistant",
-        content: "🤖 This is a sample AI response. (Integrate API here!)",
-      };
-      setMessages((prev) => [...prev, aiMessage]);
-    }, 600);
+      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+    }, 500);
 
     setInput("");
   };
+
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-center">
@@ -69,7 +82,7 @@ export default function ChatWidget() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                placeholder="Type a message..."
+                placeholder="Type a question..."
                 className="flex-1 px-4 py-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-sm"
               />
               <button
@@ -83,27 +96,26 @@ export default function ChatWidget() {
         )}
       </AnimatePresence>
 
-{!isOpen && (
-  <motion.div
-    key="chat-button"
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: 20 }}
-    transition={{ duration: 0.3 }}
-    className="flex flex-col items-center"
-  >
-    <button
-      onClick={() => setIsOpen(true)}
-      className="w-14 h-14 rounded-full bg-gradient-to-r from-[#F42222] to-[#8e3d3d] flex items-center justify-center shadow-lg text-white hover:opacity-90 transition"
-    >
-      <MessageCircle size={24} />
-    </button>
-    <span className="mt-2 text-sm text-gray-600 font-medium">
-      Collegium AI
-    </span>
-  </motion.div>
-)}
-
+      {!isOpen && (
+        <motion.div
+          key="chat-button"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          transition={{ duration: 0.3 }}
+          className="flex flex-col items-center"
+        >
+          <button
+            onClick={() => setIsOpen(true)}
+            className="w-14 h-14 rounded-full bg-gradient-to-r from-[#F42222] to-[#8e3d3d] flex items-center justify-center shadow-lg text-white hover:opacity-90 transition"
+          >
+            <MessageCircle size={24} />
+          </button>
+          <span className="mt-2 text-sm text-gray-600 font-medium">
+            Collegium AI
+          </span>
+        </motion.div>
+      )}
     </div>
   );
 }
