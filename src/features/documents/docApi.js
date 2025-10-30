@@ -4,6 +4,7 @@ import { baseQueryWithReauth } from "../../app/baseQuery";
 export const docApi = createApi({
   reducerPath: "docApi",
   baseQuery: baseQueryWithReauth,
+  tagTypes: ["Documents"], // Add tag for caching
   endpoints: (builder) => ({
     uploadDocuments: builder.mutation({
       query: ({ studentId, formData }) => ({
@@ -11,6 +12,7 @@ export const docApi = createApi({
         method: "POST",
         body: formData,
       }),
+      invalidatesTags: ["Documents"],
     }),
 
     getDocuments: builder.query({
@@ -18,8 +20,21 @@ export const docApi = createApi({
         url: `students/${studentId}/documents`,
         method: "GET",
       }),
+      providesTags: ["Documents"],
+    }),
+
+    deleteDocument: builder.mutation({
+      query: ({ studentId, fieldName }) => ({
+        url: `students/${studentId}/documents/${fieldName}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Documents"],
     }),
   }),
 });
 
-export const { useUploadDocumentsMutation, useGetDocumentsQuery } = docApi;
+export const {
+  useUploadDocumentsMutation,
+  useGetDocumentsQuery,
+  useDeleteDocumentMutation,
+} = docApi;

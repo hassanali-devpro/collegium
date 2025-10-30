@@ -1,43 +1,107 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { countryFaqs , basicFaqs } from "../../content/faqData";
 
-// Import the FAQ array
-import { faqRules } from "../../content/faqData";
+const countryList = [
+  "france",
+  "italy",
+  "cyprus",
+  "malta",
+  "sweden",
+  "finland",
+  "germany",
+  "belgium",
+  "uk",
+  "spain",
+  "usa",
+  "australia",
+  "canada",
+  "hungary",
+  "netherlands",
+  "denmark",
+  "lithuania",
+  "estonia",
+  "belarus",
+  "georgia",
+];
+
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState(null);
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "👋 Hi! How can I help you today?" },
+    {
+      role: "assistant",
+      content: "👋 Hi! I'm Collegium AI, How can I help you today?",
+    },
   ]);
   const [input, setInput] = useState("");
 
-  // Function to find matching FAQ
+  useEffect(() => {
+    if (selectedCountry) {
+      console.log("Selected country:", selectedCountry);
+    }
+  }, [selectedCountry]);
+
+  // Detect country name from message
+  const detectCountry = (message) => {
+    const lower = message.toLowerCase();
+    for (let c of countryList) {
+      if (lower.includes(c)) return c;
+    }
+    return null;
+  };
+
+  // ✅ Handle basic and country-based replies
   const getReply = (message) => {
     const lowerMsg = message.toLowerCase();
-    for (let rule of faqRules) {
+
+    // 🔹 1️⃣ Check if it's a basic question first
+    for (let rule of basicFaqs) {
+      if (rule.keywords.some((kw) => lowerMsg.includes(kw))) {
+        return rule.response;
+      }
+    }
+
+    // 🔹 2️⃣ Detect country
+    const detected = detectCountry(lowerMsg);
+    if (detected) {
+      setSelectedCountry(detected);
+    }
+
+    const activeCountry = detected || selectedCountry;
+
+    // 🔹 3️⃣ If no country found yet → ask for one
+    if (!activeCountry) {
+      return "For which country to need study information?";
+    }
+
+    // 🔹 4️⃣ Check country-specific FAQs
+    const faqs = countryFaqs[activeCountry] || [];
+    for (let rule of faqs) {
       if (rule.keywords.some((kw) => lowerMsg.includes(kw.toLowerCase()))) {
         return rule.response;
       }
     }
-    return "🤔 Sorry, I don't have an answer for that. Please ask another question.";
+
+    // 🔹 5️⃣ Default fallback
+    return `🤔 Sorry, I don’t have information for that question related to ${activeCountry}. Try asking about budget, visa, or universities.`;
   };
 
   const handleSend = () => {
     if (!input.trim()) return;
 
-    const userMessage = { role: "user", content: input };
-    setMessages((prev) => [...prev, userMessage]);
+    const userMsg = { role: "user", content: input };
+    setMessages((prev) => [...prev, userMsg]);
 
     const reply = getReply(input);
-
     setTimeout(() => {
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
-    }, 500);
+    }, 400);
 
     setInput("");
   };
-
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-center">
@@ -59,11 +123,11 @@ export default function ChatWidget() {
               </button>
             </div>
 
-            {/* Messages */}
+            {/* Chat Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-50">
-              {messages.map((msg, index) => (
+              {messages.map((msg, i) => (
                 <div
-                  key={index}
+                  key={i}
                   className={`p-3 rounded-2xl max-w-[75%] shadow-sm break-words ${
                     msg.role === "user"
                       ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white self-end ml-auto"
@@ -75,7 +139,7 @@ export default function ChatWidget() {
               ))}
             </div>
 
-            {/* Input Area */}
+            {/* Input */}
             <div className="p-3 bg-gray-100 border-t flex items-center gap-2">
               <input
                 type="text"
@@ -96,12 +160,12 @@ export default function ChatWidget() {
         )}
       </AnimatePresence>
 
+      {/* Floating Button */}
       {!isOpen && (
         <motion.div
           key="chat-button"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
           transition={{ duration: 0.3 }}
           className="flex flex-col items-center"
         >
