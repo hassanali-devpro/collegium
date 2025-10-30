@@ -11,6 +11,7 @@ import {agentStudentApi} from "../features/agentStudent/agentStudentApi";
 import { applicationApi } from "../features/applications/applicationApi";
 import { notificationApi } from "../features/notifications/notificationApi";
 import { chatApi } from "../features/chat/chatApi";
+import { announcementApi } from "../features/announcements/announcementApi";
 
 
 export const store = configureStore({
@@ -26,6 +27,7 @@ export const store = configureStore({
     [applicationApi.reducerPath]: applicationApi.reducer,
     [notificationApi.reducerPath]: notificationApi.reducer,
     [chatApi.reducerPath]: chatApi.reducer,
+    [announcementApi.reducerPath]: announcementApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -39,6 +41,7 @@ export const store = configureStore({
       agentStudentApi.middleware,
       applicationApi.middleware,
       notificationApi.middleware,
-      chatApi.middleware
+      chatApi.middleware,
+      announcementApi.middleware
     ),
 });

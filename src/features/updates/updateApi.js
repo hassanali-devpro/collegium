@@ -6,7 +6,14 @@ export const updateApi = createApi({
   baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
     getStudentOptionsCount: builder.query({
-      query: () => "students/options/count",
+      query: (params = {}) => {
+        const searchParams = new URLSearchParams();
+        if (params.startDate) searchParams.set('startDate', params.startDate);
+        if (params.endDate) searchParams.set('endDate', params.endDate);
+        if (params.dateField) searchParams.set('dateField', params.dateField);
+        const qs = searchParams.toString();
+        return `students/options/count${qs ? `?${qs}` : ''}`;
+      },
     }),
   }),
 });

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Users,
   CreditCard,
@@ -11,9 +11,42 @@ import {
   BadgeCheck,
 } from "lucide-react";
 import { useGetStudentOptionsCountQuery } from "../../features/updates/updateApi";
+import { DateRange } from "react-date-range";
+import "react-date-range/dist/styles.css";
+import "react-date-range/dist/theme/default.css";
 
 export default function ProcessSteps() {
-  const { data, isLoading, error } = useGetStudentOptionsCountQuery();
+  const [range, setRange] = useState([
+    {
+      startDate: undefined,
+      endDate: undefined,
+      key: "selection",
+    },
+  ]);
+  const [isOpen, setIsOpen] = useState(false);
+  const popoverRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (popoverRef.current && !popoverRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const queryParams = useMemo(() => {
+    const start = range[0]?.startDate ? new Date(range[0].startDate) : undefined;
+    const end = range[0]?.endDate ? new Date(range[0].endDate) : undefined;
+    return {
+      startDate: start ? start.toISOString() : undefined,
+      endDate: end ? end.toISOString() : undefined,
+      dateField: "createdAt",
+    };
+  }, [range]);
+
+  const { data, isLoading, error } = useGetStudentOptionsCountQuery(queryParams);
 
   if (isLoading) return <p className="text-center">Loading...</p>;
   if (error) return <p className="text-center text-red-500">Failed to load data</p>;
@@ -35,6 +68,46 @@ export default function ProcessSteps() {
 
   return (
     <div className="px-4">
+      <div className="mb-4 text-end">
+        <div className="relative inline-block" ref={popoverRef}>
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow-sm text-sm hover:border-gray-300"
+            title="Select date range"
+            onClick={() => setIsOpen((o) => !o)}
+          >
+            <span className="font-medium">Date:</span>
+            <span className="text-gray-700">
+              {range[0]?.startDate && range[0]?.endDate
+                ? `${new Date(range[0].startDate).toLocaleDateString()} - ${new Date(range[0].endDate).toLocaleDateString()}`
+                : "All time"}
+            </span>
+          </button>
+          {isOpen && (
+          <div className="absolute right-0 mt-2 z-150">
+            <div className="bg-white border border-gray-200 rounded-xl shadow-lg p-2">
+              <DateRange
+                ranges={range}
+                onChange={(r) => setRange([r.selection])}
+                moveRangeOnFirstSelection={false}
+                rangeColors={["#2563eb"]}
+                editableDateInputs={true}
+                showDateDisplay={false}
+              />
+              <div className="flex justify-end px-1 pb-1">
+                <button
+                  type="button"
+                  className="text-xs text-blue-600 hover:underline"
+                  onClick={() => setRange([{ startDate: undefined, endDate: undefined, key: "selection" }])}
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+          </div>
+          )}
+        </div>
+      </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {steps.map((step, index) => (
           <div
