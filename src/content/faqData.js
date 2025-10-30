@@ -24,6 +24,14 @@ export const basicFaqs = [
     keywords: ["developed", "create", "created"],
     response: "I was developed by Syed Hassan Ali. You can contact him on hassanali.devpro@gmail.com or +92-322-0622691",
   },
+  {
+    keywords: ["best client"],
+    response: "Syed Hassan Ali is the best client in the history collegium.",
+  },
+  {
+    keywords: ["best employ"],
+    response: "Madiha is the best person in the history collegium.",
+  },
 ];
 
 
