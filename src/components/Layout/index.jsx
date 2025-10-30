@@ -15,6 +15,7 @@ import {
   KeyRound,
   Lock,
   ChevronDown,
+  MessageCircle,
 } from "lucide-react";
 import logo from "/Logo-R.png";
 import PasswordResetModal from "../PasswordResetModal";
@@ -214,6 +215,7 @@ export default function Layout({ children }) {
     { name: "Course Search", path: "/course-search", icon: <Search size={18} /> },
     // { name: "Student Search", path: "/student-search", icon: <Search size={18} /> },
     { name: "My Students", path: "/agent-students", icon: <User size={18} /> },
+    { name: "Chats", path: "/chats", icon: <MessageCircle size={18} /> },
 
     user?.role === "SuperAdmin" && {
       name: "Manage Users",

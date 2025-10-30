@@ -25,6 +25,7 @@ import StudentPage from "./pages/Student";
 import StudentForm from "./pages/Student/StudentForm";
 import ApplicationList from "./pages/Application/ApplicationList";
 import ApplicationDetail from "./pages/ApplicationDetail";
+import ChatPage from "./pages/Chats/ChatPage";
 
 function AppContent() {
   const userRole = "admin";
@@ -58,6 +59,7 @@ function AppContent() {
         <Route path="/login" element={<Login />} />
         <Route path="/student-documents" element={<Doc />} />
         <Route path="/learning-resource" element={<Resource />} />
+        <Route path="/chats" element={<ChatPage />} />
 
         {protectedRoutes.map(({ path, element }) => (
           <Route
