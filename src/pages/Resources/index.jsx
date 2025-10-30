@@ -3,17 +3,28 @@ import { useConfirmationModal } from "../../hooks/useConfirmationModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
 
 const COUNTRIES = [
-  "USA",
-  "UK",
-  "Canada",
-  "Australia",
-  "Germany",
   "France",
-  "China",
-  "India",
-  "Japan",
-  "UAE",
+  "Italy",
+  "Cyprus",
+  "Malta",
+  "Sweden",
+  "Finland",
+  "Germany",
+  "Belgium",
+  "UK",
+  "Spain",
+  "USA",
+  "Australia",
+  "Canada",
+  "Hungary",
+  "Netherlands",
+  "Denmark",
+  "Lithuania",
+  "Estonia",
+  "Belarus",
+  "Georgia"
 ];
+
 
 export default function LearningResources() {
   const { modalState, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationModal();

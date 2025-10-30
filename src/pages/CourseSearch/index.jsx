@@ -167,7 +167,7 @@ const ProgramCard = ({ studentId }) => {
 
           {!studentId &&
             user?.role &&
-            ["SuperAdmin", "Admin", "Agent"].includes(user.role) && (
+            ["SuperAdmin"].includes(user.role) && (
               <button
                 onClick={() => navigate("/add-course")}
                 className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto flex items-center justify-center gap-2"

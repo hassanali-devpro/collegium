@@ -1,6 +1,10 @@
-import React, { useState } from "react";
-import { Trash2, FileText, Loader2, UploadCloud } from "lucide-react";
-import { useUploadDocumentsMutation } from "../../features/documents/docApi";
+import React, { useState, useEffect } from "react";
+import { Trash2, FileText, Loader2, UploadCloud, Eye } from "lucide-react";
+import {
+  useUploadDocumentsMutation,
+  useGetDocumentsQuery,
+  useDeleteDocumentMutation,
+} from "../../features/documents/docApi";
 import { useToastContext } from "../../contexts/ToastContext";
 import { useConfirmationModal } from "../../hooks/useConfirmationModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
@@ -24,57 +28,43 @@ const documentTypes = [
 const DocumentsTab = ({ studentId, onPrev, onNext }) => {
   const [selectedFiles, setSelectedFiles] = useState({});
   const [uploading, setUploading] = useState(false);
+
   const [uploadDocuments] = useUploadDocumentsMutation();
+  const [deleteDocument] = useDeleteDocumentMutation();
+  const { data, error, isLoading, refetch } = useGetDocumentsQuery(studentId, {
+    skip: !studentId,
+  });
+
   const { success, error: showError } = useToastContext();
   const { modalState, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationModal();
 
+  // Log API data
+  useEffect(() => {
+    if (data) console.log("📄 Documents API Response:", data);
+    if (error) console.error("❌ Error fetching documents:", error);
+  }, [data, error]);
+
+  // Handle file selection
   const handleFileSelect = (fieldName, file) => {
     setSelectedFiles((prev) => ({ ...prev, [fieldName]: file }));
   };
 
-  const handleDelete = (fieldName) => {
-    const documentType = documentTypes.find(dt => dt.fieldName === fieldName);
-    const displayName = documentType?.displayName || fieldName;
-    
-    showConfirmation({
-      title: "Delete Document",
-      message: `Are you sure you want to delete ${displayName}? This action cannot be undone.`,
-      confirmText: "Delete",
-      cancelText: "Cancel",
-      type: "danger",
-      onConfirm: () => {
-        setSelectedFiles((prev) => {
-          const updated = { ...prev };
-          delete updated[fieldName];
-          return updated;
-        });
-      }
-    });
-  };
-
+  // Handle upload all
   const handleUploadAll = async () => {
-    if (!studentId) {
-      showError("Student ID is required for document upload.");
-      return;
-    }
+    if (!studentId) return showError("Student ID is required for document upload.");
 
     const filesToUpload = Object.entries(selectedFiles).filter(([_, f]) => f);
-    if (filesToUpload.length === 0) {
-      showError("Please select at least one file before submitting.");
-      return;
-    }
+    if (filesToUpload.length === 0) return showError("Please select at least one file.");
 
     const formData = new FormData();
-    filesToUpload.forEach(([fieldName, file]) => {
-      // Use the correct field name for each document type
-      formData.append(fieldName, file);
-    });
+    filesToUpload.forEach(([fieldName, file]) => formData.append(fieldName, file));
 
     try {
       setUploading(true);
       await uploadDocuments({ studentId, formData }).unwrap();
       success("All selected files uploaded successfully!");
       setSelectedFiles({});
+      refetch(); // Refresh document list
     } catch (error) {
       console.error(error);
       showError("Upload failed. Please try again.");
@@ -83,27 +73,51 @@ const DocumentsTab = ({ studentId, onPrev, onNext }) => {
     }
   };
 
+  // Handle delete document
+  const handleDelete = (fieldName) => {
+    const documentType = documentTypes.find((d) => d.fieldName === fieldName);
+    const displayName = documentType?.displayName || fieldName;
+
+    showConfirmation({
+      title: "Delete Document",
+      message: `Are you sure you want to delete ${displayName}?`,
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          await deleteDocument({ studentId, fieldName }).unwrap();
+          success(`${displayName} deleted successfully.`);
+          refetch();
+        } catch (err) {
+          console.error(err);
+          showError("Failed to delete document. Please try again.");
+        }
+      },
+    });
+  };
+
+  const uploadedDocs = data?.data?.documents || {};
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center mb-8">
-        <h3 className="text-xl font-bold text-gray-800 mb-2">
-          Document Upload Center
-        </h3>
+        <h3 className="text-xl font-bold text-gray-800 mb-2">Document Upload Center</h3>
         <p className="text-gray-500 text-sm">
           Select your documents and click "Submit All" to upload them together.
         </p>
         {studentId && (
-          <p className="text-blue-600 text-sm mt-1">
-            Student ID: {studentId}
-          </p>
+          <p className="text-blue-600 text-sm mt-1">Student ID: {studentId}</p>
         )}
       </div>
 
-      {/* Two-column grid */}
+      {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {documentTypes.map((docType) => {
+          const uploaded = uploadedDocs[docType.fieldName];
           const selectedFile = selectedFiles[docType.fieldName];
+
           return (
             <div
               key={docType.fieldName}
@@ -114,6 +128,7 @@ const DocumentsTab = ({ studentId, onPrev, onNext }) => {
                 <FileText className="text-blue-500" size={16} />
               </div>
 
+              {/* File input */}
               <div className="flex flex-col gap-2">
                 <label className="cursor-pointer w-full bg-white border border-gray-300 p-2 rounded text-xs text-gray-600 hover:bg-gray-50 transition">
                   Choose File
@@ -127,20 +142,31 @@ const DocumentsTab = ({ studentId, onPrev, onNext }) => {
                   />
                 </label>
 
+                {/* Selected File */}
                 {selectedFile && (
                   <p className="text-xs text-blue-600 truncate italic">
                     Selected: {selectedFile.name}
                   </p>
                 )}
 
-                {selectedFile && (
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(docType.fieldName)}
-                    className="flex items-center justify-center gap-1 bg-red-100 text-red-600 p-1 rounded text-xs font-medium hover:bg-red-200 transition"
-                  >
-                    <Trash2 size={12} /> Delete
-                  </button>
+                {/* Uploaded File */}
+                {uploaded && (
+                  <div className="flex items-center justify-between text-xs text-gray-700 bg-white border rounded p-2">
+                    <a
+                      href={uploaded.path || uploaded.s3Url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-blue-600 hover:underline"
+                    >
+                      <Eye size={12} /> View
+                    </a>
+                    <button
+                      onClick={() => handleDelete(docType.fieldName)}
+                      className="flex items-center gap-1 text-red-600 hover:text-red-800"
+                    >
+                      <Trash2 size={12} /> Delete
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -148,7 +174,7 @@ const DocumentsTab = ({ studentId, onPrev, onNext }) => {
         })}
       </div>
 
-      {/* Submit All Button */}
+      {/* Submit All */}
       <div className="flex justify-center mb-6">
         <button
           onClick={handleUploadAll}
@@ -171,7 +197,7 @@ const DocumentsTab = ({ studentId, onPrev, onNext }) => {
         </button>
       </div>
 
-      {/* Navigation Buttons */}
+      {/* Navigation */}
       <div className="flex justify-between pt-4 border-t border-gray-200">
         <button
           onClick={onPrev}
@@ -186,7 +212,7 @@ const DocumentsTab = ({ studentId, onPrev, onNext }) => {
           Next
         </button>
       </div>
-      
+
       {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={modalState.isOpen}
