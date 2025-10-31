@@ -5,6 +5,7 @@ import {
   useUpdateCourseMutation,
 } from "../../features/courses/courseApi";
 import { useConfirmationModal } from "../../hooks/useConfirmationModal";
+import { useGetCountriesQuery } from "../../features/meta/metaApi";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import { useToastContext } from "../../contexts/ToastContext";
 
@@ -17,6 +18,8 @@ const StudyProgramForm = () => {
 
   const [createCourse, { isLoading: isCreating }] = useCreateCourseMutation();
   const [updateCourse, { isLoading: isUpdating }] = useUpdateCourseMutation();
+  const { data: countriesData } = useGetCountriesQuery();
+  const countries = countriesData?.data || [];
 
   const [formData, setFormData] = useState({
     name: "",
@@ -154,29 +157,9 @@ const StudyProgramForm = () => {
               className={inputClass}
             >
               <option value="">Select Country*</option>
-              <option value="France">France</option>
-              <option value="Italy">Italy</option>
-              <option value="Cyprus">Cyprus</option>
-              <option value="Malta">Malta</option>
-              <option value="Sweden">Sweden</option>
-              <option value="Finland">Finland</option>
-              <option value="Germany">Germany</option>
-              <option value="Belgium">Belgium</option>
-              <option value="UK">UK</option>
-              <option value="Spain">Spain</option>
-              <option value="USA">USA</option>
-              <option value="Australia">Australia</option>
-              <option value="Canada">Canada</option>
-              <option value="Hungary">Hungary</option>
-              <option value="Netherlands">Netherlands</option>
-              <option value="Denmark">Denmark</option>
-              <option value="Lithuania">Lithuania</option>
-              <option value="Latvia">Latvia</option>
-              <option value="Estonia">Estonia</option>
-              <option value="Belarus">Belarus</option>
-              <option value="Georgia">Georgia</option>
-              <option value="Austria">Austria</option>
-              <option value="Other">Other</option>
+              {countries.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
             </select>
 
             <input

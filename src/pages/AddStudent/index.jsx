@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { useAddStudentMutation, useUpdateStudentMutation, useGetStudentByIdQuery } from "../../features/students/studentApi";
 import { useToastContext } from "../../contexts/ToastContext";
 import PhoneInput from "react-phone-input-2";
+import { useGetCountriesQuery } from "../../features/meta/metaApi";
 import "react-phone-input-2/lib/style.css";
 
 const StudentRegistrationForm = ({ onStudentCreated, existingStudentId }) => {
@@ -42,6 +43,9 @@ const StudentRegistrationForm = ({ onStudentCreated, existingStudentId }) => {
   const navigate = useNavigate();
   const isLoading = isCreating || isUpdating;
   const isEditMode = !!existingStudentId;
+
+  const { data: countriesData } = useGetCountriesQuery();
+  const countries = countriesData?.data || [];
 
 
   // ✅ Generate unique student ID
@@ -415,29 +419,9 @@ const StudentRegistrationForm = ({ onStudentCreated, existingStudentId }) => {
               className={inputClass}
             >
               <option value="">Select Country for Study 1</option>
-              <option value="France">France</option>
-              <option value="Italy">Italy</option>
-              <option value="Cyprus">Cyprus</option>
-              <option value="Malta">Malta</option>
-              <option value="Sweden">Sweden</option>
-              <option value="Finland">Finland</option>
-              <option value="Germany">Germany</option>
-              <option value="Belgium">Belgium</option>
-              <option value="UK">UK</option>
-              <option value="Spain">Spain</option>
-              <option value="USA">USA</option>
-              <option value="Australia">Australia</option>
-              <option value="Canada">Canada</option>
-              <option value="Hungary">Hungary</option>
-              <option value="Netherlands">Netherlands</option>
-              <option value="Denmark">Denmark</option>
-              <option value="Lithuania">Lithuania</option>
-              <option value="Latvia">Latvia</option>
-              <option value="Estonia">Estonia</option>
-              <option value="Belarus">Belarus</option>
-              <option value="Georgia">Georgia</option>
-              <option value="Austria">Austria</option>
-              <option value="Other">Other</option>
+              {countries.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
             </select>
 
             <select
@@ -447,29 +431,9 @@ const StudentRegistrationForm = ({ onStudentCreated, existingStudentId }) => {
               className={inputClass}
             >
               <option value="">Select Country for Study 2</option>
-              <option value="France">France</option>
-              <option value="Italy">Italy</option>
-              <option value="Cyprus">Cyprus</option>
-              <option value="Malta">Malta</option>
-              <option value="Sweden">Sweden</option>
-              <option value="Finland">Finland</option>
-              <option value="Germany">Germany</option>
-              <option value="Belgium">Belgium</option>
-              <option value="UK">UK</option>
-              <option value="Spain">Spain</option>
-              <option value="USA">USA</option>
-              <option value="Australia">Australia</option>
-              <option value="Canada">Canada</option>
-              <option value="Hungary">Hungary</option>
-              <option value="Netherlands">Netherlands</option>
-              <option value="Denmark">Denmark</option>
-              <option value="Lithuania">Lithuania</option>
-              <option value="Latvia">Latvia</option>
-              <option value="Estonia">Estonia</option>
-              <option value="Belarus">Belarus</option>
-              <option value="Georgia">Georgia</option>
-              <option value="Austria">Austria</option>
-              <option value="Other">Other</option>
+              {countries.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
             </select>
           </div>
 

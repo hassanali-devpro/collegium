@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useAddStudentMutation, useUpdateStudentMutation, useGetStudentByIdQuery } from "../../features/students/studentApi";
@@ -10,6 +10,7 @@ import { useToastContext } from "../../contexts/ToastContext";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import DocumentsTab from "./DocumentsTab";
+import { useGetCountriesQuery } from "../../features/meta/metaApi";
 import ApplicationTabLayout from "../../components/ApplicationTabLayout";
 
 const StudentForm = () => {
@@ -57,6 +58,9 @@ const StudentForm = () => {
     feeSort: "", // "high-to-low" or "low-to-high"
   });
 
+  // State for available universities based on selected country
+  const [availableUniversities, setAvailableUniversities] = useState([]);
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
@@ -73,12 +77,52 @@ const StudentForm = () => {
     location.state?.selectedApplicationId ? "applications" : "profile"
   );
 
+  const { data: countriesData } = useGetCountriesQuery();
+  const countries = countriesData?.data || [];
+
   // Switch to applications tab when navigating from notification
   useEffect(() => {
     if (location.state?.selectedApplicationId && activeTab !== "applications") {
       setActiveTab("applications");
     }
   }, [location.state?.selectedApplicationId]);
+
+  // Fetch courses for university list (when country is selected)
+  const { data: universitiesCoursesData, isLoading: isLoadingUniversities } = useSearchCoursesQuery({
+    search: "",
+    country: courseFilters.country,
+    type: "",
+    university: "",
+    intake: "",
+    feeSort: "",
+    page: 1,
+    limit: 1000, // Fetch many courses to get all universities
+  }, {
+    skip: !courseFilters.country || activeTab !== "course", // Only fetch when country is selected
+    keepUnusedDataFor: 180
+  });
+
+  // Extract unique universities when courses data is available
+  useEffect(() => {
+    if (universitiesCoursesData?.data && courseFilters.country && Array.isArray(universitiesCoursesData.data) && universitiesCoursesData.data.length > 0) {
+      const universities = [...new Set(universitiesCoursesData.data.map(course => course.university))].sort();
+      setAvailableUniversities(universities);
+    } else if (universitiesCoursesData?.data && Array.isArray(universitiesCoursesData.data) && universitiesCoursesData.data.length === 0) {
+      // Data loaded but no courses found
+      setAvailableUniversities([]);
+    } else {
+      setAvailableUniversities([]);
+    }
+  }, [universitiesCoursesData, courseFilters.country]);
+
+  // Reset university filter when country changes (but not on initial mount)
+  const prevCountryRef = useRef(courseFilters.country);
+  useEffect(() => {
+    if (prevCountryRef.current !== courseFilters.country && courseFilters.country) {
+      setCourseFilters(prev => ({ ...prev, university: "" }));
+    }
+    prevCountryRef.current = courseFilters.country;
+  }, [courseFilters.country]);
 
   // Debouncing effect for search filters
   useEffect(() => {
@@ -680,29 +724,9 @@ const StudentForm = () => {
                       className={inputClass}
                     >
                       <option value="">Select Country for Study 1</option>
-                      <option value="France">France</option>
-                      <option value="Italy">Italy</option>
-                      <option value="Cyprus">Cyprus</option>
-                      <option value="Malta">Malta</option>
-                      <option value="Sweden">Sweden</option>
-                      <option value="Finland">Finland</option>
-                      <option value="Germany">Germany</option>
-                      <option value="Belgium">Belgium</option>
-                      <option value="UK">UK</option>
-                      <option value="Spain">Spain</option>
-                      <option value="USA">USA</option>
-                      <option value="Australia">Australia</option>
-                      <option value="Canada">Canada</option>
-                      <option value="Hungary">Hungary</option>
-                      <option value="Netherlands">Netherlands</option>
-                      <option value="Denmark">Denmark</option>
-                      <option value="Lithuania">Lithuania</option>
-                      <option value="Latvia">Latvia</option>
-                      <option value="Estonia">Estonia</option>
-                      <option value="Belarus">Belarus</option>
-                      <option value="Georgia">Georgia</option>
-                      <option value="Austria">Austria</option>
-                      <option value="Other">Other</option>
+                      {countries.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
                     </select>
 
                     <select
@@ -712,29 +736,9 @@ const StudentForm = () => {
                       className={inputClass}
                     >
                       <option value="">Select Country for Study 2</option>
-                      <option value="France">France</option>
-                      <option value="Italy">Italy</option>
-                      <option value="Cyprus">Cyprus</option>
-                      <option value="Malta">Malta</option>
-                      <option value="Sweden">Sweden</option>
-                      <option value="Finland">Finland</option>
-                      <option value="Germany">Germany</option>
-                      <option value="Belgium">Belgium</option>
-                      <option value="UK">UK</option>
-                      <option value="Spain">Spain</option>
-                      <option value="USA">USA</option>
-                      <option value="Australia">Australia</option>
-                      <option value="Canada">Canada</option>
-                      <option value="Hungary">Hungary</option>
-                      <option value="Netherlands">Netherlands</option>
-                      <option value="Denmark">Denmark</option>
-                      <option value="Lithuania">Lithuania</option>
-                      <option value="Latvia">Latvia</option>
-                      <option value="Estonia">Estonia</option>
-                      <option value="Belarus">Belarus</option>
-                      <option value="Georgia">Georgia</option>
-                      <option value="Austria">Austria</option>
-                      <option value="Other">Other</option>
+                      {countries.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
                     </select>
                   </div>
 
@@ -783,25 +787,35 @@ const StudentForm = () => {
                       className="p-2 sm:p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                     >
                       <option value="">All Countries</option>
-                      <option value="Australia">Australia</option>
-                      <option value="Canada">Canada</option>
-                      <option value="Germany">Germany</option>
-                      <option value="New Zealand">New Zealand</option>
-                      <option value="Singapore">Singapore</option>
-                      <option value="UK">UK</option>
-                      <option value="USA">USA</option>
+                      {countries.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
                     </select>
                   </div>
 
                   {/* Second Row - University, Intake, Type, Fee Sort */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                    <input
-                      type="text"
-                      placeholder="University (partial match)..."
+                    <select
                       value={courseFilters.university}
                       onChange={(e) => setCourseFilters({ ...courseFilters, university: e.target.value })}
-                      className="p-2 sm:p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
-                    />
+                      disabled={!courseFilters.country || (courseFilters.country && !isLoadingUniversities && availableUniversities.length === 0)}
+                      className="p-2 sm:p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400"
+                    >
+                      <option value="">
+                        {!courseFilters.country 
+                          ? "Select Country first" 
+                          : isLoadingUniversities
+                            ? "Loading universities..." 
+                            : availableUniversities.length === 0
+                              ? "No universities available"
+                              : "All Universities"}
+                      </option>
+                      {availableUniversities.map((university) => (
+                        <option key={university} value={university}>
+                          {university}
+                        </option>
+                      ))}
+                    </select>
                     <select
                       value={courseFilters.intake}
                       onChange={(e) => setCourseFilters({ ...courseFilters, intake: e.target.value })}
