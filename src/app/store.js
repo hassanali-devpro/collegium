@@ -13,6 +13,7 @@ import { notificationApi } from "../features/notifications/notificationApi";
 import { chatApi } from "../features/chat/chatApi";
 import { announcementApi } from "../features/announcements/announcementApi";
 import { metaApi } from "../features/meta/metaApi";
+import { learningResourceApi } from "../features/learningResources/learningResourceApi";
 
 
 export const store = configureStore({
@@ -30,6 +31,7 @@ export const store = configureStore({
     [chatApi.reducerPath]: chatApi.reducer,
     [announcementApi.reducerPath]: announcementApi.reducer,
     [metaApi.reducerPath]: metaApi.reducer,
+    [learningResourceApi.reducerPath]: learningResourceApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -45,6 +47,7 @@ export const store = configureStore({
       notificationApi.middleware,
       chatApi.middleware,
       announcementApi.middleware,
-      metaApi.middleware
+      metaApi.middleware,
+      learningResourceApi.middleware
     ),
 });

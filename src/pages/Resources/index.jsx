@@ -1,194 +1,275 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useSelector } from "react-redux";
+import {
+  useGetLearningResourceByCountryQuery,
+  useUploadLearningResourceFileMutation,
+  useDeleteLearningResourceFileMutation,
+  useLazyDownloadLearningResourceFileQuery,
+} from "../../features/learningResources/learningResourceApi";
+import { useGetCountriesQuery } from "../../features/meta/metaApi";
+import { useToastContext } from "../../contexts/ToastContext";
 import { useConfirmationModal } from "../../hooks/useConfirmationModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
-
-const COUNTRIES = [
-  "France",
-  "Italy",
-  "Cyprus",
-  "Malta",
-  "Sweden",
-  "Finland",
-  "Germany",
-  "Belgium",
-  "UK",
-  "Spain",
-  "USA",
-  "Australia",
-  "Canada",
-  "Hungary",
-  "Netherlands",
-  "Denmark",
-  "Lithuania",
-  "Estonia",
-  "Belarus",
-  "Georgia"
-];
-
+import { Upload, Download, Trash2, FileText, Loader2 } from "lucide-react";
 
 export default function LearningResources() {
-  const { modalState, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationModal();
-  const [data, setData] = useState(
-    COUNTRIES.reduce((acc, country) => {
-      acc[country] = [
-        {
-          id: `${country}-pdf1`,
-          name: `${country}-Resource1.pdf`,
-          url: `/resources/${country}/resource1.pdf`,
-          type: "application/pdf",
-        },
-        {
-          id: `${country}-ppt1`,
-          name: `${country}-Slides1.pptx`,
-          url: `/resources/${country}/slides1.pptx`,
-          type: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-        },
-      ];
-      return acc;
-    }, {})
+  const { user } = useSelector((state) => state.auth);
+  const { success, error: showError } = useToastContext();
+  const { modalState, showConfirmation, hideConfirmation, handleConfirm } =
+    useConfirmationModal();
+
+  const { data: countriesData } = useGetCountriesQuery();
+  const countries = countriesData?.data || [];
+
+  // Default to first country for SuperAdmin
+  const [selectedCountry, setSelectedCountry] = useState(
+    countries.length > 0 ? countries[0] : ""
   );
 
-  const fileInputsRef = useRef({});
+  // Update selected country when countries load
+  useEffect(() => {
+    if (countries.length > 0 && !selectedCountry) {
+      setSelectedCountry(countries[0]);
+    }
+  }, [countries, selectedCountry]);
 
-  const handleUpload = (country, files) => {
-    if (!files || files.length === 0) return;
-    const newFiles = Array.from(files).map((file) => ({
-      id: `${country}-${Date.now()}-${file.name}`,
-      name: file.name,
-      url: URL.createObjectURL(file),
-      type: file.type,
-    }));
+  const fileInputRef = useRef(null);
 
-    setData((prev) => ({
-      ...prev,
-      [country]: [...(prev[country] || []), ...newFiles],
-    }));
+  const {
+    data: resourceData,
+    isLoading,
+    refetch,
+  } = useGetLearningResourceByCountryQuery(selectedCountry, {
+    skip: !selectedCountry,
+  });
 
-    if (fileInputsRef.current[country]) fileInputsRef.current[country].value = "";
+  const [uploadFile, { isLoading: isUploading }] =
+    useUploadLearningResourceFileMutation();
+  const [deleteFile, { isLoading: isDeleting }] =
+    useDeleteLearningResourceFileMutation();
+  const [downloadFile, { isLoading: isDownloading }] =
+    useLazyDownloadLearningResourceFileQuery();
+
+  const resource = resourceData?.data;
+  const files = resource?.files || [];
+  const isSuperAdmin = user?.role === "SuperAdmin";
+  const canUpload = files.length < 2;
+
+  const handleFileSelect = () => {
+    fileInputRef.current?.click();
   };
 
-  const handleDelete = (country, id) => {
-    const file = data[country]?.find(f => f.id === id);
-    const fileName = file?.name || 'this file';
-    
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!selectedCountry) {
+      showError("Please select a country first");
+      return;
+    }
+
+    if (files.length >= 2) {
+      showError("Maximum 2 files allowed per country");
+      return;
+    }
+
+    try {
+      await uploadFile({ country: selectedCountry, file }).unwrap();
+      success("File uploaded successfully!");
+      refetch();
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      showError(err?.data?.message || "Failed to upload file");
+    }
+  };
+
+  const handleDelete = (fileId, fileName) => {
     showConfirmation({
       title: "Delete File",
-      message: `Are you sure you want to delete ${fileName}? This action cannot be undone.`,
+      message: `Are you sure you want to delete "${fileName}"?`,
       confirmText: "Delete",
       cancelText: "Cancel",
       type: "danger",
-      onConfirm: () => {
-        setData((prev) => ({
-          ...prev,
-          [country]: (prev[country] || []).filter((f) => f.id !== id),
-        }));
-      }
+      onConfirm: async () => {
+        try {
+          await deleteFile({ country: selectedCountry, fileId }).unwrap();
+          success("File deleted successfully!");
+          refetch();
+        } catch (err) {
+          console.error("Delete error:", err);
+          showError(err?.data?.message || "Failed to delete file");
+        }
+      },
     });
   };
 
-  const handleDownload = (file) => {
-    const a = document.createElement("a");
-    a.href = file.url;
-    a.download = file.name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+  const handleDownload = async (fileId, fileName) => {
+    try {
+      const result = await downloadFile({
+        country: selectedCountry,
+        fileId,
+      }).unwrap();
+
+      if (result?.data?.downloadUrl) {
+        // Open download URL in new tab
+        const link = document.createElement("a");
+        link.href = result.data.downloadUrl;
+        link.download = fileName || result.data.fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        success("Download started!");
+      } else {
+        showError("Download URL not available");
+      }
+    } catch (err) {
+      console.error("Download error:", err);
+      showError(err?.data?.message || "Failed to download file");
+    }
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      {/* Header */}
-      <header className="flex flex-col items-center mb-8">
-        <img src="/Logo-R.png" alt="Company Logo" className="w-24 h-auto mb-3" />
-        <h1 className="text-xl font-semibold text-gray-800">Learning Resources</h1>
-      </header>
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+            Learning Resources
+          </h1>
+          <p className="text-gray-600">
+            {isSuperAdmin
+              ? "Manage learning resources by country (Max 2 files per country)"
+              : "Download learning resources for your selected country"}
+          </p>
+        </div>
 
-      <div className="space-y-5">
-        {COUNTRIES.map((country) => (
-          <section key={country} className="border border-gray-200 rounded-lg p-4 bg-white shadow-xl">
-            <div className="flex items-center justify-between">
-              <h2 className="font-medium text-gray-700">{country}</h2>
+        {/* Country Selection */}
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Select Country
+          </label>
+          <select
+            value={selectedCountry}
+            onChange={(e) => setSelectedCountry(e.target.value)}
+            className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {countries.map((country) => (
+              <option key={country} value={country}>
+                {country}
+              </option>
+            ))}
+          </select>
+        </div>
 
-              <label className="text-sm text-blue-600 cursor-pointer hover:underline">
-                Upload
-                <input
-                  ref={(el) => (fileInputsRef.current[country] = el)}
-                  onChange={(e) => handleUpload(country, e.target.files)}
-                  multiple
-                  accept=".pdf,.ppt,.pptx"
-                  type="file"
-                  className="hidden"
-                />
-              </label>
-            </div>
-
-            <div className="mt-3">
-              {(data[country] || []).length === 0 ? (
-                <p className="text-sm text-gray-400">No files available.</p>
-              ) : (
-                <ul className="divide-y divide-gray-100">
-                  {(data[country] || []).map((file) => (
-                    <li key={file.id} className="flex items-center justify-between py-2">
-                      <div className="flex items-center gap-3">
-                        <FileIcon name={file.name} type={file.type} />
-                        <span className="text-sm text-gray-700 truncate max-w-[200px]">
-                          {file.name}
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleDownload(file)}
-                          className="text-xs px-2 py-1 border rounded hover:bg-gray-50"
-                        >
-                          Download
-                        </button>
-                        <button
-                          onClick={() => handleDelete(country, file.id)}
-                          className="text-xs px-2 py-1 border rounded text-red-600 hover:bg-red-50"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+        {/* Files Section */}
+        <div className="bg-white rounded-lg shadow">
+          <div className="p-4 sm:p-6 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <h2 className="text-lg font-semibold text-gray-800">
+                Files for {selectedCountry || "Selected Country"}
+              </h2>
+              {isSuperAdmin && canUpload && (
+                <button
+                  onClick={handleFileSelect}
+                  disabled={isUploading}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="animate-spin" size={18} />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <Upload size={18} />
+                      Upload File
+                    </>
+                  )}
+                </button>
               )}
             </div>
-          </section>
-        ))}
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              onChange={handleFileChange}
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png"
+            />
+          </div>
+
+          <div className="p-4 sm:p-6">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="animate-spin text-blue-600" size={32} />
+              </div>
+            ) : files.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                <FileText size={48} className="mx-auto mb-4 text-gray-300" />
+                <p>No files available for this country</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {files.map((file) => (
+                  <div
+                    key={file._id}
+                    className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
+                  >
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <FileText className="text-blue-600 flex-shrink-0" size={24} />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 truncate">
+                          {file.originalName}
+                        </p>
+                        {file.size && (
+                          <p className="text-sm text-gray-500">
+                            {(file.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => handleDownload(file._id, file.originalName)}
+                        disabled={isDownloading}
+                        className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50"
+                        title="Download"
+                      >
+                        <Download size={18} />
+                      </button>
+                      {isSuperAdmin && (
+                        <button
+                          onClick={() => handleDelete(file._id, file.originalName)}
+                          disabled={isDeleting}
+                          className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50"
+                          title="Delete"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-      
+
       {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={modalState.isOpen}
+        onClose={hideConfirmation}
+        onConfirm={handleConfirm}
         title={modalState.title}
         message={modalState.message}
         confirmText={modalState.confirmText}
         cancelText={modalState.cancelText}
         type={modalState.type}
-        onConfirm={handleConfirm}
-        onCancel={hideConfirmation}
       />
-    </div>
-  );
-}
-
-function FileIcon({ name, type }) {
-  const ext = name.split(".").pop()?.toLowerCase() || "";
-  const isPdf = ext === "pdf" || type === "application/pdf";
-  const isPpt = ["ppt", "pptx"].includes(ext) || type.includes("presentation");
-
-  return (
-    <div
-      className={`w-8 h-8 flex items-center justify-center text-xs font-semibold rounded ${
-        isPdf
-          ? "bg-red-100 text-red-600"
-          : isPpt
-          ? "bg-yellow-100 text-yellow-700"
-          : "bg-gray-100 text-gray-600"
-      }`}
-    >
-      {isPdf ? "PDF" : isPpt ? "PPT" : ext.toUpperCase()}
     </div>
   );
 }
