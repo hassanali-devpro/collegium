@@ -48,7 +48,8 @@ function AppContent() {
     // Application routes
     { path: "/applications", element: <ApplicationList /> },
     {path:"/add-course", element:<AddCourse />},
-    {path:"/add-student", element:<AddStudent />}
+    {path:"/add-student", element:<AddStudent />},
+    {path:"/chats", element:<ChatPage />}
   ];
 
   return (
@@ -59,7 +60,6 @@ function AppContent() {
         <Route path="/login" element={<Login />} />
         <Route path="/student-documents" element={<Doc />} />
         <Route path="/learning-resource" element={<Resource />} />
-        <Route path="/chats" element={<ChatPage />} />
 
         {protectedRoutes.map(({ path, element }) => (
           <Route

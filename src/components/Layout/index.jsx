@@ -27,12 +27,14 @@ import {
   useMarkAllNotificationsAsReadMutation,
   useDeleteAllNotificationsMutation
 } from "../../features/notifications/notificationApi";
+import { useGetUserChatsQuery } from "../../features/chat/chatApi";
 
 export default function Layout({ children }) {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isProfileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [isPasswordResetModalOpen, setIsPasswordResetModalOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isChatsOpen, setIsChatsOpen] = useState(false);
   const [socket, setSocket] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -48,6 +50,20 @@ export default function Layout({ children }) {
   const [markAllNotificationsAsReadMutation] = useMarkAllNotificationsAsReadMutation();
   const [deleteAllNotificationsMutation] = useDeleteAllNotificationsMutation();
   
+  // Chats data for navbar dropdown
+  const { data: chatsResponse, refetch: refetchChats } = useGetUserChatsQuery({ page: 1, limit: 10 });
+  const chats = chatsResponse?.data || [];
+  const unreadChatsTotal = chats.reduce((sum, chat) => sum + (chat.unreadCount || 0), 0);
+  const topThreeChats = chats.slice(0, 3);
+
+  // Periodically refresh chats for unread badge when dropdown is closed
+  useEffect(() => {
+    const id = setInterval(() => {
+      refetchChats();
+    }, 5000);
+    return () => clearInterval(id);
+  }, [refetchChats]);
+
   // console.log(user)
 
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
@@ -249,6 +265,78 @@ export default function Layout({ children }) {
         </div>
 
         <div className="flex items-center gap-4 sm:gap-6">
+          {/* Chat Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setIsChatsOpen(!isChatsOpen)}
+              className="relative p-2 hover:bg-gray-100 rounded-full transition"
+            >
+              <MessageCircle size={20} />
+              {unreadChatsTotal > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                  {unreadChatsTotal > 9 ? '9+' : unreadChatsTotal}
+                </span>
+              )}
+            </button>
+
+            {isChatsOpen && (
+              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+                <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                  <h3 className="text-sm font-semibold text-gray-900">Recent Chats</h3>
+                  <button
+                    onClick={() => navigate('/chats')}
+                    className="text-xs text-blue-600 hover:text-blue-800"
+                  >
+                    View all
+                  </button>
+                </div>
+                <div>
+                  {topThreeChats.length === 0 ? (
+                    <div className="p-6 text-center">
+                      <MessageCircle className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                      <p className="text-sm text-gray-500">No chats yet</p>
+                    </div>
+                  ) : (
+                    topThreeChats.map((chat) => {
+                      // Derive chat name (other participant or group)
+                      const currentUserId = user?._id || user?.id;
+                      const others = chat.participants?.filter(p => (p._id || p.id) !== currentUserId) || [];
+                      const chatName = chat.name || (others.length === 1 ? (others[0].name || others[0].email) : 'Group Chat');
+                      const lastText = chat.lastMessage || 'No messages yet';
+                      return (
+                        <button
+                          key={chat._id}
+                          onClick={() => {
+                            setIsChatsOpen(false);
+                            navigate('/chats', { state: { openChatId: chat._id } });
+                          }}
+                          className="w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition"
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs font-semibold">
+                              {(chatName || 'U').charAt(0).toUpperCase()}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <p className="text-sm font-medium text-gray-900 truncate">{chatName}</p>
+                                {chat.unreadCount > 0 && (
+                                  <span className="ml-2 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center flex-shrink-0">
+                                    {chat.unreadCount > 9 ? '9+' : chat.unreadCount}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-600 truncate mt-1">{lastText}</p>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Notifications Dropdown */}
           <div className="relative">
             <button
@@ -435,12 +523,13 @@ export default function Layout({ children }) {
       />
 
       {/* Click outside to close dropdowns */}
-      {(isProfileDropdownOpen || isNotificationsOpen) && (
+      {(isProfileDropdownOpen || isNotificationsOpen || isChatsOpen) && (
         <div
           className="fixed inset-0 z-40"
           onClick={() => {
             setProfileDropdownOpen(false);
             setIsNotificationsOpen(false);
+            setIsChatsOpen(false);
           }}
         />
       )}

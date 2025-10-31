@@ -12,6 +12,7 @@ import UserSearchModal from "../../components/Chats/UserSearchModal";
 import { useSelector } from "react-redux";
 import { Plus, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const ChatPage = () => {
   const [selectedChat, setSelectedChat] = useState(null);
@@ -20,6 +21,8 @@ const ChatPage = () => {
   const [sendingMessages, setSendingMessages] = useState({}); // Track messages being sent
   const { socket, isConnected } = useSocket();
   const currentUser = useSelector((state) => state.auth?.user);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // Get user's chats
   const {
@@ -27,6 +30,18 @@ const ChatPage = () => {
     isLoading: chatsLoading,
     refetch: refetchChats,
   } = useGetUserChatsQuery({ page: 1, limit: 50 });
+
+  // Auto-select chat when navigated with state.openChatId
+  useEffect(() => {
+    const openChatId = location.state?.openChatId;
+    if (!openChatId || !chatsData?.data) return;
+    const found = chatsData.data.find((c) => c._id === openChatId);
+    if (found) {
+      setSelectedChat(found);
+      // Clear state to avoid re-select on back/forward
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, chatsData, navigate, location.pathname]);
 
   // Get messages for selected chat
   const {

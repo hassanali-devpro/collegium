@@ -19,6 +19,8 @@ const documentTypes = [
   { displayName: "Transcript", fieldName: "transcript" },
   { displayName: "Language Test", fieldName: "languageCertificate" },
   { displayName: "Passport", fieldName: "passport" },
+  { displayName: "Recommendation Letter 1", fieldName: "recommendationLetter1" },
+  { displayName: "Recommendation Letter 2", fieldName: "recommendationLetter2" },
   { displayName: "Experience Letter", fieldName: "experienceLetter" },
   { displayName: "Birth Certificate", fieldName: "birthCertificate" },
   { displayName: "Family Registration", fieldName: "familyRegistration" },

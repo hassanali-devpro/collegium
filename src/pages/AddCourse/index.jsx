@@ -26,6 +26,7 @@ const StudyProgramForm = () => {
     city: "",
     intake: "",
     isPrivate: "",
+    openAdmission: false,
     type: "",
     fee: "",
     timePeriod: "",
@@ -43,7 +44,11 @@ const StudyProgramForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    if (name === "openAdmission") {
+      setFormData({ ...formData, openAdmission: value === "Yes" });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -232,6 +237,16 @@ const StudyProgramForm = () => {
               className={inputClass}
             >
               <option value="">Private*</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+            <select
+              name="openAdmission"
+              value={formData.openAdmission ? "Yes" : "No"}
+              onChange={handleChange}
+              required
+              className={inputClass}
+            >
               <option value="Yes">Yes</option>
               <option value="No">No</option>
             </select>
