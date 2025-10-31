@@ -29,7 +29,7 @@ const StudyProgramForm = () => {
     city: "",
     intake: "",
     isPrivate: "",
-    openAdmission: false,
+    openAdmission: true,
     type: "",
     fee: "",
     timePeriod: "",
@@ -230,8 +230,8 @@ const StudyProgramForm = () => {
               required
               className={inputClass}
             >
-              <option value="Yes">Yes</option>
-              <option value="No">No</option>
+              <option value="Yes">Admission Opened</option>
+              <option value="No">Admission Closed</option>
             </select>
             <select
               name="type"

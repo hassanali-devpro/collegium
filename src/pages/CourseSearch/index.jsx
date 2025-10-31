@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -31,7 +31,7 @@ const ProgramCard = ({ studentId }) => {
   });
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 50;
   const [debouncedFilters, setDebouncedFilters] = useState(filters);
 
   useEffect(() => {
@@ -69,6 +69,25 @@ const ProgramCard = ({ studentId }) => {
       skip: !studentId,
     }
   );
+
+  // Extract unique countries
+  const countryOptions = useMemo(() => {
+    if (!data?.data) return [];
+    return Array.from(
+      new Set(data.data.map((course) => course.country).filter(Boolean))
+    ).sort();
+  }, [data]);
+
+  // Extract universities filtered by selected country
+  const universityOptions = useMemo(() => {
+    if (!data?.data) return [];
+    const filteredCourses = filters.country
+      ? data.data.filter((course) => course.country === filters.country)
+      : data.data;
+    return Array.from(
+      new Set(filteredCourses.map((course) => course.university).filter(Boolean))
+    ).sort();
+  }, [data, filters.country]);
 
   const handleDelete = async (id) => {
     showConfirmation({
@@ -197,32 +216,47 @@ const ProgramCard = ({ studentId }) => {
             placeholder="Search courses..."
             className="border border-gray-300 p-2 sm:p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
             value={filters.search}
-            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            onChange={(e) =>
+              setFilters({ ...filters, search: e.target.value })
+            }
           />
         </div>
 
-        {/* Organized Filter Grid */}
+        {/* Filter Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          <input
-            type="text"
-            placeholder="Country"
-            className="border border-gray-300 p-2 sm:p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
+          {/* Country Dropdown */}
+          <select
             value={filters.country}
             onChange={(e) =>
-              setFilters({ ...filters, country: e.target.value })
+              setFilters({ ...filters, country: e.target.value, university: "" })
             }
-          />
-
-          <input
-            type="text"
-            placeholder="University..."
             className="border border-gray-300 p-2 sm:p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
+          >
+            <option value="">Select Country</option>
+            {countryOptions.map((country) => (
+              <option key={country} value={country}>
+                {country}
+              </option>
+            ))}
+          </select>
+
+          {/* University Dropdown */}
+          <select
             value={filters.university}
             onChange={(e) =>
               setFilters({ ...filters, university: e.target.value })
             }
-          />
+            className="border border-gray-300 p-2 sm:p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
+          >
+            <option value="">Select University</option>
+            {universityOptions.map((uni) => (
+              <option key={uni} value={uni}>
+                {uni}
+              </option>
+            ))}
+          </select>
 
+          {/* Type Dropdown */}
           <select
             className="border border-gray-300 p-2 sm:p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
             value={filters.type}
@@ -234,6 +268,7 @@ const ProgramCard = ({ studentId }) => {
             <option value="PhD">PhD</option>
           </select>
 
+          {/* Intake Dropdown */}
           <select
             className="border border-gray-300 p-2 sm:p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
             value={filters.intake}
@@ -260,6 +295,7 @@ const ProgramCard = ({ studentId }) => {
             ))}
           </select>
 
+          {/* Fee Sort */}
           <select
             className="border border-gray-300 p-2 sm:p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
             value={filters.feeSort}
@@ -294,6 +330,7 @@ const ProgramCard = ({ studentId }) => {
         </div>
       )}
 
+      {/* Error */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
           <p className="text-sm text-red-600">
@@ -302,6 +339,7 @@ const ProgramCard = ({ studentId }) => {
         </div>
       )}
 
+      {/* Showing Count */}
       {data && !isLoading && (
         <div className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 px-1">
           Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
@@ -333,9 +371,7 @@ const ProgramCard = ({ studentId }) => {
                     {program.university} • {program.country}
                   </p>
                   {program.city && (
-                    <p className="text-xs text-gray-500 truncate">
-                      {program.city}
-                    </p>
+                    <p className="text-xs text-gray-500 truncate">{program.city}</p>
                   )}
                 </div>
 
@@ -379,6 +415,7 @@ const ProgramCard = ({ studentId }) => {
               </div>
             </div>
 
+            {/* Program Details */}
             <div className="grid grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm text-gray-800">
               {program.department && (
                 <div>
@@ -438,6 +475,12 @@ const ProgramCard = ({ studentId }) => {
                 <div>
                   <p className="font-semibold">Minimum Bands / Score:</p>
                   <p>{program.minBands}</p>
+                </div>
+              )}
+              {program.openAdmission !== undefined && (
+                <div>
+                  <p className="font-semibold">Admission Open:</p>
+                  <p>{program.openAdmission ? "Yes" : "No"}</p>
                 </div>
               )}
             </div>
