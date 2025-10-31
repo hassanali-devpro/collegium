@@ -72,7 +72,7 @@ const AgentsPage = () => {
   const handleDelete = async (id) => {
     showConfirmation({
       title: "Delete Agent",
-      message: "Are you sure you want to delete this agent? This action cannot be undone.",
+      message: "Are you sure you want to delete this agent?",
       confirmText: "Delete",
       cancelText: "Cancel",
       type: "danger",
@@ -82,17 +82,14 @@ const AgentsPage = () => {
         } catch (err) {
           console.error("Failed to delete agent:", err);
         }
-      }
+      },
     });
   };
 
   const handleToggleStatus = async (agent) => {
     try {
-      if (agent.isActive) {
-        await deactivateAgent(agent._id).unwrap();
-      } else {
-        await activateAgent(agent._id).unwrap();
-      }
+      if (agent.isActive) await deactivateAgent(agent._id).unwrap();
+      else await activateAgent(agent._id).unwrap();
     } catch (err) {
       console.error("Failed to toggle status:", err);
     }
@@ -101,22 +98,17 @@ const AgentsPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError("");
-
     try {
-      if (editingAgent) {
+      if (editingAgent)
         await updateAgent({ id: editingAgent._id, ...formData }).unwrap();
-      } else {
-        await createAgent(formData).unwrap();
-      }
+      else await createAgent(formData).unwrap();
       setIsModalOpen(false);
     } catch (err) {
-      if (err?.data?.errors?.length > 0) {
-        setFormError(err.data.errors[0].msg);
-      } else if (err?.data?.message) {
-        setFormError(err.data.message);
-      } else {
-        setFormError("Something went wrong. Please try again.");
-      }
+      setFormError(
+        err?.data?.errors?.[0]?.msg ||
+          err?.data?.message ||
+          "Something went wrong. Please try again."
+      );
     }
   };
 
@@ -137,14 +129,14 @@ const AgentsPage = () => {
         <h1 className="text-2xl font-bold">Agents</h1>
         <button
           onClick={openCreateModal}
-          className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+          className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
         >
           + Create User
         </button>
       </div>
 
-      {/* Responsive Table */}
-      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow">
+      {/* Desktop Table */}
+      <div className="hidden sm:block overflow-x-auto rounded-lg border border-gray-200 bg-white shadow">
         <table className="min-w-full text-sm text-left">
           <thead className="bg-gray-100 text-gray-700">
             <tr>
@@ -157,7 +149,6 @@ const AgentsPage = () => {
               <th className="px-4 py-2 text-center">Actions</th>
             </tr>
           </thead>
-
           <tbody>
             {agents.map((agent) => (
               <tr key={agent._id} className="border-t hover:bg-gray-50">
@@ -173,7 +164,6 @@ const AgentsPage = () => {
                     {agent.role}
                   </span>
                 </td>
-
                 <td className="px-4 py-2">
                   <button
                     onClick={() => handleToggleStatus(agent)}
@@ -186,40 +176,24 @@ const AgentsPage = () => {
                     {agent.isActive ? "Active" : "Inactive"}
                   </button>
                 </td>
-
                 <td className="px-4 py-2">
                   {agent.lastLogin
                     ? new Date(agent.lastLogin).toLocaleString()
                     : "Never"}
                 </td>
-
-                <td className="px-4 py-2 text-center">
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <button
-                      onClick={() => openEditModal(agent)}
-                      className="px-4 py-1 w-20 text-sm bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(agent._id)}
-                      className="px-4 py-1 w-20 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700"
-                    >
-                      Delete
-                    </button>
-                    <div className="flex items-center justify-center mt-2">
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={agent.isActive}
-                          onChange={() => handleToggleStatus(agent)}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-green-300 transition-all"></div>
-                        <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full peer-checked:translate-x-5 transform transition-all"></div>
-                      </label>
-                    </div>
-                  </div>
+                <td className="px-4 py-2 text-center space-y-2">
+                  <button
+                    onClick={() => openEditModal(agent)}
+                    className="w-20 px-4 py-1 text-sm bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(agent._id)}
+                    className="w-20 px-4 py-1 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}
@@ -227,11 +201,66 @@ const AgentsPage = () => {
         </table>
       </div>
 
+      {/* Mobile Cards */}
+      <div className="grid sm:hidden gap-4">
+        {agents.map((agent) => (
+          <div
+            key={agent._id}
+            className="bg-white rounded-xl shadow p-4 border border-gray-200"
+          >
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="font-semibold text-lg">{agent.name}</h2>
+              <span
+                className={`px-2 py-1 text-xs rounded-full font-semibold ${getRoleColor(
+                  agent.role
+                )}`}
+              >
+                {agent.role}
+              </span>
+            </div>
+            <p className="text-sm text-gray-700">{agent.email}</p>
+            <p className="text-sm text-gray-700">{agent.phone}</p>
+            <p className="text-xs text-gray-500 mt-1">
+              Last Login:{" "}
+              {agent.lastLogin
+                ? new Date(agent.lastLogin).toLocaleDateString()
+                : "Never"}
+            </p>
+            <div className="flex justify-between items-center mt-3">
+              <button
+                onClick={() => handleToggleStatus(agent)}
+                className={`px-2 py-1 text-xs rounded-full ${
+                  agent.isActive
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
+                }`}
+              >
+                {agent.isActive ? "Active" : "Inactive"}
+              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => openEditModal(agent)}
+                  className="px-3 py-1 text-xs bg-gray-200 rounded-lg"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(agent._id)}
+                  className="px-3 py-1 text-xs bg-red-600 text-white rounded-lg"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* Pagination */}
       {data?.pagination?.totalPages > 1 && (
         <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-3">
           <button
-            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+            onClick={() => setPage((p) => Math.max(p - 1, 1))}
             disabled={page === 1}
             className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300"
           >
@@ -241,7 +270,7 @@ const AgentsPage = () => {
             Page {page} of {data?.pagination?.totalPages}
           </span>
           <button
-            onClick={() => setPage((prev) => prev + 1)}
+            onClick={() => setPage((p) => p + 1)}
             disabled={page === data?.pagination?.totalPages}
             className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300"
           >
@@ -257,20 +286,14 @@ const AgentsPage = () => {
             <h2 className="text-xl font-semibold mb-4">
               {editingAgent ? "Edit User" : "Create User"}
             </h2>
-
-            {formError && (
-              <p className="text-red-500 text-sm mb-2">{formError}</p>
-            )}
-
+            {formError && <p className="text-red-500 text-sm mb-2">{formError}</p>}
             <form onSubmit={handleSubmit} className="space-y-4">
               <input
                 type="text"
                 placeholder="Name"
                 className="w-full border p-2 rounded"
                 value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
               />
               <input
@@ -278,9 +301,7 @@ const AgentsPage = () => {
                 placeholder="Email"
                 className="w-full border p-2 rounded"
                 value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
               />
               {!editingAgent && (
@@ -331,7 +352,7 @@ const AgentsPage = () => {
                 ))}
               </select>
 
-              <div className="flex justify-end space-x-2">
+              <div className="flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
@@ -350,8 +371,7 @@ const AgentsPage = () => {
           </div>
         </div>
       )}
-      
-      {/* Confirmation Modal */}
+
       <ConfirmationModal
         isOpen={modalState.isOpen}
         onClose={hideConfirmation}
