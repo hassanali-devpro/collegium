@@ -21,7 +21,7 @@ import logo from "/Logo-R.png";
 import PasswordResetModal from "../PasswordResetModal";
 import { io } from "socket.io-client";
 import { useToastContext } from "../../contexts/ToastContext";
-import { 
+import {
   useGetNotificationsQuery,
   useMarkNotificationAsReadMutation,
   useMarkAllNotificationsAsReadMutation,
@@ -43,13 +43,13 @@ export default function Layout({ children }) {
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
   const { info } = useToastContext();
-  
+
   // Fetch notifications from database
   const { data: notificationsData, refetch: refetchNotifications } = useGetNotificationsQuery();
   const [markNotificationAsRead] = useMarkNotificationAsReadMutation();
   const [markAllNotificationsAsReadMutation] = useMarkAllNotificationsAsReadMutation();
   const [deleteAllNotificationsMutation] = useDeleteAllNotificationsMutation();
-  
+
   // Chats data for navbar dropdown
   const { data: chatsResponse, refetch: refetchChats } = useGetUserChatsQuery({ page: 1, limit: 10 });
   const chats = chatsResponse?.data || [];
@@ -97,7 +97,7 @@ export default function Layout({ children }) {
 
   const handleNotificationClick = async (notification) => {
     console.log('🔔 Notification clicked:', notification);
-    
+
     // Mark notification as read in database
     if (!notification.isRead && notification._id) {
       try {
@@ -106,40 +106,40 @@ export default function Layout({ children }) {
         console.error('Failed to mark notification as read:', error);
       }
     }
-    
+
     // Update local state
     setNotifications(prev =>
-      prev.map(n => 
+      prev.map(n =>
         n.id === notification.id ? { ...n, isRead: true } : n
       )
     );
     setUnreadCount(prev => Math.max(0, prev - 1));
-    
+
     setIsNotificationsOpen(false);
-    
+
     // Navigate to student page with the application tab selected
     if (notification.studentId) {
       let studentIdValue;
-      
+
       // If studentId is a string that looks like an object literal (contains "_id: new ObjectId")
       if (typeof notification.studentId === 'string' && notification.studentId.includes('ObjectId')) {
         // Extract the ObjectId from the string using regex
         const match = notification.studentId.match(/ObjectId\("([^"]+)"\)/);
         studentIdValue = match ? match[1] : null;
-      } 
+      }
       // If it's an object, extract the _id or id
       else if (typeof notification.studentId === 'object') {
         studentIdValue = notification.studentId._id || notification.studentId.id;
-      } 
+      }
       // Otherwise use as-is (should be a simple string ID)
       else {
         studentIdValue = notification.studentId;
       }
-      
+
       console.log(`📍 StudentId extracted: ${studentIdValue}`);
       console.log(`📍 ApplicationId: ${notification.applicationId}`);
       console.log(`📍 Navigating to student: /student/edit/${studentIdValue}`);
-      
+
       if (studentIdValue) {
         // Pass the applicationId in state to select it in the applications tab
         navigate(`/student/edit/${studentIdValue}`, {
@@ -202,10 +202,10 @@ export default function Layout({ children }) {
     // Listen for notifications with multiple event names
     const handleNotification = (notification) => {
       console.log("🔔 Received notification:", notification);
-      
+
       // Refetch notifications from database to get the stored version
       refetchNotifications();
-      
+
       // Show toast notification
       if (notification.title && notification.message) {
         info(`${notification.title}: ${notification.message}`);
@@ -279,8 +279,13 @@ export default function Layout({ children }) {
               )}
             </button>
 
+            {/* Chat dropdown */}
             {isChatsOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+              <div
+                className="fixed sm:absolute right-0 sm:right-auto inset-x-4 sm:inset-x-auto top-20 sm:top-auto
+             w-80 max-h-96 overflow-y-auto bg-white border border-gray-200 shadow-xl 
+             rounded-2xl sm:rounded-lg z-50"
+              >
                 <div className="flex items-center justify-between p-4 border-b border-gray-200">
                   <h3 className="text-sm font-semibold text-gray-900">Recent Chats</h3>
                   <button
@@ -290,7 +295,8 @@ export default function Layout({ children }) {
                     View all
                   </button>
                 </div>
-                <div>
+
+                <div className="overflow-y-auto max-h-80">
                   {topThreeChats.length === 0 ? (
                     <div className="p-6 text-center">
                       <MessageCircle className="w-12 h-12 mx-auto mb-2 text-gray-300" />
@@ -298,34 +304,44 @@ export default function Layout({ children }) {
                     </div>
                   ) : (
                     topThreeChats.map((chat) => {
-                      // Derive chat name (other participant or group)
                       const currentUserId = user?._id || user?.id;
-                      const others = chat.participants?.filter(p => (p._id || p.id) !== currentUserId) || [];
-                      const chatName = chat.name || (others.length === 1 ? (others[0].name || others[0].email) : 'Group Chat');
-                      const lastText = chat.lastMessage || 'No messages yet';
+                      const others =
+                        chat.participants?.filter(
+                          (p) => (p._id || p.id) !== currentUserId
+                        ) || [];
+                      const chatName =
+                        chat.name ||
+                        (others.length === 1
+                          ? others[0].name || others[0].email
+                          : "Group Chat");
+                      const lastText = chat.lastMessage || "No messages yet";
                       return (
                         <button
                           key={chat._id}
                           onClick={() => {
                             setIsChatsOpen(false);
-                            navigate('/chats', { state: { openChatId: chat._id } });
+                            navigate("/chats", { state: { openChatId: chat._id } });
                           }}
                           className="w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition"
                         >
                           <div className="flex items-start gap-3">
                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs font-semibold">
-                              {(chatName || 'U').charAt(0).toUpperCase()}
+                              {(chatName || "U").charAt(0).toUpperCase()}
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between">
-                                <p className="text-sm font-medium text-gray-900 truncate">{chatName}</p>
+                                <p className="text-sm font-medium text-gray-900 truncate">
+                                  {chatName}
+                                </p>
                                 {chat.unreadCount > 0 && (
                                   <span className="ml-2 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center flex-shrink-0">
-                                    {chat.unreadCount > 9 ? '9+' : chat.unreadCount}
+                                    {chat.unreadCount > 9 ? "9+" : chat.unreadCount}
                                   </span>
                                 )}
                               </div>
-                              <p className="text-xs text-gray-600 truncate mt-1">{lastText}</p>
+                              <p className="text-xs text-gray-600 truncate mt-1">
+                                {lastText}
+                              </p>
                             </div>
                           </div>
                         </button>
@@ -346,15 +362,18 @@ export default function Layout({ children }) {
               <Bell size={20} />
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
-                  {unreadCount > 9 ? '9+' : unreadCount}
+                  {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
             </button>
 
-            {/* Notifications Dropdown */}
             {isNotificationsOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto">
-                {/* Header */}
+              <div
+                className="fixed sm:absolute right-0 inset-x-4 sm:inset-x-auto top-20 sm:top-auto 
+             w-80 sm:w-80 bg-white shadow-xl border border-gray-200 z-50 
+             max-h-96 overflow-y-auto rounded-2xl sm:rounded-lg"
+              >
+
                 <div className="flex items-center justify-between p-4 border-b border-gray-200">
                   <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
                   <div className="flex gap-2">
@@ -377,8 +396,7 @@ export default function Layout({ children }) {
                   </div>
                 </div>
 
-                {/* Notifications List */}
-                <div>
+                <div className="overflow-y-auto max-h-80">
                   {notifications.length === 0 ? (
                     <div className="p-6 text-center">
                       <Bell className="w-12 h-12 mx-auto mb-2 text-gray-300" />
@@ -389,23 +407,25 @@ export default function Layout({ children }) {
                       <button
                         key={notification.id || index}
                         onClick={() => handleNotificationClick(notification)}
-                        className={`w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition ${
-                          !notification.isRead ? 'bg-blue-50' : ''
-                        }`}
+                        className={`w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition ${!notification.isRead ? "bg-blue-50" : ""
+                          }`}
                       >
                         <div className="flex items-start gap-3">
-                          <div className={`flex-shrink-0 w-2 h-2 rounded-full mt-2 ${
-                            !notification.isRead ? 'bg-blue-600' : 'bg-gray-300'
-                          }`} />
+                          <div
+                            className={`flex-shrink-0 w-2 h-2 rounded-full mt-2 ${!notification.isRead ? "bg-blue-600" : "bg-gray-300"
+                              }`}
+                          />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-gray-900">
-                              {notification.title || 'Notification'}
+                              {notification.title || "Notification"}
                             </p>
                             <p className="text-xs text-gray-600 mt-1">
                               {notification.message}
                             </p>
                             <p className="text-xs text-gray-400 mt-1">
-                              {notification.receivedAt ? new Date(notification.receivedAt).toLocaleString() : 'Just now'}
+                              {notification.receivedAt
+                                ? new Date(notification.receivedAt).toLocaleString()
+                                : "Just now"}
                             </p>
                           </div>
                         </div>
@@ -416,6 +436,7 @@ export default function Layout({ children }) {
               </div>
             )}
           </div>
+
 
           {/* User Profile Dropdown */}
           <div className="relative">
@@ -440,7 +461,7 @@ export default function Layout({ children }) {
                   <p className="text-xs text-gray-500 truncate">{user?.email || ""}</p>
                   <p className="text-xs text-gray-400 mt-1 capitalize">{user?.role || ""}</p>
                 </div>
-                
+
                 <div className="py-1">
                   <button
                     onClick={() => {
@@ -497,8 +518,8 @@ export default function Layout({ children }) {
                   <Link
                     to={item.path}
                     className={`flex items-center gap-3 p-2 rounded-lg transition ${location.pathname === item.path
-                        ? "bg-gray-300 text-gray-900"
-                        : "text-gray-700 hover:bg-gray-200 hover:text-gray-900"
+                      ? "bg-gray-300 text-gray-900"
+                      : "text-gray-700 hover:bg-gray-200 hover:text-gray-900"
                       }`}
                     onClick={toggleSidebar}
                   >

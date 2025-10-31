@@ -84,8 +84,8 @@ export default function Offices() {
     );
 
   return (
-    <div className="min-h-full flex items-start justify-center">
-      <div className="bg-white shadow-md rounded-2xl p-6 w-full max-w-5xl">
+    <div className="min-h-full flex items-start justify-center p-2 sm:p-6">
+      <div className="bg-white shadow-md rounded-2xl p-4 sm:p-6 w-full max-w-5xl">
         <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">
           Office Management
         </h1>
@@ -97,7 +97,7 @@ export default function Offices() {
               setForm({ id: null, name: "", address: "", location: "" });
               setIsModalOpen(true);
             }}
-            className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+            className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm sm:text-base"
           >
             + Add Office
           </button>
@@ -109,34 +109,38 @@ export default function Offices() {
             return (
               <li
                 key={office.id}
-                className="flex justify-between items-center bg-gray-100 p-3 rounded-lg shadow-sm"
+                className="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-gray-100 p-3 rounded-lg shadow-sm gap-3 sm:gap-0"
               >
                 <div>
                   <p className="font-semibold text-gray-800">{office.name}</p>
                   <p className="text-sm text-gray-600">{office.address}</p>
                   <p className="text-xs text-gray-500">Created: {date}</p>
                 </div>
-                <div className="flex gap-2">
+
+                <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3">
                   {office.location && (
                     <a
-                      href={office.location.startsWith("http") ? office.location : `https://${office.location}`}
+                      href={
+                        office.location.startsWith("http")
+                          ? office.location
+                          : `https://${office.location}`
+                      }
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="bg-gray-200 text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-300 transition"
+                      className="bg-gray-200 text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-300 transition text-sm text-center flex-1 sm:flex-none"
                     >
                       View Location
                     </a>
                   )}
-
                   <button
                     onClick={() => handleEdit(office)}
-                    className="bg-gray-200 text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-300 transition"
+                    className="bg-gray-200 text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-300 transition text-sm text-center flex-1 sm:flex-none"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(office.id)}
-                    className=" px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                    className="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition text-sm text-center flex-1 sm:flex-none"
                   >
                     Delete
                   </button>
@@ -147,9 +151,10 @@ export default function Offices() {
         </ul>
       </div>
 
+      {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-lg w-full max-w-md mx-5 p-6">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-2 sm:px-0">
+          <div className="bg-white rounded-2xl shadow-lg w-full max-w-md mx-auto p-4 sm:p-6">
             <h2 className="text-xl font-bold mb-4 text-center text-gray-800">
               {isEditing ? "Edit Office" : "Add Office"}
             </h2>
@@ -181,10 +186,10 @@ export default function Offices() {
               className="border border-gray-300 rounded-lg px-3 py-2 w-full mb-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400"
             />
 
-            <div className="flex justify-end gap-2">
+            <div className="flex flex-col sm:flex-row justify-end gap-2">
               <button
                 onClick={resetForm}
-                className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+                className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-sm"
               >
                 Cancel
               </button>
@@ -192,14 +197,14 @@ export default function Offices() {
               {isEditing ? (
                 <button
                   onClick={handleUpdate}
-                  className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition"
+                  className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm"
                 >
                   Update
                 </button>
               ) : (
                 <button
                   onClick={handleAdd}
-                  className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition"
+                  className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm"
                 >
                   Add
                 </button>
@@ -211,4 +216,3 @@ export default function Offices() {
     </div>
   );
 }
-  
