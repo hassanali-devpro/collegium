@@ -288,7 +288,7 @@ const StudyProgramForm = () => {
             <input
               type="text"
               name="cgpaRequirement"
-              placeholder="CGPA Requirement"
+              placeholder="CGPA or Marks Requirement"
               value={formData.cgpaRequirement}
               onChange={handleChange}
               className={inputClass}
@@ -301,16 +301,16 @@ const StudyProgramForm = () => {
             >
               <option value="">Select Language Test</option>
               <option value="IELTS">IELTS</option>
-              <option value="TOEFL">TOEFL</option>
               <option value="PTE">PTE</option>
-              <option value="Duolingo">Duolingo</option>
-              <option value="Other">Other</option>
+              <option value="TOEFL">TOEFL</option>
+              <option value="Duolingo">Ielts and PTE</option>
+              <option value="Other">All</option>
             </select>
 
             <input
               type="text"
               name="minBands"
-              placeholder="Minimum Bands / Score"
+              placeholder="Score"
               value={formData.minBands}
               onChange={handleChange}
               className={inputClass}

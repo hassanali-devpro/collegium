@@ -1,4 +1,3 @@
-// Basic FAQs (no country required)
 export const basicFaqs = [
   {
     keywords: ["hi", "hello", "hey", "good morning", "good evening"],
@@ -22,24 +21,23 @@ export const basicFaqs = [
   },
   {
     keywords: ["developed", "create", "created"],
-    response: "I was developed by Syed Hassan Ali. You can contact him on hassanali.devpro@gmail.com or +92-322-0622691",
+    response:
+      "I was developed by Syed Hassan Ali. You can contact him on hassanali.devpro@gmail.com or +92-322-0622691",
   },
   {
     keywords: ["best client"],
-    response: "Syed Hassan Ali is the best client in the history collegium.",
+    response: "Syed Hassan Ali is the best client in the history of Collegium.",
   },
   {
     keywords: ["best employ"],
-    response: "Madiha is the best person in the history collegium.",
+    response: "Madiha is the best person in the history of Collegium.",
   },
 ];
 
-
-// Country-specific FAQs
 export const countryFaqs = {
   france: [
     {
-      keywords: ["budget", "cost", "expenses", "how much money"],
+      keywords: ["budget", "cost", "expenses", "money"],
       response:
         "🇫🇷 The total estimated budget required for studying in France is 18 to 20 Lac PKR.",
     },
@@ -123,11 +121,279 @@ export const countryFaqs = {
         "🇫🇷 Students are eligible for a 1.5-year Post-Study Work Visa after completing their degree.",
     },
   ],
-  italy: [],
+  italy: [
+    {
+      keywords: ["budget", "cost", "expenses", "money"],
+      response:
+        "🇮🇹 The total estimated budget required for studying in Italy is around 10 to 12 Lac PKR, including tuition, visa, travel, and initial accommodation expenses.",
+    },
+    {
+      keywords: ["bank statement", "bank", "statement", "balance", "funds"],
+      response:
+        "🇮🇹 A bank statement of approximately 25 to 30 Lac PKR is required to support your Italian visa application and living costs.",
+    },
+    {
+      keywords: ["universities", "collegium panel", "how many universities"],
+      response:
+        "🇮🇹 There are 32 universities on the Collegium panel for Italy, offering a wide range of programs for international students.",
+    },
+    {
+      keywords: [
+        "tuition fee",
+        "course fee",
+        "courses fee",
+        "programs fee",
+        "university fee",
+      ],
+      response:
+        "🇮🇹 The tuition fees in Italy are very affordable, ranging from €0 to €1,400 per year depending on the university and course.",
+    },
+    {
+      keywords: ["courses", "programs", "available courses"],
+      response:
+        "🇮🇹 Courses available include: Geo Engineering, MBBS, Business, Marketing, AI, Data Science, Cyber Security, Computer Engineering, Finance, Political Science, Neuroscience, Marine Biology, Hospitality, Environmental Science, and more.",
+    },
+    {
+      keywords: ["apply", "collegium apply"],
+      response:
+        "🇮🇹 Collegium will apply to up to 5 universities in Italy on your behalf to increase your chances of admission.",
+    },
+    {
+      keywords: ["ielts", "language test", "english requirement"],
+      response:
+        "🇮🇹 IELTS is not mandatory for all programs. However, some universities may require it depending on the course and language of instruction.",
+    },
+    {
+      keywords: ["accommodation", "hostel", "stay", "housing"],
+      response:
+        "🇮🇹 Yes, accommodation will be arranged for students after their visa is approved, ensuring a smooth transition to Italy.",
+    },
+    {
+      keywords: ["insurance", "health insurance", "medical insurance"],
+      response: "🇮🇹 The health insurance cost for students is around 18,000 PKR per year.",
+    },
+    {
+      keywords: ["embassy fee", "visa fee", "application fee"],
+      response: "🇮🇹 The embassy fee for an Italian student visa is approximately 50,000 PKR.",
+    },
+    {
+      keywords: ["visa appointment", "visa process", "how to get visa"],
+      response:
+        "🇮🇹 Collegium will assist you in securing your visa appointment for Italy and guide you through the process.",
+    },
+    {
+      keywords: ["spouse", "bring spouse", "family"],
+      response: "🇮🇹 Students cannot take their spouse or dependents on a student visa to Italy.",
+    },
+    {
+      keywords: ["permanent residency", "pr", "residency"],
+      response:
+        "🇮🇹 You can apply for Permanent Residency (PR) after 5 years of legal stay in Italy. Half of your study period counts towards PR.",
+    },
+    {
+      keywords: ["minimum wage", "salary", "earnings"],
+      response: "🇮🇹 The minimum wage in Italy is approximately €15 per hour.",
+    },
+    {
+      keywords: ["work hours", "part-time work", "student job"],
+      response: "🇮🇹 Students are allowed to work up to 20 hours per week while studying.",
+    },
+    {
+      keywords: ["post-study work", "psw", "work after study"],
+      response:
+        "🇮🇹 After completing your degree, you are eligible for a Post-Study Work (PSW) visa to gain professional experience in Italy.",
+    },
+  ],
+  finland: [
+    {
+      keywords: ["budget", "cost", "expenses", "money"],
+      response:
+        "🇫🇮 The total estimated budget required for studying in Finland is around **50 Lac PKR** for a single student and **60 Lac PKR** if you are applying with your spouse. This covers tuition fees, visa costs, travel, and initial living expenses.",
+    },
+    {
+      keywords: ["bank statement", "bank", "statement", "balance", "funds"],
+      response:
+        "🇫🇮 A bank statement of **40 Lac PKR** is required for single applicants, while those applying with a spouse should maintain a statement of **60 Lac PKR** to support their visa and living expenses.",
+    },
+    {
+      keywords: ["universities", "collegium panel", "how many universities"],
+      response:
+        "🇫🇮 There are **11 universities** on the Collegium panel for Finland, offering diverse programs for international students across multiple disciplines.",
+    },
+    {
+      keywords: [
+        "tuition fee",
+        "course fee",
+        "courses fee",
+        "programs fee",
+        "university fee",
+      ],
+      response:
+        "🇫🇮 The tuition fees in Finland range from **€6,000 to €12,000 per year**, depending on the program and university.",
+    },
+    {
+      keywords: ["courses", "programs", "available courses"],
+      response:
+        "🇫🇮 Finland offers **all types of academic programs**, including Engineering, Business, Computer Science, Artificial Intelligence, Health Sciences, Education, and Social Sciences.",
+    },
+    {
+      keywords: ["apply", "collegium apply"],
+      response:
+        "🇫🇮 Collegium will apply to **6 universities** in Finland on your behalf to maximize your chances of getting admission.",
+    },
+    {
+      keywords: ["ielts", "language test", "english requirement"],
+      response:
+        "🇫🇮 **IELTS is required** for all undergraduate programs. However, **postgraduate programs do not require IELTS**, provided your previous education was in English.",
+    },
+    {
+      keywords: ["accommodation", "hostel", "stay", "housing"],
+      response:
+        "🇫🇮 Yes, **accommodation will be arranged after visa approval**, ensuring you have a place to stay upon arrival in Finland.",
+    },
+    {
+      keywords: ["insurance", "health insurance", "medical insurance"],
+      response:
+        "🇫🇮 The cost of student health insurance in Finland is approximately **22,000 PKR per year**.",
+    },
+    {
+      keywords: ["embassy fee", "visa fee", "application fee"],
+      response:
+        "🇫🇮 The embassy fee for a Finland student visa is around **45,000 PKR**.",
+    },
+    {
+      keywords: ["visa appointment", "visa process", "how to get visa"],
+      response:
+        "🇫🇮 Visa appointments for Finland are **easily available through VFS Global**, making the process smooth and convenient.",
+    },
+    {
+      keywords: ["spouse", "bring spouse", "family"],
+      response:
+        "🇫🇮 Yes, **students can take their spouse** to Finland during their studies on a dependent visa.",
+    },
+    {
+      keywords: ["permanent residency", "pr", "residency"],
+      response:
+        "🇫🇮 You can apply for **Permanent Residency (PR) after 4 years** of continuous legal stay in Finland.",
+    },
+    {
+      keywords: ["study period pr", "study count pr", "count towards pr"],
+      response:
+        "🇫🇮 Yes, the **study period counts towards PR** in Finland, helping you qualify sooner for permanent residency.",
+    },
+    {
+      keywords: ["minimum wage", "salary", "earnings"],
+      response:
+        "🇫🇮 The **minimum wage** for part-time jobs in Finland is approximately **€15 per hour**.",
+    },
+    {
+      keywords: ["work hours", "part-time work", "student job"],
+      response:
+        "🇫🇮 International students in Finland are allowed to work **up to 20 hours per week** during their studies.",
+    },
+    {
+      keywords: ["post-study work", "psw", "work after study"],
+      response:
+        "🇫🇮 Yes, after completing your studies, you are eligible for a **Post-Study Work (PSW) visa**, allowing you to stay and work in Finland to gain professional experience.",
+    },
+  ],
+  sweden: [
+    {
+      keywords: ["budget", "cost", "expenses", "money"],
+      response:
+        "🇸🇪 The total estimated budget required for studying in Sweden is around **30 Lac PKR** for a single student and **35 Lac PKR** if applying with a spouse. This includes tuition fees, visa costs, travel, and initial living expenses.",
+    },
+    {
+      keywords: ["bank statement", "bank", "statement", "balance", "funds"],
+      response:
+        "🇸🇪 A bank statement of **40 Lac PKR** is required for single applicants, while those applying with a spouse should maintain a statement of **60 Lac PKR** to support their visa application and living costs.",
+    },
+    {
+      keywords: ["universities", "collegium panel", "how many universities"],
+      response:
+        "🇸🇪 There are **10 universities** on the Collegium panel for Sweden, offering a wide range of high-quality academic programs for international students.",
+    },
+    {
+      keywords: [
+        "tuition fee",
+        "course fee",
+        "courses fee",
+        "programs fee",
+        "university fee",
+      ],
+      response:
+        "🇸🇪 The tuition fee in Sweden ranges from **€6,000 to €8,000 per semester**, depending on the course and university.",
+    },
+    {
+      keywords: ["courses", "programs", "available courses"],
+      response:
+        "🇸🇪 Sweden offers **all types of courses**, including Engineering, Business, Computer Science, Artificial Intelligence, Health Sciences, Environmental Studies, and Social Sciences.",
+    },
+    {
+      keywords: ["apply", "collegium apply"],
+      response:
+        "🇸🇪 Collegium will apply to **4 universities for Master's programs** and **8 universities for Bachelor's programs** on your behalf.",
+    },
+    {
+      keywords: ["ielts", "language test", "english requirement"],
+      response:
+        "🇸🇪 Yes, **IELTS is required** for admission in Sweden. The minimum required score is **6.5 overall bands**, with **no less than 6.0 in each module**.",
+    },
+    {
+      keywords: ["accommodation", "hostel", "stay", "housing"],
+      response:
+        "🇸🇪 Yes, **accommodation will be arranged after visa approval**, ensuring you have a confirmed place to stay upon arrival in Sweden.",
+    },
+    {
+      keywords: ["insurance", "health insurance", "medical insurance"],
+      response:
+        "🇸🇪 The cost of student health insurance in Sweden is approximately **22,000 PKR per year**.",
+    },
+    {
+      keywords: ["embassy fee", "visa fee", "application fee"],
+      response:
+        "🇸🇪 The embassy fee for a Sweden student visa is around **20,000 PKR**.",
+    },
+    {
+      keywords: ["visa appointment", "visa process", "how to get visa"],
+      response:
+        "🇸🇪 Visa appointments for Sweden can be **booked easily through VFS Global**.",
+    },
+    {
+      keywords: ["spouse", "bring spouse", "family"],
+      response:
+        "🇸🇪 Yes, **students can take their spouse** to Sweden during their study period on a dependent visa.",
+    },
+    {
+      keywords: ["permanent residency", "pr", "residency"],
+      response:
+        "🇸🇪 You can apply for **Permanent Residency (PR) after 4 years** of continuous legal stay in Sweden.",
+    },
+    {
+      keywords: ["study period pr", "study count pr", "count towards pr"],
+      response:
+        "🇸🇪 No, the **study period does not count towards PR** eligibility in Sweden.",
+    },
+    {
+      keywords: ["minimum wage", "salary", "earnings"],
+      response:
+        "🇸🇪 The **minimum wage** for part-time work in Sweden is approximately **150 SEK per hour**.",
+    },
+    {
+      keywords: ["work hours", "part-time work", "student job"],
+      response:
+        "🇸🇪 International students in Sweden are allowed to work **up to 20 hours per week** during their studies.",
+    },
+    {
+      keywords: ["post-study work", "psw", "work after study"],
+      response:
+        "🇸🇪 Yes, after completing your degree, you are eligible for a **Post-Study Work (PSW) visa** to gain professional experience in Sweden.",
+    },
+  ],
+
+
   cyprus: [],
   malta: [],
-  sweden: [],
-  finland: [],
   germany: [],
   belgium: [],
   uk: [],
