@@ -241,6 +241,7 @@ const StudyProgramForm = () => {
               className={inputClass}
             >
               <option value="">Program Type*</option>
+              <option value="Foundation">Foundation</option>
               <option value="Bachelors">Bachelors</option>
               <option value="Masters">Masters</option>
               <option value="PhD">PhD</option>
