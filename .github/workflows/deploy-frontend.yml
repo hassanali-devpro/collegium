@@ -1,26 +1,52 @@
-name: Deploy
+name: Deploy Frontend
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main  # Replace with your deployment branch if different
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout the repo
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Use project directory from secret
-        run: |
-          echo "Project directory is: ${{ secrets.PROJECT_DIR }}"
+      # 2. Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
 
-      - name: Deploy to server
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
-            cd ${{ secrets.PROJECT_DIR }} && \
-            git pull origin main && \
-            npm install && \
-            pm2 restart all
-          "
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. Build the project
+      - name: Build frontend
+        run: npm run build
+
+      # 5. Copy build folder to server
+      - name: Copy build to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: 22
+          source: "dist/*"
+          target: ${{ secrets.PROJECT_DIR }}
+
+      # 6. Reload Nginx on server
+      - name: Reload Nginx
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: 22
+          script: |
+            sudo nginx -t
+            sudo systemctl reload nginx
