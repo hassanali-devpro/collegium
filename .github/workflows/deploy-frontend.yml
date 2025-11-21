@@ -3,44 +3,39 @@ name: Deploy Frontend
 on:
   push:
     branches:
-      - main  # Replace with your deployment branch if different
+      - main  # Deploy when pushing to main branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the repo
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Setup Node.js
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      # 3. Install dependencies
       - name: Install dependencies
         run: npm ci
 
-      # 4. Build the project
       - name: Build frontend
         run: npm run build
 
-      # 5. Copy build folder to server
-      - name: Copy build to server
+      - name: Copy frontend to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           port: 22
-          source: "dist/*"
-          target: ${{ secrets.PROJECT_DIR }}
+          source: "dist/"
+          target: "${{ secrets.PROJECT_DIR }}/dist"
+          rm: true
 
-      # 6. Reload Nginx on server
-      - name: Reload Nginx
+      - name: Restart PM2 backend & reload Nginx
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -48,5 +43,7 @@ jobs:
           key: ${{ secrets.DEPLOY_KEY }}
           port: 22
           script: |
+            cd ${{ secrets.PROJECT_DIR }}
+            pm2 restart travel-backend || pm2 start dist/server.js --name travel-backend
             sudo nginx -t
             sudo systemctl reload nginx
