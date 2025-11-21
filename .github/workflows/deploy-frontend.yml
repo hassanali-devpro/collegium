@@ -24,7 +24,7 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Upload frontend files to server
+      - name: Upload frontend build to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -34,7 +34,7 @@ jobs:
           source: "dist/*"
           target: "${{ secrets.FRONTEND_DIR }}/dist"
 
-      - name: Restart Nginx
+      - name: Reload Nginx
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SSH_HOST }}
