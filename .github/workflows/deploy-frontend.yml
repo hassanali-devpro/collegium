@@ -3,7 +3,7 @@ name: Deploy Frontend
 on:
   push:
     branches:
-      - main
+      - main  # Deploy when pushing to main branch
 
 jobs:
   deploy:
@@ -24,18 +24,8 @@ jobs:
       - name: Build frontend
         run: npm run build
 
-      - name: Copy frontend to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.DEPLOY_KEY }}
-          port: 22
-          source: "dist/*"         # copy all files inside dist
-          target: "/var/www/travel-frontend/dist"
-          rm: true                 # remove old files first
-
-      - name: Reload Nginx
+      # Remove old frontend build and prepare directory
+      - name: Remove old frontend build
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -43,5 +33,33 @@ jobs:
           key: ${{ secrets.DEPLOY_KEY }}
           port: 22
           script: |
+            sudo rm -rf ${{ secrets.PROJECT_DIR }}/dist
+            mkdir -p ${{ secrets.PROJECT_DIR }}/dist
+            sudo chown -R deploy:deploy ${{ secrets.PROJECT_DIR }}/dist
+
+      # Copy new frontend build to server
+      - name: Copy frontend to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: 22
+          source: "dist/"
+          target: "${{ secrets.PROJECT_DIR }}/dist"
+          rm: false  # already removed via SSH
+          overwrite: true
+
+      # Restart backend (PM2) and reload Nginx
+      - name: Restart PM2 backend & reload Nginx
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: 22
+          script: |
+            cd ${{ secrets.PROJECT_DIR }}
+            pm2 restart travel-backend || pm2 start dist/server.js --name travel-backend
             sudo nginx -t
             sudo systemctl reload nginx
