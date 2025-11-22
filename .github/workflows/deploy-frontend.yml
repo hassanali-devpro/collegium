@@ -44,7 +44,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           port: 22
-          source: "dist/**"
+          source: "dist/*"
           target: "${{ secrets.PROJECT_DIR }}"
           rm: false        # already cleaned, no need to remove again
           overwrite: true
