@@ -3,7 +3,7 @@ name: Deploy Frontend
 on:
   push:
     branches:
-      - main  # Deploy when pushing to main branch
+      - main  # Trigger deployment on main branch push
 
 jobs:
   deploy:
@@ -24,18 +24,7 @@ jobs:
       - name: Build frontend
         run: npm run build
 
-      - name: Copy frontend to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.DEPLOY_KEY }}
-          port: 22
-          source: "dist/"
-          target: "${{ secrets.PROJECT_DIR }}/dist"
-          rm: true
-
-      - name: Restart PM2 backend & reload Nginx
+      - name: Clean dist folder on server
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -43,7 +32,31 @@ jobs:
           key: ${{ secrets.DEPLOY_KEY }}
           port: 22
           script: |
-            cd ${{ secrets.PROJECT_DIR }}
-            pm2 restart travel-backend || pm2 start dist/server.js --name travel-backend
+            sudo rm -rf ${{ secrets.PROJECT_DIR }}/*
+            sudo mkdir -p ${{ secrets.PROJECT_DIR }}
+            sudo chown -R deploy:deploy ${{ secrets.PROJECT_DIR }}
+
+      - name: Copy frontend to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: 22
+          source: "dist/*"               # copies CONTENTS of dist, not the folder
+          target: "${{ secrets.PROJECT_DIR }}"  # should point to /var/www/travel-frontend/dist
+          rm: false
+          overwrite: true
+
+      - name: Reload Nginx and set permissions
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: 22
+          script: |
+            sudo chown -R deploy:deploy ${{ secrets.PROJECT_DIR }}
+            sudo chmod -R 755 ${{ secrets.PROJECT_DIR }}
             sudo nginx -t
             sudo systemctl reload nginx
