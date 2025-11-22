@@ -32,7 +32,6 @@ jobs:
           key: ${{ secrets.DEPLOY_KEY }}
           port: 22
           script: |
-            # Remove all old files in PROJECT_DIR
             sudo rm -rf ${{ secrets.PROJECT_DIR }}/*
             sudo mkdir -p ${{ secrets.PROJECT_DIR }}
             sudo chown -R deploy:deploy ${{ secrets.PROJECT_DIR }}
@@ -44,9 +43,9 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           port: 22
-          source: "dist/*"
-          target: "${{ secrets.PROJECT_DIR }}"
-          rm: false        # already cleaned, no need to remove again
+          source: "dist/*"               # copies CONTENTS of dist, not the folder
+          target: "${{ secrets.PROJECT_DIR }}"  # should point to /var/www/travel-frontend/dist
+          rm: false
           overwrite: true
 
       - name: Reload Nginx and set permissions
