@@ -1,6 +1,5 @@
 name: Deploy Frontend
 
-
 on:
   push:
     branches:
@@ -25,6 +24,19 @@ jobs:
       - name: Build frontend
         run: npm run build
 
+      - name: Clean dist folder on server
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: 22
+          script: |
+            # Remove all old files in PROJECT_DIR
+            sudo rm -rf ${{ secrets.PROJECT_DIR }}/*
+            sudo mkdir -p ${{ secrets.PROJECT_DIR }}
+            sudo chown -R deploy:deploy ${{ secrets.PROJECT_DIR }}
+
       - name: Copy frontend to server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -32,12 +44,12 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           port: 22
-          source: "dist/*"
-          target: "${{ secrets.PROJECT_DIR }}"   # <-- FIXED
-          rm: true
+          source: "dist/**"
+          target: "${{ secrets.PROJECT_DIR }}"
+          rm: false        # already cleaned, no need to remove again
           overwrite: true
 
-      - name: Reload Nginx and ensure correct permissions
+      - name: Reload Nginx and set permissions
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -47,6 +59,5 @@ jobs:
           script: |
             sudo chown -R deploy:deploy ${{ secrets.PROJECT_DIR }}
             sudo chmod -R 755 ${{ secrets.PROJECT_DIR }}
-
             sudo nginx -t
             sudo systemctl reload nginx
