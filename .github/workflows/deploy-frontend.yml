@@ -31,10 +31,9 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           port: 22
-          source: "dist/"
-          target: "${{ secrets.PROJECT_DIR }}/dist"
+          source: "dist/*"
+          target: "${{ secrets.PROJECT_DIR }}"   # <-- FIXED
           rm: true
-          strip_components: 0
           overwrite: true
 
       - name: Reload Nginx and ensure correct permissions
@@ -45,10 +44,8 @@ jobs:
           key: ${{ secrets.DEPLOY_KEY }}
           port: 22
           script: |
-            # Make sure dist folder has correct ownership
-            sudo chown -R deploy:deploy ${{ secrets.PROJECT_DIR }}/dist
-            sudo chmod -R 755 ${{ secrets.PROJECT_DIR }}/dist
+            sudo chown -R deploy:deploy ${{ secrets.PROJECT_DIR }}
+            sudo chmod -R 755 ${{ secrets.PROJECT_DIR }}
 
-            # Test Nginx configuration and reload
             sudo nginx -t
             sudo systemctl reload nginx
