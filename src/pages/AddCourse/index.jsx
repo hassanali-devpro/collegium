@@ -31,9 +31,9 @@ const StudyProgramForm = () => {
     isPrivate: "",
     openAdmission: true,
     type: "",
-    fee: "",
+    fee: "0",
     timePeriod: "",
-    percentageRequirement: "",
+    percentageRequirement: "None",
     cgpaRequirement: "",
     languageTest: "",
     minBands: "",
@@ -294,19 +294,15 @@ const StudyProgramForm = () => {
               onChange={handleChange}
               className={inputClass}
             />
-            <select
+            <input
+              type="text"
               name="languageTest"
               value={formData.languageTest}
               onChange={handleChange}
               className={inputClass}
-            >
-              <option value="">Select Language Test</option>
-              <option value="IELTS">IELTS</option>
-              <option value="PTE">PTE</option>
-              <option value="TOEFL">TOEFL</option>
-              <option value="Duolingo">Ielts and PTE</option>
-              <option value="Other">All</option>
-            </select>
+              placeholder="Enter Language Tests"
+            />
+
 
             <input
               type="text"
