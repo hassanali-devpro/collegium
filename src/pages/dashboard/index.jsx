@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import UpdatedSection from "../../components/UpdatedSection";
 import QRSection from "../../components/QRSection"
 import AdminMessage from "../../components/AdminMessages";
+import Contacts from "../../components/Contacts"
 
 const Index = () => {
   const getGreeting = () => {
@@ -57,6 +58,9 @@ const quotes = [
       <div className="flex w-full px-4">
         <AdminMessage />
       </div>
+      {/* <div className="flex w-full px-4">
+        <Contacts />
+      </div> */}
     </div>
   );
 };
