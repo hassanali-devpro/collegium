@@ -2,61 +2,40 @@ name: Deploy Frontend
 
 on:
   push:
-    branches:
-      - main  # Trigger deployment on main branch push
+    branches: ["main"]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
+      - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: 18
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install deps & build
+        run: |
+          npm install
+          npm run build
 
-      - name: Build frontend
-        run: npm run build
-
-      - name: Clean dist folder on server
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.DEPLOY_KEY }}
-          port: 22
-          script: |
-            sudo rm -rf ${{ secrets.PROJECT_DIR }}/*
-            sudo mkdir -p ${{ secrets.PROJECT_DIR }}
-            sudo chown -R deploy:deploy ${{ secrets.PROJECT_DIR }}
-
-      - name: Copy frontend to server
+      - name: Copy build via SSH
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
-          port: 22
-          source: "dist/*"               # copies CONTENTS of dist, not the folder
-          target: "${{ secrets.PROJECT_DIR }}"  # should point to /var/www/travel-frontend/dist
-          rm: false
-          overwrite: true
+          source: "dist/*"
+          target: "${{ secrets.PROJECT_DIR }}"
 
-      - name: Reload Nginx and set permissions
-        uses: appleboy/ssh-action@v0.1.6
+      - name: Restart PM2 (optional)
+        uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
-          port: 22
           script: |
-            sudo chown -R deploy:deploy ${{ secrets.PROJECT_DIR }}
-            sudo chmod -R 755 ${{ secrets.PROJECT_DIR }}
-            sudo nginx -t
-            sudo systemctl reload nginx
+            pm2 restart travel-frontend || pm2 start npm --name travel-frontend -- run start
