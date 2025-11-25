@@ -34,6 +34,212 @@ export const basicFaqs = [
   },
 ];
 
+export const countryList = [
+  "france",
+  "italy",
+  "sweden",
+  "finland",
+];
+
+export const collegiumCountries = [
+  "cyprus",
+  "malta",
+  "germany",
+  "belgium",
+  "uk",
+  "spain",
+  "usa",
+  "australia",
+  "canada",
+  "hungary",
+  "netherlands",
+  "denmark",
+  "lithuania",
+  "estonia",
+  "belarus",
+  "georgia"
+];
+
+export const worldCountries = [
+  "afghanistan",
+  "albania",
+  "algeria",
+  "andorra",
+  "angola",
+  "antigua and barbuda",
+  "argentina",
+  "armenia",
+  "austria",
+  "azerbaijan",
+  "bahamas",
+  "bahrain",
+  "bangladesh",
+  "barbados",
+  "belize",
+  "benin",
+  "bhutan",
+  "bolivia",
+  "bosnia",
+  "botswana",
+  "brazil",
+  "brunei",
+  "bulgaria",
+  "burkina faso",
+  "burundi",
+  "cabo verde",
+  "cambodia",
+  "cameroon",
+  "central african",
+  "chad",
+  "chile",
+  "china",
+  "colombia",
+  "comoros",
+  "congo",
+  "costa",
+  "croatia",
+  "cuba",
+  "czechia",
+  "republic of the congo",
+  "djibouti",
+  "dominica",
+  "dominican",
+  "ecuador",
+  "egypt",
+  "el salvador",
+  "equatorial guinea",
+  "eritrea",
+  "eswatini",
+  "ethiopia",
+  "fiji",
+  "gabon",
+  "gambia",
+  "ghana",
+  "greece",
+  "grenada",
+  "guatemala",
+  "guinea",
+  "bissau",
+  "guyana",
+  "haiti",
+  "honduras",
+  "iceland",
+  "india",
+  "indonesia",
+  "iran",
+  "iraq",
+  "ireland",
+  "israel",
+  "jamaica",
+  "japan",
+  "jordan",
+  "kazakhstan",
+  "kenya",
+  "kiribati",
+  "kuwait",
+  "kyrgyzstan",
+  "laos",
+  "latvia",
+  "lebanon",
+  "lesotho",
+  "liberia",
+  "libya",
+  "luxembourg",
+  "madagascar",
+  "malawi",
+  "malaysia",
+  "maldives",
+  "marshall islands",
+  "mauritania",
+  "mauritius",
+  "mexico",
+  "micronesia",
+  "moldova",
+  "monaco",
+  "mongolia",
+  "montenegro",
+  "morocco",
+  "mozambique",
+  "myanmar",
+  "namibia",
+  "nauru",
+  "nepal",
+  "new zealand",
+  "nicaragua",
+  "niger",
+  "nigeria",
+  "north korea",
+  "north macedonia",
+  "norway",
+  "oman",
+  "pakistan",
+  "palau",
+  "palestine",
+  "panama",
+  "papua new guinea",
+  "paraguay",
+  "peru",
+  "philippines",
+  "poland",
+  "portugal",
+  "qatar",
+  "romania",
+  "russia",
+  "rwanda",
+  "saint kitts",
+  "saint lucia",
+  "saint vincent",
+  "samoa",
+  "san marino",
+  "sao tome",
+  "saudi arabia",
+  "senegal",
+  "serbia",
+  "seychelles",
+  "sierra leone",
+  "singapore",
+  "slovakia",
+  "slovenia",
+  "solomon islands",
+  "somalia",
+  "south africa",
+  "south korea",
+  "south sudan",
+  "sri lanka",
+  "sudan",
+  "suriname",
+  "switzerland",
+  "syria",
+  "taiwan",
+  "tajikistan",
+  "tanzania",
+  "thailand",
+  "timor-leste",
+  "togo",
+  "tonga",
+  "trinidad and tobago",
+  "tunisia",
+  "turkey",
+  "turkmenistan",
+  "tuvalu",
+  "uganda",
+  "ukraine",
+  "united arab emirates",
+  "uae",
+  "uruguay",
+  "uzbekistan",
+  "vanuatu",
+  "vatican city",
+  "venezuela",
+  "vietnam",
+  "yemen",
+  "zambia",
+  "zimbabwe"
+];
+
+
+
+
 export const countryFaqs = {
   france: [
     {
@@ -120,6 +326,11 @@ export const countryFaqs = {
       response:
         "🇫🇷 Students are eligible for a 1.5-year Post-Study Work Visa after completing their degree.",
     },
+  {
+    keywords: ["yes", "ok", "yeah", "go", "alright"],
+    response:
+      "Studying in France requires a total budget of 18–20 Lac PKR, with a bank statement of 35–45 Lac PKR. Tuition fees range from €9,000–30,000/year. Collegium works with 28 universities and can apply on your behalf. Courses include Marketing, Fashion, Project Management, Computer Science, and more. IELTS may be required, and initial accommodation is arranged. Health insurance costs ~22,000 PKR, and the visa fee is 28,000 PKR. Students can work 4 hours/day, and a 1.5-year post-study work visa is available. Permanent Residency can be applied for after 5 years. Spouses can visit after 1.5 years.",
+  },
   ],
   italy: [
     {
@@ -203,6 +414,12 @@ export const countryFaqs = {
       response:
         "🇮🇹 After completing your degree, you are eligible for a Post-Study Work (PSW) visa to gain professional experience in Italy.",
     },
+{
+  keywords: ["yes", "ok", "yeah", "go", "alright"],
+  response:
+    "Studying in Italy requires a total budget of 10–12 Lac PKR, with a bank statement of 25–30 Lac PKR. Tuition fees are very affordable, ranging from €0–1,400/year. Collegium works with 32 universities and can apply to up to 5 on your behalf. Courses include Geo Engineering, MBBS, Business, AI, Data Science, Cyber Security, Computer Engineering, Finance, Political Science, Neuroscience, Marine Biology, Hospitality, and more. IELTS is not mandatory for all programs. Accommodation is arranged after visa approval. Health insurance costs ~18,000 PKR, and the visa fee is ~50,000 PKR. Students can work up to 20 hours/week, and a post-study work visa is available. Permanent Residency can be applied for after 5 years. Spouses cannot accompany students initially."
+}
+
   ],
   finland: [
     {
@@ -296,6 +513,13 @@ export const countryFaqs = {
       response:
         "🇫🇮 Yes, after completing your studies, you are eligible for a **Post-Study Work (PSW) visa**, allowing you to stay and work in Finland to gain professional experience.",
     },
+    {
+  keywords: ["yes", "ok", "yeah", "go", "alright"],
+  response:
+    "Studying in Finland requires a total budget of 50–60 Lac PKR depending on whether you are single or applying with a spouse, with a bank statement of 40–60 Lac PKR. Tuition fees range from €6,000–12,000 per year. Collegium works with 11 universities and can apply to 6 on your behalf. Programs include Engineering, Business, Computer Science, AI, Health Sciences, Education, and Social Sciences. IELTS is required for undergraduate programs, while postgraduate programs may not require it if previous education was in English. Accommodation is arranged after visa approval. Health insurance costs ~22,000 PKR, and the visa fee is ~45,000 PKR. Students can work up to 20 hours/week, and a post-study work visa is available. Permanent Residency can be applied for after 4 years, and study period counts towards PR. Spouses can accompany students on a dependent visa."
+}
+
+
   ],
   sweden: [
     {
@@ -384,28 +608,33 @@ export const countryFaqs = {
       response:
         "🇸🇪 International students in Sweden are allowed to work **up to 20 hours per week** during their studies.",
     },
-    {
-      keywords: ["post-study work", "psw", "work after study"],
-      response:
-        "🇸🇪 Yes, after completing your degree, you are eligible for a **Post-Study Work (PSW) visa** to gain professional experience in Sweden.",
-    },
+{
+  keywords: ["yes", "ok", "yeah", "go", "alright"],
+  response:
+    "Studying in Sweden requires a total budget of 30–35 Lac PKR depending on whether you are single or applying with a spouse, with a bank statement of 40–60 Lac PKR. Tuition fees range from €6,000–8,000 per semester. Collegium works with 10 universities and can apply to 4 universities for Master's programs and 8 for Bachelor's programs on your behalf. Programs include Engineering, Business, Computer Science, AI, Health Sciences, Environmental Studies, and Social Sciences. IELTS is required with a minimum score of 6.5 overall and no less than 6.0 in each module. Accommodation is arranged after visa approval. Health insurance costs ~22,000 PKR, and the visa fee is ~20,000 PKR. Students can work up to 20 hours/week. Permanent Residency can be applied for after 4 years, but study period does not count towards PR. Spouses can accompany students on a dependent visa."
+}
+
+
   ],
-
-
-  cyprus: [],
-  malta: [],
-  germany: [],
-  belgium: [],
-  uk: [],
-  spain: [],
-  usa: [],
-  australia: [],
-  canada: [],
-  hungary: [],
-  netherlands: [],
-  denmark: [],
-  lithuania: [],
-  estonia: [],
-  belarus: [],
-  georgia: [],
 };
+
+
+
+
+  // cyprus: [],
+  // malta: [],
+  // germany: [],
+  // belgium: [],
+  // uk: [],
+  // spain: [],
+  // usa: [],
+  // australia: [],
+  // canada: [],
+  // hungary: [],
+  // netherlands: [],
+  // denmark: [],
+  // lithuania: [],
+  // estonia: [],
+  // belarus: [],
+  // georgia: [],
+

@@ -33,7 +33,7 @@ const StudyProgramForm = () => {
     type: "",
     fee: "0",
     timePeriod: "",
-    percentageRequirement: "",
+    percentageRequirement: "Percentage (None)",
     cgpaRequirement: "",
     languageTest: "",
     minBands: "",

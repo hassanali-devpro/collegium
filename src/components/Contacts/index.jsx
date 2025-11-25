@@ -7,21 +7,21 @@ const teamMembers = [
     name: "Mudassir Seemab",
     designation: "Visa File Manager",
     phone: "+923348087646",
-    email: "mudassir@example.com",
+    email: "Collegiumconsultancy@gmail.com",
     image: "user1.jpg",
   },
   {
     name: "Noor Ahmed",
     designation: "Managing Director",
     phone: "+923166583461",
-    email: "noor@example.com",
+    email: "Nabkht395@gmail.com",
     image: "user3.jpg",
   },
   {
     name: "Rana Afaq",
     designation: "Application Team Manager",
     phone: "+923294369840",
-    email: "rana@example.com",
+    email: "Collegiumconsultancy@gmail.com",
     image: "/user2.jpg",
   },
 ];
@@ -36,6 +36,7 @@ const TeamCard = ({ member }) => (
     <h2 className="text-lg font-semibold">{member.name}</h2>
     <p className="text-gray-500">{member.designation}</p>
     <div className="flex space-x-3 mt-2">
+      {/* WhatsApp link */}
       <a
         href={`https://wa.me/${member.phone.replace(/\D/g, "")}`}
         target="_blank"
@@ -44,18 +45,26 @@ const TeamCard = ({ member }) => (
       >
         <MessageCircle size={20} />
       </a>
+
+      {/* Phone link */}
       <a
         href={`tel:${member.phone}`}
         className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-red-500 to-red-700 text-white rounded-full hover:opacity-90 transition"
       >
         <Phone size={20} />
       </a>
-      <a
-        href={`mailto:${member.email}`}
-        className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-red-500 to-red-700 text-white rounded-full hover:opacity-90 transition"
-      >
-        <Mail size={20} />
-      </a>
+
+      {/* Email (Gmail) link, only if email exists */}
+      {member.email && (
+        <a
+          href={`https://mail.google.com/mail/?view=cm&fs=1&to=${member.email}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-red-500 to-red-700 text-white rounded-full hover:opacity-90 transition"
+        >
+          <Mail size={20} />
+        </a>
+      )}
     </div>
   </div>
 );
@@ -67,8 +76,8 @@ const TeamSection = () => (
       <p className="text-gray-500 mt-2">Our dedicated professionals ready to assist you</p>
     </div>
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-6">
-      {teamMembers.map((member) => (
-        <TeamCard key={member.email} member={member} />
+      {teamMembers.map((member, index) => (
+        <TeamCard key={index} member={member} />
       ))}
     </div>
   </section>

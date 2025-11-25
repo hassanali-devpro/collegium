@@ -1,30 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { countryFaqs, basicFaqs } from "../../content/faqData";
-
-const countryList = [
-  "france",
-  "italy",
-  "cyprus",
-  "malta",
-  "sweden",
-  "finland",
-  "germany",
-  "belgium",
-  "uk",
-  "spain",
-  "usa",
-  "australia",
-  "canada",
-  "hungary",
-  "netherlands",
-  "denmark",
-  "lithuania",
-  "estonia",
-  "belarus",
-  "georgia",
-];
+import { countryFaqs, basicFaqs, countryList, worldCountries, collegiumCountries } from "../../content/faqData";
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,38 +15,95 @@ export default function ChatWidget() {
     if (selectedCountry) console.log("Selected country:", selectedCountry);
   }, [selectedCountry]);
 
+  /** ---------------------------
+   * COUNTRY DETECTOR
+   ----------------------------*/
   const detectCountry = (message) => {
     const lower = message.toLowerCase();
-    for (let c of countryList) {
-      if (lower.includes(c)) return c;
+    const allCountries = [...countryList, ...worldCountries, ...collegiumCountries];
+
+    for (let c of allCountries) {
+      if (lower.includes(c.toLowerCase())) return c.toLowerCase();
     }
     return null;
   };
 
+  /** ---------------------------
+   * MAIN REPLY LOGIC
+   ----------------------------*/
   const getReply = (message) => {
     const lowerMsg = message.toLowerCase();
+
+    // 1️⃣ BASIC FAQs
     for (let rule of basicFaqs) {
-      if (rule.keywords.some((kw) => lowerMsg.includes(kw))) return rule.response;
+      if (rule.keywords.some((kw) => lowerMsg.includes(kw))) {
+        return rule.response;
+      }
     }
+
+    // 2️⃣ CHECK COUNTRY ON EVERY MESSAGE
     const detected = detectCountry(lowerMsg);
-    if (detected) setSelectedCountry(detected);
-    const activeCountry = detected || selectedCountry;
-    if (!activeCountry) return "Please tell me which country you'd like to know about.";
-    const faqs = countryFaqs[activeCountry] || [];
-    for (let rule of faqs) {
-      if (rule.keywords.some((kw) => lowerMsg.includes(kw.toLowerCase()))) return rule.response;
+
+    if (detected) {
+      console.log("Country detected in this message:", detected);
+      setSelectedCountry(detected);
     }
-    return `🤔 Sorry, I don’t have info for that question related to ${activeCountry}. Try asking about budget, visa, or universities.`;
+
+    // Always use latest detected OR previous saved value
+    const activeCountry = detected || selectedCountry;
+
+    console.log("Active Country:", activeCountry);
+
+    // 3️⃣ Determine category for that country
+    let category = null;
+
+    if (countryList.includes(activeCountry)) category = "countryList";
+    else if (worldCountries.includes(activeCountry)) category = "worldCountries";
+    else if (collegiumCountries.includes(activeCountry)) category = "collegiumCountries";
+
+    console.log("Category:", category);
+
+    // 4️⃣ COUNTRY-SPECIFIC FAQS
+    const faqs = countryFaqs[activeCountry] || [];
+
+    for (let rule of faqs) {
+      if (rule.keywords.some((kw) => lowerMsg.includes(kw.toLowerCase()))) {
+        return rule.response;
+      }
+    }
+
+    // 5️⃣ DEFAULT COUNTRY RESPONSES
+    if (category === "countryList") {
+      return `What do you want to know about ${activeCountry}? I can provide full details if you want.`;
+    }
+
+    if (category === "worldCountries") {
+      return `I'm sorry, we do not deal with ${activeCountry}. We may start in the future.`;
+    }
+
+    if (category === "collegiumCountries") {
+      return `Collegium deals with ${activeCountry}. Information for ${activeCountry} will be added to the database soon.`;
+    }
+
+    // 6️⃣ FALLBACK
+    return `I'm not sure I understood. Please specify a country.`;
   };
 
+  /** ---------------------------
+   * SEND MESSAGE
+   ----------------------------*/
   const handleSend = () => {
     if (!input.trim()) return;
+
     const userMsg = { role: "user", content: input };
     setMessages((prev) => [...prev, userMsg]);
+
     const reply = getReply(input);
+
     setTimeout(() => {
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
     }, 400);
+
     setInput("");
   };
 
@@ -106,16 +140,15 @@ export default function ChatWidget() {
               {messages.map((msg, i) => (
                 <div
                   key={i}
-                  className={`p-3 rounded-2xl max-w-[80%] text-sm sm:text-base shadow-sm break-words ${
-                    msg.role === "user"
+                  className={`p-3 rounded-2xl max-w-[80%] text-sm sm:text-base shadow-sm break-words ${msg.role === "user"
                       ? "bg-gradient-to-r from-[#F32222] to-[#B81717] text-white self-end ml-auto"
                       : "bg-gray-200 text-gray-800 self-start"
-                  }`}
+                    }`}
                 >
                   {msg.content}
                 </div>
               ))}
-              {/* Spacer for safe area */}
+
               <div className="pb-[env(safe-area-inset-bottom)]" />
             </div>
 
@@ -129,6 +162,7 @@ export default function ChatWidget() {
                 placeholder="Type a question..."
                 className="flex-1 px-3 py-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-red-400 shadow-sm text-sm sm:text-base"
               />
+
               <button
                 onClick={handleSend}
                 className="px-3 py-2 bg-gradient-to-r from-[#F32222] to-[#B81717] text-white rounded-xl font-medium shadow hover:opacity-90 transition text-sm sm:text-base"
