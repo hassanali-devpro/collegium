@@ -261,7 +261,9 @@ export default function Layout({ children }) {
           >
             <Menu size={22} />
           </button>
+          <Link to="/dashboard">
           <img src={logo} alt="Logo" className="h-10 w-auto hidden md:block" />
+          </Link>
         </div>
 
         <div className="flex items-center gap-4 sm:gap-6">

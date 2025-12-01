@@ -24,7 +24,7 @@ const documentTypes = [
   { displayName: "Experience Letter", fieldName: "experienceLetter" },
   { displayName: "Birth Certificate", fieldName: "birthCertificate" },
   { displayName: "Family Registration", fieldName: "familyRegistration" },
-  { displayName: "Other Documents", fieldName: "otherDocs" },
+  { displayName: "Other Document", fieldName: "otherDocs" },
 ];
 
 const DocumentsTab = ({ studentId, onPrev, onNext }) => {
@@ -40,20 +40,17 @@ const DocumentsTab = ({ studentId, onPrev, onNext }) => {
   const { success, error: showError } = useToastContext();
   const { modalState, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationModal();
 
-  // Log API data
   useEffect(() => {
     if (data) console.log("📄 Documents API Response:", data);
     if (error) console.error("❌ Error fetching documents:", error);
   }, [data, error]);
 
-  // Handle file selection
   const handleFileSelect = (fieldName, file) => {
     setSelectedFiles((prev) => ({ ...prev, [fieldName]: file }));
   };
 
-  // Handle upload all
   const handleUploadAll = async () => {
-    if (!studentId) return showError("Student ID is required for document upload.");
+    if (!studentId) return showError("Student ID is required.");
 
     const filesToUpload = Object.entries(selectedFiles).filter(([_, f]) => f);
     if (filesToUpload.length === 0) return showError("Please select at least one file.");
@@ -66,7 +63,7 @@ const DocumentsTab = ({ studentId, onPrev, onNext }) => {
       await uploadDocuments({ studentId, formData }).unwrap();
       success("All selected files uploaded successfully!");
       setSelectedFiles({});
-      refetch(); // Refresh document list
+      refetch();
     } catch (error) {
       console.error(error);
       showError("Upload failed. Please try again.");
@@ -75,20 +72,23 @@ const DocumentsTab = ({ studentId, onPrev, onNext }) => {
     }
   };
 
-  // Handle delete document
-  const handleDelete = (fieldName) => {
-    const documentType = documentTypes.find((d) => d.fieldName === fieldName);
-    const displayName = documentType?.displayName || fieldName;
+  // ----------- DELETE LOGIC UPDATE -----------
+  const handleDelete = (fieldName, index = null) => {
+    const docType = documentTypes.find((d) => d.fieldName === fieldName);
+    const displayName = docType?.displayName || fieldName;
 
     showConfirmation({
       title: "Delete Document",
-      message: `Are you sure you want to delete ${displayName}?`,
+      message:
+        index !== null
+          ? `Are you sure you want to delete ${displayName} #${index + 1}?`
+          : `Are you sure you want to delete ${displayName}?`,
       confirmText: "Delete",
       cancelText: "Cancel",
       type: "danger",
       onConfirm: async () => {
         try {
-          await deleteDocument({ studentId, fieldName }).unwrap();
+          await deleteDocument({ studentId, fieldName, index }).unwrap();
           success(`${displayName} deleted successfully.`);
           refetch();
         } catch (err) {
@@ -98,11 +98,13 @@ const DocumentsTab = ({ studentId, onPrev, onNext }) => {
       },
     });
   };
+  // -------------------------------------------
 
   const uploadedDocs = data?.data?.documents || {};
 
   return (
     <div className="space-y-6">
+
       {/* Header */}
       <div className="text-center mb-8">
         <h3 className="text-xl font-bold text-gray-800 mb-2">Document Upload Center</h3>
@@ -121,10 +123,8 @@ const DocumentsTab = ({ studentId, onPrev, onNext }) => {
           const selectedFile = selectedFiles[docType.fieldName];
 
           return (
-            <div
-              key={docType.fieldName}
-              className="bg-gray-50 p-4 rounded-lg border hover:shadow-md transition"
-            >
+            <div key={docType.fieldName} className="bg-gray-50 p-4 rounded-lg border hover:shadow-md transition">
+              
               <div className="flex items-center justify-between mb-3">
                 <h4 className="font-medium text-gray-800 text-sm">{docType.displayName}</h4>
                 <FileText className="text-blue-500" size={16} />
@@ -138,9 +138,7 @@ const DocumentsTab = ({ studentId, onPrev, onNext }) => {
                     type="file"
                     accept="image/*,.pdf,.doc,.docx"
                     className="hidden"
-                    onChange={(e) =>
-                      handleFileSelect(docType.fieldName, e.target.files[0] || null)
-                    }
+                    onChange={(e) => handleFileSelect(docType.fieldName, e.target.files[0] || null)}
                   />
                 </label>
 
@@ -151,8 +149,33 @@ const DocumentsTab = ({ studentId, onPrev, onNext }) => {
                   </p>
                 )}
 
-                {/* Uploaded File */}
-                {uploaded && (
+                {/* MULTIPLE otherDocs display */}
+                {docType.fieldName === "otherDocs" && Array.isArray(uploaded) && (
+                  <div className="space-y-2 mt-2">
+                    {uploaded.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between text-xs text-gray-700 bg-white border rounded p-2">
+                        <a
+                          href={file.path || file.s3Url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 text-blue-600 hover:underline"
+                        >
+                          <Eye size={12} /> {file.originalName}
+                        </a>
+
+                        <button
+                          onClick={() => handleDelete(docType.fieldName, index)}
+                          className="flex items-center gap-1 text-red-600 hover:text-red-800"
+                        >
+                          <Trash2 size={12} /> Delete
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Single file uploaded */}
+                {uploaded && docType.fieldName !== "otherDocs" && (
                   <div className="flex items-center justify-between text-xs text-gray-700 bg-white border rounded p-2">
                     <a
                       href={uploaded.path || uploaded.s3Url}
@@ -162,6 +185,7 @@ const DocumentsTab = ({ studentId, onPrev, onNext }) => {
                     >
                       <Eye size={12} /> View
                     </a>
+
                     <button
                       onClick={() => handleDelete(docType.fieldName)}
                       className="flex items-center gap-1 text-red-600 hover:text-red-800"
@@ -182,9 +206,7 @@ const DocumentsTab = ({ studentId, onPrev, onNext }) => {
           onClick={handleUploadAll}
           disabled={uploading}
           className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-white ${
-            uploading
-              ? "bg-blue-400 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700"
+            uploading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
           } transition`}
         >
           {uploading ? (
@@ -224,7 +246,7 @@ const DocumentsTab = ({ studentId, onPrev, onNext }) => {
         cancelText={modalState.cancelText}
         type={modalState.type}
         onConfirm={handleConfirm}
-        onCancel={hideConfirmation}
+        onClose={hideConfirmation}
       />
     </div>
   );

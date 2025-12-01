@@ -669,6 +669,7 @@ const StudentForm = () => {
                       <option value="PTE">PTE</option>
                       <option value="TOEFL">TOEFL</option>
                       <option value="Duolingo">Duolingo</option>
+                      <option value="MUI">MUI</option>
                       <option value="Other">Other</option>
                     </select>
                     <input

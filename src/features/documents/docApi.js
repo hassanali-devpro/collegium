@@ -4,8 +4,9 @@ import { baseQueryWithReauth } from "../../app/baseQuery";
 export const docApi = createApi({
   reducerPath: "docApi",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["Documents"], // Add tag for caching
+  tagTypes: ["Documents"],
   endpoints: (builder) => ({
+
     uploadDocuments: builder.mutation({
       query: ({ studentId, formData }) => ({
         url: `students/${studentId}/documents/bulk`,
@@ -24,12 +25,20 @@ export const docApi = createApi({
     }),
 
     deleteDocument: builder.mutation({
-      query: ({ studentId, fieldName }) => ({
-        url: `students/${studentId}/documents/${fieldName}`,
-        method: "DELETE",
-      }),
+      query: ({ studentId, fieldName, index }) => {
+        const url =
+          index !== undefined
+            ? `students/${studentId}/documents/${fieldName}?index=${index}`
+            : `students/${studentId}/documents/${fieldName}`;
+
+        return {
+          url,
+          method: "DELETE",
+        };
+      },
       invalidatesTags: ["Documents"],
     }),
+
   }),
 });
 
