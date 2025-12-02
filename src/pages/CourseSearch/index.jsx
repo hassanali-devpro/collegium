@@ -13,11 +13,14 @@ import { useToast } from "../../hooks/useToast";
 import { useConfirmationModal } from "../../hooks/useConfirmationModal";
 import ToastContainer from "../../components/Toast/ToastContainer";
 import ConfirmationModal from "../../components/ConfirmationModal";
+import { useGetCountriesQuery } from "../../features/meta/metaApi";
 
 const ProgramCard = ({ studentId }) => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const { toasts, removeToast, success, error: showError } = useToast();
+  const { data: countriesData } = useGetCountriesQuery();
+  const countries = countriesData?.data || [];
   const { modalState, showConfirmation, hideConfirmation, handleConfirm } =
     useConfirmationModal();
 
@@ -77,6 +80,11 @@ const ProgramCard = ({ studentId }) => {
       new Set(data.data.map((course) => course.country).filter(Boolean))
     ).sort();
   }, [data]);
+
+  console.log(countries)
+
+
+
 
   // Extract universities filtered by selected country
   const universityOptions = useMemo(() => {
@@ -233,7 +241,7 @@ const ProgramCard = ({ studentId }) => {
             className="border border-gray-300 p-2 sm:p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
           >
             <option value="">Select Country</option>
-            {countryOptions.map((country) => (
+            {countries.map((country) => (
               <option key={country} value={country}>
                 {country}
               </option>
@@ -521,11 +529,10 @@ const ProgramCard = ({ studentId }) => {
                   key={pageNum}
                   onClick={() => handlePageChange(pageNum)}
                   disabled={isLoading}
-                  className={`px-3 py-2 text-sm font-medium rounded-lg ${
-                    currentPage === pageNum
+                  className={`px-3 py-2 text-sm font-medium rounded-lg ${currentPage === pageNum
                       ? "bg-blue-600 text-white"
                       : "text-gray-500 bg-white border border-gray-300 hover:bg-gray-50"
-                  } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                    } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   {pageNum}
                 </button>

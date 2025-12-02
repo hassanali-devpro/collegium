@@ -112,7 +112,7 @@ const ApplyToCourse = ({ studentId }) => {
     <div className="space-y-6">
       {/* Course Filters */}
       <div className="p-4 shadow-lg rounded-lg bg-white">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Course Filters</h3>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">Course Filers</h3>
 
         {/* First Row - Search and Country */}
         <div className="flex flex-col md:flex-row gap-4 mb-4">
