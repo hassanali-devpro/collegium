@@ -26,12 +26,12 @@ jobs:
       - name: Build frontend
         run: npm run build
         
-      - name: Debug: Check secrets
+      - name: Debug Check secrets
         run: |
           echo "SSH_HOST: ${{ secrets.SSH_HOST }}"
           echo "SSH_USER: ${{ secrets.SSH_USER }}"
           echo "PROJECT_DIR: ${{ secrets.PROJECT_DIR }}"
-          # echo "DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}"  # DO NOT UNCOMMENT
+          echo "DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}"
 
       - name: Clean dist folder on server
         uses: appleboy/ssh-action@v0.1.6
