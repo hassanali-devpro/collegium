@@ -3,7 +3,7 @@ name: Deploy Frontend
 on:
   push:
     branches:
-      - main  # Trigger deployment on main branch push
+      - main
 
 jobs:
   deploy:
@@ -21,17 +21,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-
-
       - name: Build frontend
         run: npm run build
-        
+
+      # Optional: Debug secrets if needed (remove after testing)
       - name: Debug Check secrets
         run: |
           echo "SSH_HOST: ${{ secrets.SSH_HOST }}"
           echo "SSH_USER: ${{ secrets.SSH_USER }}"
           echo "PROJECT_DIR: ${{ secrets.PROJECT_DIR }}"
-          echo "DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}"
+          echo "DEPLOY_KEY length: ${#DEPLOY_KEY}"
+
 
       - name: Clean dist folder on server
         uses: appleboy/ssh-action@v0.1.6
@@ -41,23 +41,23 @@ jobs:
           key: ${{ secrets.DEPLOY_KEY }}
           port: 22
           script: |
+            echo "Cleaning project directory..."
             sudo rm -rf ${{ secrets.PROJECT_DIR }}/*
             sudo mkdir -p ${{ secrets.PROJECT_DIR }}
-            sudo chown -R deploy:deploy ${{ secrets.PROJECT_DIR }}
+            sudo chown -R ${{ secrets.SSH_USER }}:${{ secrets.SSH_USER }} ${{ secrets.PROJECT_DIR }}
 
-      - name: Copy frontend to server
+      - name: Upload build files to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           port: 22
-          source: "dist/*"               # copies CONTENTS of dist, not the folder
-          target: "${{ secrets.PROJECT_DIR }}"  # should point to /var/www/travel-frontend/dist
-          rm: false
+          source: "dist/*"
+          target: "${{ secrets.PROJECT_DIR }}"
           overwrite: true
 
-      - name: Reload Nginx and set permissions
+      - name: Fix permissions & Reload Nginx
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -65,7 +65,14 @@ jobs:
           key: ${{ secrets.DEPLOY_KEY }}
           port: 22
           script: |
-            sudo chown -R deploy:deploy ${{ secrets.PROJECT_DIR }}
+            echo "Setting permissions..."
+            sudo chown -R ${{ secrets.SSH_USER }}:${{ secrets.SSH_USER }} ${{ secrets.PROJECT_DIR }}
             sudo chmod -R 755 ${{ secrets.PROJECT_DIR }}
+
+            echo "Testing Nginx..."
             sudo nginx -t
+
+            echo "Reloading Nginx..."
             sudo systemctl reload nginx
+
+            echo "Deployment completed!"
