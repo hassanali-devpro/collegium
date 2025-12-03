@@ -45,11 +45,15 @@ const TagMultiSelect = ({ options, value, onChange, placeholder = "Select..." })
           ))}
         <button
           type="button"
-          onClick={() => setOpen((p) => !p)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen((p) => !p); 
+          }}
           className="ml-auto text-xs text-gray-500 hover:text-[#F42222] px-2 py-1 rounded-md transition"
         >
           {open ? "Close" : "Select"}
         </button>
+
       </div>
 
       {open && (
@@ -68,9 +72,8 @@ const TagMultiSelect = ({ options, value, onChange, placeholder = "Select..." })
               return (
                 <li
                   key={o._id}
-                  className={`px-3 py-2 hover:bg-[#F42222]/5 cursor-pointer flex items-center justify-between ${
-                    selected ? "bg-[#F42222]/5" : ""
-                  }`}
+                  className={`px-3 py-2 hover:bg-[#F42222]/5 cursor-pointer flex items-center justify-between ${selected ? "bg-[#F42222]/5" : ""
+                    }`}
                   onClick={() => {
                     if (selected) onChange(value.filter((v) => v !== o._id));
                     else onChange([...value, o._id]);
@@ -297,9 +300,8 @@ const AdminChatBoard = () => {
 
           {feedback.text && (
             <div
-              className={`xl:col-span-3 text-sm mt-1 ${
-                feedback.type === "error" ? "text-red-600" : "text-green-600"
-              }`}
+              className={`xl:col-span-3 text-sm mt-1 ${feedback.type === "error" ? "text-red-600" : "text-green-600"
+                }`}
             >
               {feedback.text}
             </div>

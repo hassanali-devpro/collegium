@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -36,6 +36,8 @@ const ProgramCard = ({ studentId }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
   const [debouncedFilters, setDebouncedFilters] = useState(filters);
+  // State for available universities based on selected country
+  const [availableUniversities, setAvailableUniversities] = useState([]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -81,21 +83,55 @@ const ProgramCard = ({ studentId }) => {
     ).sort();
   }, [data]);
 
-  console.log(countries)
 
+  // Fetch courses for university list (when country is selected)
+  const { data: universitiesCoursesData, isLoading: isLoadingUniversities } = useSearchCoursesQuery({
+    search: "",
+    country: filters.country,
+    type: "",
+    university: "",
+    intake: "",
+    feeSort: "",
+    page: 1,
+    limit: 1000, // Fetch many courses to get all universities
+  }, {
+    skip: !filters.country, // Only fetch when country is selected
+    keepUnusedDataFor: 180
+  });
+
+  useEffect(() => {
+    if (universitiesCoursesData?.data && filters.country && Array.isArray(universitiesCoursesData.data) && universitiesCoursesData.data.length > 0) {
+      const universities = [...new Set(universitiesCoursesData.data.map(course => course.university))].sort();
+      setAvailableUniversities(universities);
+    } else if (universitiesCoursesData?.data && Array.isArray(universitiesCoursesData.data) && universitiesCoursesData.data.length === 0) {
+      // Data loaded but no courses found
+      setAvailableUniversities([]);
+    } else {
+      setAvailableUniversities([]);
+    }
+  }, [universitiesCoursesData, filters.country]);
+
+  // Reset university filter when country changes (but not on initial mount)
+  const prevCountryRef = useRef(filters.country);
+  useEffect(() => {
+    if (prevCountryRef.current !== filters.country && filters.country) {
+      setFilters(prev => ({ ...prev, university: "" }));
+    }
+    prevCountryRef.current = filters.country;
+  }, [filters.country]);
 
 
 
   // Extract universities filtered by selected country
-  const universityOptions = useMemo(() => {
-    if (!data?.data) return [];
-    const filteredCourses = filters.country
-      ? data.data.filter((course) => course.country === filters.country)
-      : data.data;
-    return Array.from(
-      new Set(filteredCourses.map((course) => course.university).filter(Boolean))
-    ).sort();
-  }, [data, filters.country]);
+  // const universityOptions = useMemo(() => {
+  //   if (!data?.data) return [];
+  //   const filteredCourses = filters.country
+  //     ? data.data.filter((course) => course.country === filters.country)
+  //     : data.data;
+  //   return Array.from(
+  //     new Set(filteredCourses.map((course) => course.university).filter(Boolean))
+  //   ).sort();
+  // }, [data, filters.country]);
 
   const handleDelete = async (id) => {
     showConfirmation({
@@ -254,15 +290,26 @@ const ProgramCard = ({ studentId }) => {
             onChange={(e) =>
               setFilters({ ...filters, university: e.target.value })
             }
-            className="border border-gray-300 p-2 sm:p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
+            disabled={!filters.country} // Disable if no country selected
+            className={`border border-gray-300 p-2 sm:p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base ${!filters.country ? "bg-gray-100 cursor-not-allowed" : ""}`}
           >
-            <option value="">Select University</option>
-            {universityOptions.map((uni) => (
-              <option key={uni} value={uni}>
-                {uni}
-              </option>
-            ))}
+            <option value="">
+              {!filters.country
+                ? "Select Country first"
+                : isLoadingUniversities
+                  ? "Loading universities..."
+                  : availableUniversities.length === 0
+                    ? "No universities available"
+                    : "All Universities"}
+            </option>
+            {!isLoadingUniversities &&
+              availableUniversities.map((uni) => (
+                <option key={uni} value={uni}>
+                  {uni}
+                </option>
+              ))}
           </select>
+
 
           {/* Type Dropdown */}
           <select
@@ -530,8 +577,8 @@ const ProgramCard = ({ studentId }) => {
                   onClick={() => handlePageChange(pageNum)}
                   disabled={isLoading}
                   className={`px-3 py-2 text-sm font-medium rounded-lg ${currentPage === pageNum
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-500 bg-white border border-gray-300 hover:bg-gray-50"
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-500 bg-white border border-gray-300 hover:bg-gray-50"
                     } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   {pageNum}

@@ -219,9 +219,10 @@ const StudyProgramForm = () => {
               required
               className={inputClass}
             >
-              <option value="">Private*</option>
-              <option value="Yes">Yes</option>
-              <option value="No">No</option>
+              <option value="">University*</option>
+              <option value="Yes">Private</option>
+              <option value="No">Public</option>
+              <option value="No">Semi Gov</option>
             </select>
             <select
               name="openAdmission"
