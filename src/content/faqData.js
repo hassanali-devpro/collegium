@@ -385,7 +385,7 @@ export const countryFaqs = {
     },
     {
       keywords: ["embassy fee", "visa fee", "application fee"],
-      response: "🇮🇹 The embassy fee for an Italian student visa is approximately 50,000 PKR.",
+      response: "The embassy fee for an Italian student visa is approximately 50,000 PKR.",
     },
     {
       keywords: ["visa appointment", "visa process", "how to get visa"],
