@@ -31,7 +31,11 @@ export const SocketProvider = ({ children }) => {
     }
 
     // Create new socket connection
-    const newSocket = io(API_BASE_URL.replace("/api/", ""), {
+    // Extract base URL by removing /api/ paths and trailing slashes
+    const baseUrl = API_BASE_URL.replace(/\/api\/?/g, "").replace(/\/$/, "");
+    const socketUrl = baseUrl || "http://localhost:5000";
+    
+    const newSocket = io(socketUrl, {
       auth: {
         token: token,
       },

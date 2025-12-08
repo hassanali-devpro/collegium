@@ -21,6 +21,7 @@ import logo from "/Logo-R.png";
 import PasswordResetModal from "../PasswordResetModal";
 import { io } from "socket.io-client";
 import { useToastContext } from "../../contexts/ToastContext";
+import { API_BASE_URL } from "../../app/apiConfig";
 import {
   useGetNotificationsQuery,
   useMarkNotificationAsReadMutation,
@@ -180,7 +181,11 @@ export default function Layout({ children }) {
 
     if (!token) return;
 
-    const newSocket = io("http://localhost:5000", {
+    // Extract base URL by removing /api/ paths and trailing slashes
+    const baseUrl = API_BASE_URL.replace(/\/api\/?/g, "").replace(/\/$/, "");
+    const socketUrl = baseUrl || "http://localhost:5000";
+
+    const newSocket = io(socketUrl, {
       auth: {
         token: token
       }

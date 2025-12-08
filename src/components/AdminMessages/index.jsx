@@ -144,7 +144,11 @@ const AdminChatBoard = () => {
   useEffect(() => {
     const token = auth?.token;
     if (!token) return;
-    const socket = io(import.meta.env.VITE_API_BASE_URL || "http://localhost:5000", {
+    // Extract base URL by removing /api/ paths and trailing slashes
+    const apiUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api/";
+    const baseUrl = apiUrl.replace(/\/api\/?/g, "").replace(/\/$/, "");
+    const socketUrl = baseUrl || "http://localhost:5000";
+    const socket = io(socketUrl, {
       path: "/socket.io",
       auth: { token },
       transports: ["websocket", "polling"],
